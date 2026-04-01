@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "powershell": "Add-Content -Path '.github/hooks/agent_log.txt' -Value ($input | Out-String)",
+        "cwd": "."
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "powershell": "Add-Content -Path '.github/hooks/agent_log.txt' -Value ($input | Out-String)",
+        "cwd": "."
+      }
+    ]
+  }
+}
