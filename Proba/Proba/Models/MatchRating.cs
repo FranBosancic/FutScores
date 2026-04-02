@@ -4,11 +4,11 @@ namespace Proba.Models
     {
         public int MatchRatingId { get; set; }
         public int MatchId { get; set; }
-        public required Match Match { get; set; }
+        public Match Match { get; set; }
         public int Rating { get; set; }
-        public required string Comments { get; set; }
+        public string Comments { get; set; }
         public DateTime RatedAt { get; set; }
-        public required string RatedBy { get; set; }
+        public string RatedBy { get; set; }
 
         public MatchRating()
         {
