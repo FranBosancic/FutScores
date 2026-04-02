@@ -16,5 +16,16 @@ namespace Proba.Models
         {
             MatchRatings = new List<PlayerMatchRating>();
         }
+
+        public Player(string name, int jerseyNumber, DateTime dateOfBirth, PlayerPosition position, Club club)
+        {
+            Name = name;
+            JerseyNumber = jerseyNumber;
+            DateOfBirth = dateOfBirth;
+            Position = position;
+            Club = club;
+            Appearances = 0;
+            MatchRatings = new List<PlayerMatchRating>();
+        }
     }
 }

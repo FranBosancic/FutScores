@@ -15,5 +15,15 @@ namespace Proba.Models
             Clubs = new List<Club>();
             Matches = new List<Match>();
         }
+
+        public League(string name, string country, int foundationYear, int totalClubs)
+        {
+            Name = name;
+            Country = country;
+            FoundationYear = foundationYear;
+            TotalClubs = totalClubs;
+            Clubs = new List<Club>();
+            Matches = new List<Match>();
+        }
     }
 }

@@ -16,5 +16,16 @@ namespace Proba.Models
         {
             Players = new List<Player>();
         }
+
+        public Club(string name, string city, int foundationYear, string stadium, League league)
+        {
+            Name = name;
+            City = city;
+            FoundationYear = foundationYear;
+            Stadium = stadium;
+            League = league;
+            Points = 0;
+            Players = new List<Player>();
+        }
     }
 }

@@ -9,5 +9,19 @@ namespace Proba.Models
         public string Comments { get; set; }
         public DateTime RatedAt { get; set; }
         public string RatedBy { get; set; }
+
+        public MatchRating()
+        {
+        }
+
+        public MatchRating(Match match, int rating, string comments, string ratedBy, DateTime ratedAt)
+        {
+            Match = match;
+            MatchId = match.MatchId;
+            Rating = rating;
+            Comments = comments;
+            RatedBy = ratedBy;
+            RatedAt = ratedAt;
+        }
     }
 }

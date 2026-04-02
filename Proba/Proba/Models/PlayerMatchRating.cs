@@ -10,5 +10,20 @@ namespace Proba.Models
         public int Rating { get; set; }
         public string Performance { get; set; }
         public DateTime RatedAt { get; set; }
+
+        public PlayerMatchRating()
+        {
+        }
+
+        public PlayerMatchRating(Player player, Match match, int rating, string performance, DateTime ratedAt)
+        {
+            Player = player;
+            PlayerId = player.PlayerId;
+            Match = match;
+            MatchId = match.MatchId;
+            Rating = rating;
+            Performance = performance;
+            RatedAt = ratedAt;
+        }
     }
 }

@@ -19,5 +19,19 @@ namespace Proba.Models
         {
             PlayerRatings = new List<PlayerMatchRating>();
         }
+
+        public Match(Club homeClub, Club awayClub, DateTime matchDate, int homeScore, int awayScore, League league)
+        {
+            HomeClub = homeClub;
+            HomeClubId = homeClub.ClubId;
+            AwayClub = awayClub;
+            AwayClubId = awayClub.ClubId;
+            MatchDate = matchDate;
+            HomeScore = homeScore;
+            AwayScore = awayScore;
+            League = league;
+            LeagueId = league.LeagueId;
+            PlayerRatings = new List<PlayerMatchRating>();
+        }
     }
 }

@@ -14,5 +14,15 @@ namespace Proba.Models
         {
             Leagues = new List<League>();
         }
+
+        public Season(int year, DateTime startDate, DateTime endDate, string name)
+        {
+            Year = year;
+            StartDate = startDate;
+            EndDate = endDate;
+            Name = name;
+            TotalMatches = 0;
+            Leagues = new List<League>();
+        }
     }
 }
