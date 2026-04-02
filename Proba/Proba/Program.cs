@@ -4,228 +4,171 @@
 Console.WriteLine("=== FutScores - Football Match and Player Performance Rating Platform ===\n");
 
 // Create Leagues
-var premierLeague = new League
+var premierLeague = new League("Premier League", "England", 1992, 20)
 {
-    LeagueId = 1,
-    Name = "Premier League",
-    Country = "England",
-    FoundationYear = 1992,
-    TotalClubs = 20
+    LeagueId = 1
 };
 
-var laLiga = new League
+var laLiga = new League("La Liga", "Spain", 1929, 20)
 {
-    LeagueId = 2,
-    Name = "La Liga",
-    Country = "Spain",
-    FoundationYear = 1929,
-    TotalClubs = 20
+    LeagueId = 2
 };
 
-var bundesliga = new League
+var bundesliga = new League("Bundesliga", "Germany", 1963, 18)
 {
-    LeagueId = 3,
-    Name = "Bundesliga",
-    Country = "Germany",
-    FoundationYear = 1963,
-    TotalClubs = 18
+    LeagueId = 3
 };
 
 var allLeagues = new List<League> { premierLeague, laLiga, bundesliga };
 
 // ===== PREMIER LEAGUE - CLUBS AND PLAYERS =====
-var manchesterCity = new Club
+var manchesterCity = new Club("Manchester City", "Manchester", 1880, "Etihad Stadium", premierLeague)
 {
     ClubId = 1,
-    Name = "Manchester City",
-    City = "Manchester",
-    FoundationYear = 1880,
-    Stadium = "Etihad Stadium",
     Points = 89,
-    LeagueId = 1,
-    League = premierLeague
+    LeagueId = 1
 };
 
 var manchesterCity_Players = new List<Player>
 {
-    new Player { PlayerId = 1, Name = "Ederson", JerseyNumber = 1, DateOfBirth = new DateTime(1993, 8, 17), Position = PlayerPosition.Goalkeeper, Appearances = 38, ClubId = 1, Club = manchesterCity },
-    new Player { PlayerId = 2, Name = "Kyle Walker", JerseyNumber = 2, DateOfBirth = new DateTime(1990, 5, 28), Position = PlayerPosition.Defender, Appearances = 35, ClubId = 1, Club = manchesterCity },
-    new Player { PlayerId = 3, Name = "Rodri", JerseyNumber = 16, DateOfBirth = new DateTime(1996, 6, 22), Position = PlayerPosition.Midfielder, Appearances = 37, ClubId = 1, Club = manchesterCity },
-    new Player { PlayerId = 4, Name = "Erling Haaland", JerseyNumber = 9, DateOfBirth = new DateTime(2000, 7, 21), Position = PlayerPosition.Forward, Appearances = 36, ClubId = 1, Club = manchesterCity }
+    new Player("Ederson", 1, new DateTime(1993, 8, 17), PlayerPosition.Goalkeeper, manchesterCity) { PlayerId = 1, Appearances = 38, ClubId = 1 },
+    new Player("Kyle Walker", 2, new DateTime(1990, 5, 28), PlayerPosition.Defender, manchesterCity) { PlayerId = 2, Appearances = 35, ClubId = 1 },
+    new Player("Rodri", 16, new DateTime(1996, 6, 22), PlayerPosition.Midfielder, manchesterCity) { PlayerId = 3, Appearances = 37, ClubId = 1 },
+    new Player("Erling Haaland", 9, new DateTime(2000, 7, 21), PlayerPosition.Forward, manchesterCity) { PlayerId = 4, Appearances = 36, ClubId = 1 }
 };
 manchesterCity.Players = manchesterCity_Players;
 
-var liverpool = new Club
+var liverpool = new Club("Liverpool", "Liverpool", 1892, "Anfield", premierLeague)
 {
     ClubId = 2,
-    Name = "Liverpool",
-    City = "Liverpool",
-    FoundationYear = 1892,
-    Stadium = "Anfield",
     Points = 82,
-    LeagueId = 1,
-    League = premierLeague
+    LeagueId = 1
 };
 
 var liverpool_Players = new List<Player>
 {
-    new Player { PlayerId = 5, Name = "Alisson", JerseyNumber = 1, DateOfBirth = new DateTime(1992, 10, 2), Position = PlayerPosition.Goalkeeper, Appearances = 38, ClubId = 2, Club = liverpool },
-    new Player { PlayerId = 6, Name = "Trent Alexander-Arnold", JerseyNumber = 66, DateOfBirth = new DateTime(1998, 10, 7), Position = PlayerPosition.Defender, Appearances = 32, ClubId = 2, Club = liverpool },
-    new Player { PlayerId = 7, Name = "Mohamed Salah", JerseyNumber = 11, DateOfBirth = new DateTime(1992, 6, 15), Position = PlayerPosition.Forward, Appearances = 37, ClubId = 2, Club = liverpool },
-    new Player { PlayerId = 8, Name = "Alexis Mac Allister", JerseyNumber = 10, DateOfBirth = new DateTime(1998, 7, 24), Position = PlayerPosition.Midfielder, Appearances = 28, ClubId = 2, Club = liverpool }
+    new Player("Alisson", 1, new DateTime(1992, 10, 2), PlayerPosition.Goalkeeper, liverpool) { PlayerId = 5, Appearances = 38, ClubId = 2 },
+    new Player("Trent Alexander-Arnold", 66, new DateTime(1998, 10, 7), PlayerPosition.Defender, liverpool) { PlayerId = 6, Appearances = 32, ClubId = 2 },
+    new Player("Mohamed Salah", 11, new DateTime(1992, 6, 15), PlayerPosition.Forward, liverpool) { PlayerId = 7, Appearances = 37, ClubId = 2 },
+    new Player("Alexis Mac Allister", 10, new DateTime(1998, 7, 24), PlayerPosition.Midfielder, liverpool) { PlayerId = 8, Appearances = 28, ClubId = 2 }
 };
 liverpool.Players = liverpool_Players;
 
-var chelsea = new Club
+var chelsea = new Club("Chelsea", "London", 1905, "Stamford Bridge", premierLeague)
 {
     ClubId = 3,
-    Name = "Chelsea",
-    City = "London",
-    FoundationYear = 1905,
-    Stadium = "Stamford Bridge",
     Points = 76,
-    LeagueId = 1,
-    League = premierLeague
+    LeagueId = 1
 };
 
 var chelsea_Players = new List<Player>
 {
-    new Player { PlayerId = 9, Name = "Robert Sánchez", JerseyNumber = 1, DateOfBirth = new DateTime(1996, 11, 18), Position = PlayerPosition.Goalkeeper, Appearances = 30, ClubId = 3, Club = chelsea },
-    new Player { PlayerId = 10, Name = "Reece James", JerseyNumber = 24, DateOfBirth = new DateTime(1999, 12, 8), Position = PlayerPosition.Defender, Appearances = 25, ClubId = 3, Club = chelsea },
-    new Player { PlayerId = 11, Name = "Conor Gallagher", JerseyNumber = 23, DateOfBirth = new DateTime(2000, 2, 6), Position = PlayerPosition.Midfielder, Appearances = 29, ClubId = 3, Club = chelsea },
-    new Player { PlayerId = 12, Name = "Nicolas Jackson", JerseyNumber = 15, DateOfBirth = new DateTime(2001, 6, 5), Position = PlayerPosition.Forward, Appearances = 27, ClubId = 3, Club = chelsea }
+    new Player("Robert Sánchez", 1, new DateTime(1996, 11, 18), PlayerPosition.Goalkeeper, chelsea) { PlayerId = 9, Appearances = 30, ClubId = 3 },
+    new Player("Reece James", 24, new DateTime(1999, 12, 8), PlayerPosition.Defender, chelsea) { PlayerId = 10, Appearances = 25, ClubId = 3 },
+    new Player("Conor Gallagher", 23, new DateTime(2000, 2, 6), PlayerPosition.Midfielder, chelsea) { PlayerId = 11, Appearances = 29, ClubId = 3 },
+    new Player("Nicolas Jackson", 15, new DateTime(2001, 6, 5), PlayerPosition.Forward, chelsea) { PlayerId = 12, Appearances = 27, ClubId = 3 }
 };
 chelsea.Players = chelsea_Players;
 
 premierLeague.Clubs = new List<Club> { manchesterCity, liverpool, chelsea };
 
 // ===== LA LIGA - CLUBS AND PLAYERS =====
-var realMadrid = new Club
+var realMadrid = new Club("Real Madrid", "Madrid", 1902, "Santiago Bernabéu", laLiga)
 {
     ClubId = 4,
-    Name = "Real Madrid",
-    City = "Madrid",
-    FoundationYear = 1902,
-    Stadium = "Santiago Bernabéu",
     Points = 90,
-    LeagueId = 2,
-    League = laLiga
+    LeagueId = 2
 };
 
 var realMadrid_Players = new List<Player>
 {
-    new Player { PlayerId = 13, Name = "Andriy Lunin", JerseyNumber = 1, DateOfBirth = new DateTime(1999, 2, 11), Position = PlayerPosition.Goalkeeper, Appearances = 38, ClubId = 4, Club = realMadrid },
-    new Player { PlayerId = 14, Name = "Dani Carvajal", JerseyNumber = 2, DateOfBirth = new DateTime(1992, 1, 11), Position = PlayerPosition.Defender, Appearances = 36, ClubId = 4, Club = realMadrid },
-    new Player { PlayerId = 15, Name = "Toni Kroos", JerseyNumber = 8, DateOfBirth = new DateTime(1990, 1, 4), Position = PlayerPosition.Midfielder, Appearances = 34, ClubId = 4, Club = realMadrid },
-    new Player { PlayerId = 16, Name = "Vinícius Júnior", JerseyNumber = 7, DateOfBirth = new DateTime(2000, 7, 12), Position = PlayerPosition.Forward, Appearances = 37, ClubId = 4, Club = realMadrid }
+    new Player("Andriy Lunin", 1, new DateTime(1999, 2, 11), PlayerPosition.Goalkeeper, realMadrid) { PlayerId = 13, Appearances = 38, ClubId = 4 },
+    new Player("Dani Carvajal", 2, new DateTime(1992, 1, 11), PlayerPosition.Defender, realMadrid) { PlayerId = 14, Appearances = 36, ClubId = 4 },
+    new Player("Toni Kroos", 8, new DateTime(1990, 1, 4), PlayerPosition.Midfielder, realMadrid) { PlayerId = 15, Appearances = 34, ClubId = 4 },
+    new Player("Vinícius Júnior", 7, new DateTime(2000, 7, 12), PlayerPosition.Forward, realMadrid) { PlayerId = 16, Appearances = 37, ClubId = 4 }
 };
 realMadrid.Players = realMadrid_Players;
 
-var barcelona = new Club
+var barcelona = new Club("FC Barcelona", "Barcelona", 1899, "Camp Nou", laLiga)
 {
     ClubId = 5,
-    Name = "FC Barcelona",
-    City = "Barcelona",
-    FoundationYear = 1899,
-    Stadium = "Camp Nou",
     Points = 78,
-    LeagueId = 2,
-    League = laLiga
+    LeagueId = 2
 };
 
 var barcelona_Players = new List<Player>
 {
-    new Player { PlayerId = 17, Name = "Marc-André ter Stegen", JerseyNumber = 1, DateOfBirth = new DateTime(1992, 4, 30), Position = PlayerPosition.Goalkeeper, Appearances = 30, ClubId = 5, Club = barcelona },
-    new Player { PlayerId = 18, Name = "Jules Koundé", JerseyNumber = 23, DateOfBirth = new DateTime(1998, 11, 4), Position = PlayerPosition.Defender, Appearances = 28, ClubId = 5, Club = barcelona },
-    new Player { PlayerId = 19, Name = "Sergi Roberto", JerseyNumber = 20, DateOfBirth = new DateTime(1992, 7, 7), Position = PlayerPosition.Midfielder, Appearances = 32, ClubId = 5, Club = barcelona },
-    new Player { PlayerId = 20, Name = "Robert Lewandowski", JerseyNumber = 9, DateOfBirth = new DateTime(1988, 8, 21), Position = PlayerPosition.Forward, Appearances = 35, ClubId = 5, Club = barcelona }
+    new Player("Marc-André ter Stegen", 1, new DateTime(1992, 4, 30), PlayerPosition.Goalkeeper, barcelona) { PlayerId = 17, Appearances = 30, ClubId = 5 },
+    new Player("Jules Koundé", 23, new DateTime(1998, 11, 4), PlayerPosition.Defender, barcelona) { PlayerId = 18, Appearances = 28, ClubId = 5 },
+    new Player("Sergi Roberto", 20, new DateTime(1992, 7, 7), PlayerPosition.Midfielder, barcelona) { PlayerId = 19, Appearances = 32, ClubId = 5 },
+    new Player("Robert Lewandowski", 9, new DateTime(1988, 8, 21), PlayerPosition.Forward, barcelona) { PlayerId = 20, Appearances = 35, ClubId = 5 }
 };
 barcelona.Players = barcelona_Players;
 
-var atleticoMadrid = new Club
+var atleticoMadrid = new Club("Atlético Madrid", "Madrid", 1903, "Metropolitano", laLiga)
 {
     ClubId = 6,
-    Name = "Atlético Madrid",
-    City = "Madrid",
-    FoundationYear = 1903,
-    Stadium = "Metropolitano",
     Points = 81,
-    LeagueId = 2,
-    League = laLiga
+    LeagueId = 2
 };
 
 var atleticoMadrid_Players = new List<Player>
 {
-    new Player { PlayerId = 21, Name = "Jan Oblak", JerseyNumber = 1, DateOfBirth = new DateTime(1993, 1, 7), Position = PlayerPosition.Goalkeeper, Appearances = 38, ClubId = 6, Club = atleticoMadrid },
-    new Player { PlayerId = 22, Name = "Kieran Trippier", JerseyNumber = 2, DateOfBirth = new DateTime(1990, 9, 19), Position = PlayerPosition.Defender, Appearances = 25, ClubId = 6, Club = atleticoMadrid },
-    new Player { PlayerId = 23, Name = "Rodrigo De Paul", JerseyNumber = 5, DateOfBirth = new DateTime(1996, 3, 24), Position = PlayerPosition.Midfielder, Appearances = 33, ClubId = 6, Club = atleticoMadrid },
-    new Player { PlayerId = 24, Name = "Antoine Griezmann", JerseyNumber = 7, DateOfBirth = new DateTime(1991, 3, 21), Position = PlayerPosition.Forward, Appearances = 36, ClubId = 6, Club = atleticoMadrid }
+    new Player("Jan Oblak", 1, new DateTime(1993, 1, 7), PlayerPosition.Goalkeeper, atleticoMadrid) { PlayerId = 21, Appearances = 38, ClubId = 6 },
+    new Player("Kieran Trippier", 2, new DateTime(1990, 9, 19), PlayerPosition.Defender, atleticoMadrid) { PlayerId = 22, Appearances = 25, ClubId = 6 },
+    new Player("Rodrigo De Paul", 5, new DateTime(1996, 3, 24), PlayerPosition.Midfielder, atleticoMadrid) { PlayerId = 23, Appearances = 33, ClubId = 6 },
+    new Player("Antoine Griezmann", 7, new DateTime(1991, 3, 21), PlayerPosition.Forward, atleticoMadrid) { PlayerId = 24, Appearances = 36, ClubId = 6 }
 };
 atleticoMadrid.Players = atleticoMadrid_Players;
 
 laLiga.Clubs = new List<Club> { realMadrid, barcelona, atleticoMadrid };
 
 // ===== BUNDESLIGA - CLUBS AND PLAYERS =====
-var bayernMunich = new Club
+var bayernMunich = new Club("Bayern Munich", "Munich", 1900, "Allianz Arena", bundesliga)
 {
     ClubId = 7,
-    Name = "Bayern Munich",
-    City = "Munich",
-    FoundationYear = 1900,
-    Stadium = "Allianz Arena",
     Points = 88,
-    LeagueId = 3,
-    League = bundesliga
+    LeagueId = 3
 };
 
 var bayernMunich_Players = new List<Player>
 {
-    new Player { PlayerId = 25, Name = "Manuel Neuer", JerseyNumber = 1, DateOfBirth = new DateTime(1986, 3, 27), Position = PlayerPosition.Goalkeeper, Appearances = 35, ClubId = 7, Club = bayernMunich },
-    new Player { PlayerId = 26, Name = "Benjamin Pavard", JerseyNumber = 5, DateOfBirth = new DateTime(1996, 3, 5), Position = PlayerPosition.Defender, Appearances = 32, ClubId = 7, Club = bayernMunich },
-    new Player { PlayerId = 27, Name = "Joshua Kimmich", JerseyNumber = 32, DateOfBirth = new DateTime(1995, 12, 13), Position = PlayerPosition.Midfielder, Appearances = 34, ClubId = 7, Club = bayernMunich },
-    new Player { PlayerId = 28, Name = "Serge Gnabry", JerseyNumber = 7, DateOfBirth = new DateTime(1995, 10, 14), Position = PlayerPosition.Forward, Appearances = 28, ClubId = 7, Club = bayernMunich }
+    new Player("Manuel Neuer", 1, new DateTime(1986, 3, 27), PlayerPosition.Goalkeeper, bayernMunich) { PlayerId = 25, Appearances = 35, ClubId = 7 },
+    new Player("Benjamin Pavard", 5, new DateTime(1996, 3, 5), PlayerPosition.Defender, bayernMunich) { PlayerId = 26, Appearances = 32, ClubId = 7 },
+    new Player("Joshua Kimmich", 32, new DateTime(1995, 12, 13), PlayerPosition.Midfielder, bayernMunich) { PlayerId = 27, Appearances = 34, ClubId = 7 },
+    new Player("Serge Gnabry", 7, new DateTime(1995, 10, 14), PlayerPosition.Forward, bayernMunich) { PlayerId = 28, Appearances = 28, ClubId = 7 }
 };
 bayernMunich.Players = bayernMunich_Players;
 
-var borussiaDortmund = new Club
+var borussiaDortmund = new Club("Borussia Dortmund", "Dortmund", 1909, "Signal Iduna Park", bundesliga)
 {
     ClubId = 8,
-    Name = "Borussia Dortmund",
-    City = "Dortmund",
-    FoundationYear = 1909,
-    Stadium = "Signal Iduna Park",
     Points = 75,
-    LeagueId = 3,
-    League = bundesliga
+    LeagueId = 3
 };
 
 var borussiaDortmund_Players = new List<Player>
 {
-    new Player { PlayerId = 29, Name = "Gregor Kobel", JerseyNumber = 1, DateOfBirth = new DateTime(1997, 6, 24), Position = PlayerPosition.Goalkeeper, Appearances = 30, ClubId = 8, Club = borussiaDortmund },
-    new Player { PlayerId = 30, Name = "Mats Hummels", JerseyNumber = 15, DateOfBirth = new DateTime(1988, 12, 16), Position = PlayerPosition.Defender, Appearances = 28, ClubId = 8, Club = borussiaDortmund },
-    new Player { PlayerId = 31, Name = "Marco Reus", JerseyNumber = 11, DateOfBirth = new DateTime(1990, 5, 31), Position = PlayerPosition.Midfielder, Appearances = 25, ClubId = 8, Club = borussiaDortmund },
-    new Player { PlayerId = 32, Name = "Sébastien Haller", JerseyNumber = 9, DateOfBirth = new DateTime(1994, 6, 22), Position = PlayerPosition.Forward, Appearances = 26, ClubId = 8, Club = borussiaDortmund }
+    new Player("Gregor Kobel", 1, new DateTime(1997, 6, 24), PlayerPosition.Goalkeeper, borussiaDortmund) { PlayerId = 29, Appearances = 30, ClubId = 8 },
+    new Player("Mats Hummels", 15, new DateTime(1988, 12, 16), PlayerPosition.Defender, borussiaDortmund) { PlayerId = 30, Appearances = 28, ClubId = 8 },
+    new Player("Marco Reus", 11, new DateTime(1990, 5, 31), PlayerPosition.Midfielder, borussiaDortmund) { PlayerId = 31, Appearances = 25, ClubId = 8 },
+    new Player("Sébastien Haller", 9, new DateTime(1994, 6, 22), PlayerPosition.Forward, borussiaDortmund) { PlayerId = 32, Appearances = 26, ClubId = 8 }
 };
 borussiaDortmund.Players = borussiaDortmund_Players;
 
-var bayerLeverkusen = new Club
+var bayerLeverkusen = new Club("Bayer Leverkusen", "Leverkusen", 1904, "BayArena", bundesliga)
 {
     ClubId = 9,
-    Name = "Bayer Leverkusen",
-    City = "Leverkusen",
-    FoundationYear = 1904,
-    Stadium = "BayArena",
     Points = 79,
-    LeagueId = 3,
-    League = bundesliga
+    LeagueId = 3
 };
 
 var bayerLeverkusen_Players = new List<Player>
 {
-    new Player { PlayerId = 33, Name = "Matěj Kovář", JerseyNumber = 1, DateOfBirth = new DateTime(1999, 9, 8), Position = PlayerPosition.Goalkeeper, Appearances = 34, ClubId = 9, Club = bayerLeverkusen },
-    new Player { PlayerId = 34, Name = "Jonathan Tah", JerseyNumber = 14, DateOfBirth = new DateTime(1996, 2, 11), Position = PlayerPosition.Defender, Appearances = 31, ClubId = 9, Club = bayerLeverkusen },
-    new Player { PlayerId = 35, Name = "Charles Aránguiz", JerseyNumber = 17, DateOfBirth = new DateTime(1989, 4, 17), Position = PlayerPosition.Midfielder, Appearances = 29, ClubId = 9, Club = bayerLeverkusen },
-    new Player { PlayerId = 36, Name = "Florian Wirtz", JerseyNumber = 28, DateOfBirth = new DateTime(2002, 5, 3), Position = PlayerPosition.Forward, Appearances = 33, ClubId = 9, Club = bayerLeverkusen }
+    new Player("Matěj Kovář", 1, new DateTime(1999, 9, 8), PlayerPosition.Goalkeeper, bayerLeverkusen) { PlayerId = 33, Appearances = 34, ClubId = 9 },
+    new Player("Jonathan Tah", 14, new DateTime(1996, 2, 11), PlayerPosition.Defender, bayerLeverkusen) { PlayerId = 34, Appearances = 31, ClubId = 9 },
+    new Player("Charles Aránguiz", 17, new DateTime(1989, 4, 17), PlayerPosition.Midfielder, bayerLeverkusen) { PlayerId = 35, Appearances = 29, ClubId = 9 },
+    new Player("Florian Wirtz", 28, new DateTime(2002, 5, 3), PlayerPosition.Forward, bayerLeverkusen) { PlayerId = 36, Appearances = 33, ClubId = 9 }
 };
 bayerLeverkusen.Players = bayerLeverkusen_Players;
 
@@ -234,15 +177,15 @@ bundesliga.Clubs = new List<Club> { bayernMunich, borussiaDortmund, bayerLeverku
 // ===== CREATE MATCHES =====
 var matches = new List<Match>
 {
-    new Match { MatchId = 1, HomeClubId = 1, HomeClub = manchesterCity, AwayClubId = 2, AwayClub = liverpool, MatchDate = new DateTime(2024, 3, 10, 15, 0, 0), HomeScore = 3, AwayScore = 1, LeagueId = 1, League = premierLeague },
-    new Match { MatchId = 2, HomeClubId = 2, HomeClub = liverpool, AwayClubId = 3, AwayClub = chelsea, MatchDate = new DateTime(2024, 3, 17, 16, 30, 0), HomeScore = 2, AwayScore = 2, LeagueId = 1, League = premierLeague },
-    new Match { MatchId = 3, HomeClubId = 3, HomeClub = chelsea, AwayClubId = 1, AwayClub = manchesterCity, MatchDate = new DateTime(2024, 3, 24, 14, 0, 0), HomeScore = 1, AwayScore = 2, LeagueId = 1, League = premierLeague },
-    new Match { MatchId = 4, HomeClubId = 4, HomeClub = realMadrid, AwayClubId = 5, AwayClub = barcelona, MatchDate = new DateTime(2024, 3, 11, 16, 0, 0), HomeScore = 4, AwayScore = 1, LeagueId = 2, League = laLiga },
-    new Match { MatchId = 5, HomeClubId = 5, HomeClub = barcelona, AwayClubId = 6, AwayClub = atleticoMadrid, MatchDate = new DateTime(2024, 3, 18, 15, 15, 0), HomeScore = 2, AwayScore = 0, LeagueId = 2, League = laLiga },
-    new Match { MatchId = 6, HomeClubId = 6, HomeClub = atleticoMadrid, AwayClubId = 4, AwayClub = realMadrid, MatchDate = new DateTime(2024, 3, 25, 16, 0, 0), HomeScore = 1, AwayScore = 3, LeagueId = 2, League = laLiga },
-    new Match { MatchId = 7, HomeClubId = 7, HomeClub = bayernMunich, AwayClubId = 8, AwayClub = borussiaDortmund, MatchDate = new DateTime(2024, 3, 12, 17, 30, 0), HomeScore = 3, AwayScore = 2, LeagueId = 3, League = bundesliga },
-    new Match { MatchId = 8, HomeClubId = 8, HomeClub = borussiaDortmund, AwayClubId = 9, AwayClub = bayerLeverkusen, MatchDate = new DateTime(2024, 3, 19, 15, 0, 0), HomeScore = 1, AwayScore = 1, LeagueId = 3, League = bundesliga },
-    new Match { MatchId = 9, HomeClubId = 9, HomeClub = bayerLeverkusen, AwayClubId = 7, AwayClub = bayernMunich, MatchDate = new DateTime(2024, 3, 26, 15, 30, 0), HomeScore = 2, AwayScore = 2, LeagueId = 3, League = bundesliga }
+    new Match(manchesterCity, liverpool, new DateTime(2024, 3, 10, 15, 0, 0), 3, 1, premierLeague) { MatchId = 1, HomeClubId = 1, AwayClubId = 2, LeagueId = 1 },
+    new Match(liverpool, chelsea, new DateTime(2024, 3, 17, 16, 30, 0), 2, 2, premierLeague) { MatchId = 2, HomeClubId = 2, AwayClubId = 3, LeagueId = 1 },
+    new Match(chelsea, manchesterCity, new DateTime(2024, 3, 24, 14, 0, 0), 1, 2, premierLeague) { MatchId = 3, HomeClubId = 3, AwayClubId = 1, LeagueId = 1 },
+    new Match(realMadrid, barcelona, new DateTime(2024, 3, 11, 16, 0, 0), 4, 1, laLiga) { MatchId = 4, HomeClubId = 4, AwayClubId = 5, LeagueId = 2 },
+    new Match(barcelona, atleticoMadrid, new DateTime(2024, 3, 18, 15, 15, 0), 2, 0, laLiga) { MatchId = 5, HomeClubId = 5, AwayClubId = 6, LeagueId = 2 },
+    new Match(atleticoMadrid, realMadrid, new DateTime(2024, 3, 25, 16, 0, 0), 1, 3, laLiga) { MatchId = 6, HomeClubId = 6, AwayClubId = 4, LeagueId = 2 },
+    new Match(bayernMunich, borussiaDortmund, new DateTime(2024, 3, 12, 17, 30, 0), 3, 2, bundesliga) { MatchId = 7, HomeClubId = 7, AwayClubId = 8, LeagueId = 3 },
+    new Match(borussiaDortmund, bayerLeverkusen, new DateTime(2024, 3, 19, 15, 0, 0), 1, 1, bundesliga) { MatchId = 8, HomeClubId = 8, AwayClubId = 9, LeagueId = 3 },
+    new Match(bayerLeverkusen, bayernMunich, new DateTime(2024, 3, 26, 15, 30, 0), 2, 2, bundesliga) { MatchId = 9, HomeClubId = 9, AwayClubId = 7, LeagueId = 3 }
 };
 
 premierLeague.Matches = matches.Where(m => m.LeagueId == 1).ToList();
@@ -252,11 +195,11 @@ bundesliga.Matches = matches.Where(m => m.LeagueId == 3).ToList();
 // ===== CREATE MATCH RATINGS =====
 var matchRatings = new List<MatchRating>
 {
-    new MatchRating { MatchRatingId = 1, MatchId = 1, Match = matches[0], Rating = 9, Comments = "Spectacular display", RatedAt = new DateTime(2024, 3, 10, 18, 0, 0), RatedBy = "Football Critic" },
-    new MatchRating { MatchRatingId = 2, MatchId = 2, Match = matches[1], Rating = 7, Comments = "Entertaining but defensive errors", RatedAt = new DateTime(2024, 3, 17, 18, 0, 0), RatedBy = "Sports Analyst" },
-    new MatchRating { MatchRatingId = 3, MatchId = 3, Match = matches[2], Rating = 8, Comments = "High intensity match", RatedAt = new DateTime(2024, 3, 24, 18, 0, 0), RatedBy = "Football Critic" },
-    new MatchRating { MatchRatingId = 4, MatchId = 4, Match = matches[3], Rating = 9, Comments = "Classical El Clásico performance", RatedAt = new DateTime(2024, 3, 11, 18, 0, 0), RatedBy = "La Liga Expert" },
-    new MatchRating { MatchRatingId = 5, MatchId = 5, Match = matches[4], Rating = 6, Comments = "Weak Barcelona performance", RatedAt = new DateTime(2024, 3, 18, 18, 0, 0), RatedBy = "La Liga Expert" }
+    new MatchRating(matches[0], 9, "Spectacular display", "Football Critic", new DateTime(2024, 3, 10, 18, 0, 0)) { MatchRatingId = 1, MatchId = 1 },
+    new MatchRating(matches[1], 7, "Entertaining but defensive errors", "Sports Analyst", new DateTime(2024, 3, 17, 18, 0, 0)) { MatchRatingId = 2, MatchId = 2 },
+    new MatchRating(matches[2], 8, "High intensity match", "Football Critic", new DateTime(2024, 3, 24, 18, 0, 0)) { MatchRatingId = 3, MatchId = 3 },
+    new MatchRating(matches[3], 9, "Classical El Clásico performance", "La Liga Expert", new DateTime(2024, 3, 11, 18, 0, 0)) { MatchRatingId = 4, MatchId = 4 },
+    new MatchRating(matches[4], 6, "Weak Barcelona performance", "La Liga Expert", new DateTime(2024, 3, 18, 18, 0, 0)) { MatchRatingId = 5, MatchId = 5 }
 };
 
 matches[0].MatchRating = matchRatings[0];
@@ -268,14 +211,14 @@ matches[4].MatchRating = matchRatings[4];
 // ===== CREATE PLAYER MATCH RATINGS =====
 var playerMatchRatings = new List<PlayerMatchRating>
 {
-    new PlayerMatchRating { PlayerMatchRatingId = 1, PlayerId = 4, Player = manchesterCity_Players[3], MatchId = 1, Match = matches[0], Rating = 9, Performance = "Hat-trick, dominant display", RatedAt = new DateTime(2024, 3, 10, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 2, PlayerId = 3, Player = manchesterCity_Players[2], MatchId = 1, Match = matches[0], Rating = 8, Performance = "Controlled midfield", RatedAt = new DateTime(2024, 3, 10, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 3, PlayerId = 7, Player = liverpool_Players[2], MatchId = 1, Match = matches[0], Rating = 6, Performance = "Below average contribution", RatedAt = new DateTime(2024, 3, 10, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 4, PlayerId = 7, Player = liverpool_Players[2], MatchId = 2, Match = matches[1], Rating = 8, Performance = "Two goals, excellent form", RatedAt = new DateTime(2024, 3, 17, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 5, PlayerId = 12, Player = chelsea_Players[3], MatchId = 3, Match = matches[2], Rating = 7, Performance = "Physical presence, one goal", RatedAt = new DateTime(2024, 3, 24, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 6, PlayerId = 16, Player = realMadrid_Players[3], MatchId = 4, Match = matches[3], Rating = 9, Performance = "Two goals and two assists", RatedAt = new DateTime(2024, 3, 11, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 7, PlayerId = 20, Player = barcelona_Players[3], MatchId = 5, Match = matches[4], Rating = 9, Performance = "One goal, clinical finishing", RatedAt = new DateTime(2024, 3, 18, 18, 0, 0) },
-    new PlayerMatchRating { PlayerMatchRatingId = 8, PlayerId = 28, Player = bayernMunich_Players[3], MatchId = 7, Match = matches[6], Rating = 8, Performance = "Outstanding game, one goal", RatedAt = new DateTime(2024, 3, 12, 18, 0, 0) }
+    new PlayerMatchRating(manchesterCity_Players[3], matches[0], 9, "Hat-trick, dominant display", new DateTime(2024, 3, 10, 18, 0, 0)) { PlayerMatchRatingId = 1, PlayerId = 4, MatchId = 1 },
+    new PlayerMatchRating(manchesterCity_Players[2], matches[0], 8, "Controlled midfield", new DateTime(2024, 3, 10, 18, 0, 0)) { PlayerMatchRatingId = 2, PlayerId = 3, MatchId = 1 },
+    new PlayerMatchRating(liverpool_Players[2], matches[0], 6, "Below average contribution", new DateTime(2024, 3, 10, 18, 0, 0)) { PlayerMatchRatingId = 3, PlayerId = 7, MatchId = 1 },
+    new PlayerMatchRating(liverpool_Players[2], matches[1], 8, "Two goals, excellent form", new DateTime(2024, 3, 17, 18, 0, 0)) { PlayerMatchRatingId = 4, PlayerId = 7, MatchId = 2 },
+    new PlayerMatchRating(chelsea_Players[3], matches[2], 7, "Physical presence, one goal", new DateTime(2024, 3, 24, 18, 0, 0)) { PlayerMatchRatingId = 5, PlayerId = 12, MatchId = 3 },
+    new PlayerMatchRating(realMadrid_Players[3], matches[3], 9, "Two goals and two assists", new DateTime(2024, 3, 11, 18, 0, 0)) { PlayerMatchRatingId = 6, PlayerId = 16, MatchId = 4 },
+    new PlayerMatchRating(barcelona_Players[3], matches[4], 9, "One goal, clinical finishing", new DateTime(2024, 3, 18, 18, 0, 0)) { PlayerMatchRatingId = 7, PlayerId = 20, MatchId = 5 },
+    new PlayerMatchRating(bayernMunich_Players[3], matches[6], 8, "Outstanding game, one goal", new DateTime(2024, 3, 12, 18, 0, 0)) { PlayerMatchRatingId = 8, PlayerId = 28, MatchId = 7 }
 };
 
 matches[0].PlayerRatings = playerMatchRatings.Where(pr => pr.MatchId == 1).ToList();
