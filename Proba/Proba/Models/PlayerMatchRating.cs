@@ -8,7 +8,7 @@ namespace Proba.Models
         public int MatchId { get; set; }
         public Match Match { get; set; }
         public int Rating { get; set; }
-        public string Performance { get; set; }
+        public string Performance { get; set; } = string.Empty;
         public DateTime RatedAt { get; set; }
 
         public PlayerMatchRating()

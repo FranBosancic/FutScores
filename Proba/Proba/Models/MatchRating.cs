@@ -6,9 +6,9 @@ namespace Proba.Models
         public int MatchId { get; set; }
         public Match Match { get; set; }
         public int Rating { get; set; }
-        public string Comments { get; set; }
+        public string Comments { get; set; } = string.Empty;
         public DateTime RatedAt { get; set; }
-        public string RatedBy { get; set; }
+        public string RatedBy { get; set; } = string.Empty;
 
         public MatchRating()
         {

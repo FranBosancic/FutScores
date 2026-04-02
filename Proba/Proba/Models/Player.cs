@@ -3,7 +3,7 @@ namespace Proba.Models
     public class Player
     {
         public int PlayerId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int JerseyNumber { get; set; }
         public DateTime DateOfBirth { get; set; }
         public PlayerPosition Position { get; set; }
