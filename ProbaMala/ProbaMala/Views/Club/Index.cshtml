@@ -4,26 +4,32 @@
     ViewData["Title"] = "Clubs";
 }
 
-<h1>Clubs</h1>
+<div class="bg-slate-900 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-slate-50 mb-2">Clubs</h1>
+            <p class="text-slate-300">@Model.Count item@(Model.Count != 1 ? "s" : "") found</p>
+        </div>
 
-<table border="1" cellpadding="10" cellspacing="0">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Founded</th>
-            <th>League Name</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var club in Model)
-        {
-            <tr>
-                <td>@club.Name</td>
-                <td>@club.FoundedDate.ToString("yyyy-MM-dd")</td>
-                <td>@club.LeagueName</td>
-                <td><a href="@Url.Action("Details", "Club", new { id = club.Id })">View</a></td>
-            </tr>
-        }
-    </tbody>
-</table>
+        <!-- Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var club in Model)
+            {
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-900 hover:border-emerald-500 transition-all duration-300 cursor-pointer">
+                    <h3 class="text-xl font-semibold text-slate-50 mb-2">@club.Name</h3>
+                    <p class="text-slate-300 mb-4">Founded @club.FoundedDate.Year</p>
+
+                    <div class="mb-4">
+                        <span class="text-slate-400 text-sm">League:</span>
+                        <p class="text-emerald-400 font-medium">@club.LeagueName</p>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <a href="@Url.Action("Details", "Club", new { id = club.Id })" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View Details →</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

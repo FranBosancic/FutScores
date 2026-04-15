@@ -4,14 +4,92 @@
     ViewData["Title"] = "Match Details";
 }
 
-<h1>Match #@Model.Id</h1>
+<div class="bg-slate-900 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+            <a asp-controller="Home" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Home</a>
+            <span class="text-slate-500 mx-2">›</span>
+            <a asp-controller="Match" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Matches</a>
+            <span class="text-slate-500 mx-2">›</span>
+            <span class="text-slate-300">Match #@Model.Id</span>
+        </nav>
 
-<div>
-    <p><strong>Date:</strong> @Model.Date.ToString("yyyy-MM-dd")</p>
-    <p><strong>League:</strong> @Model.LeagueName</p>
-    <p><strong>Home Team:</strong> @Model.HomeTeamName</p>
-    <p><strong>Away Team:</strong> @Model.AwayTeamName</p>
-    <p><strong>Score:</strong> @Model.Score</p>
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-slate-50 mb-4">Match #@Model.Id</h1>
+            <p class="text-slate-300 text-lg">@Model.Date.ToString("MMMM dd, yyyy")</p>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Match Details Card -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Match Information</h2>
+
+                <div class="space-y-4">
+                    <div class="pb-4 border-b border-slate-700">
+                        <p class="text-slate-400 text-sm mb-1">Date</p>
+                        <p class="text-slate-50 font-medium">@Model.Date.ToString("MMMM dd, yyyy")</p>
+                    </div>
+
+                    <div class="pb-4 border-b border-slate-700">
+                        <p class="text-slate-400 text-sm mb-1">League</p>
+                        <p class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors cursor-pointer">@Model.LeagueName</p>
+                    </div>
+
+                    <div>
+                        <p class="text-slate-400 text-sm mb-1">Status</p>
+                        <p class="text-slate-50 font-medium">Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Card -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Final Score</h2>
+
+                <div class="space-y-6">
+                    <!-- Home Team -->
+                    <div class="text-center pb-6 border-b border-slate-700">
+                        <p class="text-emerald-400 font-medium mb-2">@Model.HomeTeamName</p>
+                        <p class="text-4xl font-bold text-slate-50">@Model.HomeGoals</p>
+                    </div>
+
+                    <!-- Result -->
+                    <div class="text-center py-4">
+                        <p class="text-emerald-400 text-lg font-bold mb-1">Final Result</p>
+                        <p class="text-2xl font-bold text-slate-50">@Model.HomeGoals - @Model.AwayGoals</p>
+                    </div>
+
+                    <!-- Away Team -->
+                    <div class="text-center pt-6 border-t border-slate-700">
+                        <p class="text-slate-50 font-medium mb-2">@Model.AwayTeamName</p>
+                        <p class="text-4xl font-bold text-slate-50">@Model.AwayGoals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teams Card -->
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-slate-50 mb-6">Teams</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="pb-6 md:border-r md:border-slate-700 md:pr-6">
+                    <p class="text-slate-400 text-sm mb-2">Home Team</p>
+                    <p class="text-emerald-400 font-semibold text-lg hover:text-emerald-300 transition-colors cursor-pointer">@Model.HomeTeamName</p>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-sm mb-2">Away Team</p>
+                    <p class="text-slate-50 font-semibold text-lg">@Model.AwayTeamName</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8">
+            <a asp-controller="Match" asp-action="Index" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md transition-colors font-medium inline-block">← Back to Matches</a>
+        </div>
+    </div>
 </div>
-
-<p><a href="@Url.Action("Index", "Match")">Back to Matches</a></p>
