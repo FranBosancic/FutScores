@@ -1,0 +1,18 @@
+@model Player
+
+@{
+    ViewData["Title"] = "Player Details";
+}
+
+<h1>@Model.FirstName @Model.LastName</h1>
+
+<div>
+    <p><strong>Position:</strong> @Model.Position</p>
+    <p><strong>Nationality:</strong> @Model.Nationality</p>
+    <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToString("yyyy-MM-dd")</p>
+    <p><strong>Club ID:</strong> @Model.ClubId</p>
+</div>
+
+<div>
+    <a href="@Url.Action("Index", "Player")">Back to Players</a>
+</div>
