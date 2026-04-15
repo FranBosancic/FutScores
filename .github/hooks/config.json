@@ -4,14 +4,14 @@
     "userPromptSubmitted": [
       {
         "type": "command",
-        "powershell": "Add-Content -Path '../lab-2/agent_log.txt' -Value ($input | Out-String)",
+        "powershell": "Add-Content -Path '.github/hooks/agent_log.txt' -Value ($input | Out-String)",
         "cwd": "."
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "powershell": "Add-Content -Path '../lab-2/agent_log.txt' -Value ($input | Out-String)",
+        "powershell": "Add-Content -Path '.github/hooks/agent_log.txt' -Value ($input | Out-String)",
         "cwd": "."
       }
     ]

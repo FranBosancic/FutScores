@@ -1,7 +1,17 @@
+using ProbaMala.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register mock repositories
+builder.Services.AddSingleton<LeagueMockRepository>();
+builder.Services.AddSingleton<ClubMockRepository>();
+builder.Services.AddSingleton<PlayerMockRepository>();
+builder.Services.AddSingleton<MatchMockRepository>();
+builder.Services.AddSingleton<UserMockRepository>();
+builder.Services.AddSingleton<RatingMockRepository>();
 
 var app = builder.Build();
 
