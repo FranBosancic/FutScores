@@ -1,4 +1,4 @@
-@model List<Player>
+@model List<PlayerDetailsViewModel>
 
 @{
     ViewData["Title"] = "Players";
@@ -11,10 +11,8 @@
         <tr>
             <th>First Name</th>
             <th>Last Name</th>
-            <th>Position</th>
             <th>Nationality</th>
-            <th>Date of Birth</th>
-            <th>Club ID</th>
+            <th>Club Name</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -24,10 +22,8 @@
             <tr>
                 <td>@player.FirstName</td>
                 <td>@player.LastName</td>
-                <td>@player.Position</td>
                 <td>@player.Nationality</td>
-                <td>@player.DateOfBirth.ToString("yyyy-MM-dd")</td>
-                <td>@player.ClubId</td>
+                <td>@player.ClubName</td>
                 <td>
                     <a href="@Url.Action("Details", "Player", new { id = player.Id })">View</a>
                 </td>

@@ -18,7 +18,24 @@ namespace ProbaMala.Controllers
         public IActionResult Index()
         {
             var players = _playerRepository.GetAll();
-            return View(players);
+
+            var playerViewModels = players.Select(player =>
+            {
+                var club = _clubRepository.GetById(player.ClubId);
+
+                return new PlayerDetailsViewModel
+                {
+                    Id = player.Id,
+                    FirstName = player.FirstName,
+                    LastName = player.LastName,
+                    DateOfBirth = player.DateOfBirth,
+                    Position = player.Position,
+                    Nationality = player.Nationality,
+                    ClubName = club?.Name ?? "Unknown"
+                };
+            }).ToList();
+
+            return View(playerViewModels);
         }
 
         public IActionResult Details(int id)
@@ -28,7 +45,20 @@ namespace ProbaMala.Controllers
             {
                 return NotFound();
             }
-            return View(player);
+
+            var club = _clubRepository.GetById(player.ClubId);
+            var viewModel = new PlayerDetailsViewModel
+            {
+                Id = player.Id,
+                FirstName = player.FirstName,
+                LastName = player.LastName,
+                DateOfBirth = player.DateOfBirth,
+                Position = player.Position,
+                Nationality = player.Nationality,
+                ClubName = club?.Name ?? "Unknown"
+            };
+
+            return View(viewModel);
         }
     }
 }

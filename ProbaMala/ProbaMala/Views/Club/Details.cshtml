@@ -1,4 +1,4 @@
-@model Club
+@model ClubDetailsViewModel
 
 @{
     ViewData["Title"] = "Club Details";
@@ -8,7 +8,7 @@
 
 <div>
     <p><strong>Founded:</strong> @Model.FoundedDate.ToString("yyyy-MM-dd")</p>
-    <p><strong>League ID:</strong> @Model.LeagueId</p>
+    <p><strong>League:</strong> @Model.LeagueName</p>
 </div>
 
 <p><a href="@Url.Action("Index", "Club")">Back to Clubs</a></p>

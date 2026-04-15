@@ -7,16 +7,31 @@ namespace ProbaMala.Controllers
     public class ClubController : Controller
     {
         private readonly ClubMockRepository _clubRepository;
-
-        public ClubController(ClubMockRepository clubRepository)
+        private readonly LeagueMockRepository _leagueRepository;
+        public ClubController(ClubMockRepository clubRepository, LeagueMockRepository leagueRepository)
         {
             _clubRepository = clubRepository;
+            _leagueRepository = leagueRepository;
         }
 
         public IActionResult Index()
         {
             var clubs = _clubRepository.GetAll();
-            return View(clubs);
+
+            var clubViewModels = clubs.Select(club =>
+            {
+                var league = _leagueRepository.GetById(club.LeagueId);
+
+                return new ClubDetailsViewModel
+                {
+                    Id = club.Id,
+                    Name = club.Name,
+                    FoundedDate = club.FoundedDate,
+                    LeagueName = league?.Name ?? "Unknown"
+                };
+            }).ToList();
+
+            return View(clubViewModels);
         }
 
         public IActionResult Details(int id)
@@ -27,7 +42,16 @@ namespace ProbaMala.Controllers
                 return NotFound();
             }
 
-            return View(club);
+            var league = _leagueRepository.GetById(club.LeagueId);
+            var viewModel = new ClubDetailsViewModel
+            {
+                Id = club.Id,
+                Name = club.Name,
+                FoundedDate = club.FoundedDate,
+                LeagueName = league?.Name ?? "Unknown"
+            };
+
+            return View(viewModel);
         }
     }
 }

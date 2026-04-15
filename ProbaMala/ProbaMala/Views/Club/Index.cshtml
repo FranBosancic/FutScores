@@ -1,4 +1,4 @@
-@model List<Club>
+@model List<ClubDetailsViewModel>
 
 @{
     ViewData["Title"] = "Clubs";
@@ -11,7 +11,7 @@
         <tr>
             <th>Name</th>
             <th>Founded</th>
-            <th>League ID</th>
+            <th>League Name</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -21,7 +21,7 @@
             <tr>
                 <td>@club.Name</td>
                 <td>@club.FoundedDate.ToString("yyyy-MM-dd")</td>
-                <td>@club.LeagueId</td>
+                <td>@club.LeagueName</td>
                 <td><a href="@Url.Action("Details", "Club", new { id = club.Id })">View</a></td>
             </tr>
         }

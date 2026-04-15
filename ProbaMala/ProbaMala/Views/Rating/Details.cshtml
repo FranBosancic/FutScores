@@ -1,4 +1,4 @@
-@model Rating
+@model RatingDetailsViewModel
 
 @{
     ViewData["Title"] = "Rating Details";
@@ -7,9 +7,9 @@
 <h1>Rating #@Model.Id</h1>
 
 <div>
-    <p><strong>Player ID:</strong> @Model.PlayerId</p>
-    <p><strong>Match ID:</strong> @Model.MatchId</p>
-    <p><strong>User ID:</strong> @Model.UserId</p>
+    <p><strong>Player:</strong> @Model.PlayerName</p>
+    <p><strong>Match:</strong> @Model.MatchDescription</p>
+    <p><strong>User:</strong> @Model.UserName</p>
     <p><strong>Score:</strong> @Model.Score</p>
     <p><strong>Comment:</strong> @Model.Comment</p>
 </div>

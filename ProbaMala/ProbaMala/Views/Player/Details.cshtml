@@ -1,4 +1,4 @@
-@model Player
+@model PlayerDetailsViewModel
 
 @{
     ViewData["Title"] = "Player Details";
@@ -10,7 +10,7 @@
     <p><strong>Position:</strong> @Model.Position</p>
     <p><strong>Nationality:</strong> @Model.Nationality</p>
     <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToString("yyyy-MM-dd")</p>
-    <p><strong>Club ID:</strong> @Model.ClubId</p>
+    <p><strong>Club:</strong> @Model.ClubName</p>
 </div>
 
 <div>

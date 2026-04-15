@@ -1,4 +1,4 @@
-@model Match
+@model MatchDetailsViewModel
 
 @{
     ViewData["Title"] = "Match Details";
@@ -8,10 +8,10 @@
 
 <div>
     <p><strong>Date:</strong> @Model.Date.ToString("yyyy-MM-dd")</p>
-    <p><strong>League ID:</strong> @Model.LeagueId</p>
-    <p><strong>Home Team ID:</strong> @Model.HomeTeamId</p>
-    <p><strong>Away Team ID:</strong> @Model.AwayTeamId</p>
-    <p><strong>Score:</strong> @Model.HomeGoals - @Model.AwayGoals</p>
+    <p><strong>League:</strong> @Model.LeagueName</p>
+    <p><strong>Home Team:</strong> @Model.HomeTeamName</p>
+    <p><strong>Away Team:</strong> @Model.AwayTeamName</p>
+    <p><strong>Score:</strong> @Model.Score</p>
 </div>
 
 <p><a href="@Url.Action("Index", "Match")">Back to Matches</a></p>
