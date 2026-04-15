@@ -1,0 +1,17 @@
+@model Rating
+
+@{
+    ViewData["Title"] = "Rating Details";
+}
+
+<h1>Rating #@Model.Id</h1>
+
+<div>
+    <p><strong>Player ID:</strong> @Model.PlayerId</p>
+    <p><strong>Match ID:</strong> @Model.MatchId</p>
+    <p><strong>User ID:</strong> @Model.UserId</p>
+    <p><strong>Score:</strong> @Model.Score</p>
+    <p><strong>Comment:</strong> @Model.Comment</p>
+</div>
+
+<p><a href="@Url.Action("Index", "Rating")">Back to Ratings</a></p>

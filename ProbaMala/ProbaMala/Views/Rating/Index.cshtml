@@ -1,0 +1,31 @@
+@model List<Rating>
+
+@{
+    ViewData["Title"] = "Ratings";
+}
+
+<h1>Ratings</h1>
+
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Player ID</th>
+            <th>Match ID</th>
+            <th>User ID</th>
+            <th>Score</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rating in Model)
+        {
+            <tr>
+                <td>@rating.PlayerId</td>
+                <td>@rating.MatchId</td>
+                <td>@rating.UserId</td>
+                <td>@rating.Score</td>
+                <td><a href="@Url.Action("Details", "Rating", new { id = rating.Id })">View</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

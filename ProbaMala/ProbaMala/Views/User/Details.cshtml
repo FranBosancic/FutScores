@@ -1,0 +1,13 @@
+@model User
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h1>@Model.FirstName @Model.LastName</h1>
+
+<div>
+    <p><strong>Email:</strong> @Model.Email</p>
+</div>
+
+<p><a href="@Url.Action("Index", "User")">Back to Users</a></p>

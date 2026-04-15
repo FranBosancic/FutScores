@@ -1,0 +1,13 @@
+@model League
+
+@{
+    ViewData["Title"] = "League Details";
+}
+
+<h1>@Model.Name</h1>
+
+<div>
+    <p><strong>ID:</strong> @Model.Id</p>
+</div>
+
+<p><a href="@Url.Action("Index", "League")">Back to Leagues</a></p>

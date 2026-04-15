@@ -1,0 +1,25 @@
+@model List<League>
+
+@{
+    ViewData["Title"] = "Leagues";
+}
+
+<h1>Leagues</h1>
+
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var league in Model)
+        {
+            <tr>
+                <td>@league.Name</td>
+                <td><a href="@Url.Action("Details", "League", new { id = league.Id })">View</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

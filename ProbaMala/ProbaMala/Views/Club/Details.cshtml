@@ -1,0 +1,14 @@
+@model Club
+
+@{
+    ViewData["Title"] = "Club Details";
+}
+
+<h1>@Model.Name</h1>
+
+<div>
+    <p><strong>Founded:</strong> @Model.FoundedDate.ToString("yyyy-MM-dd")</p>
+    <p><strong>League ID:</strong> @Model.LeagueId</p>
+</div>
+
+<p><a href="@Url.Action("Index", "Club")">Back to Clubs</a></p>

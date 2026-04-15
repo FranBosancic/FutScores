@@ -1,0 +1,29 @@
+@model List<Club>
+
+@{
+    ViewData["Title"] = "Clubs";
+}
+
+<h1>Clubs</h1>
+
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Founded</th>
+            <th>League ID</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var club in Model)
+        {
+            <tr>
+                <td>@club.Name</td>
+                <td>@club.FoundedDate.ToString("yyyy-MM-dd")</td>
+                <td>@club.LeagueId</td>
+                <td><a href="@Url.Action("Details", "Club", new { id = club.Id })">View</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
