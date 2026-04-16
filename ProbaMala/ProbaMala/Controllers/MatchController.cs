@@ -33,6 +33,9 @@ namespace ProbaMala.Controllers
                 return new MatchDetailsViewModel
                 {
                     Id = match.Id,
+                    LeagueId = match.LeagueId,
+                    HomeTeamId = match.HomeTeamId,
+                    AwayTeamId = match.AwayTeamId,
                     Date = match.Date,
                     LeagueName = league?.Name ?? "Unknown League",
                     HomeTeamName = homeClub?.Name ?? "Unknown Home Team",
@@ -60,6 +63,9 @@ namespace ProbaMala.Controllers
             var viewModel = new MatchDetailsViewModel
             {
                 Id = match.Id,
+                LeagueId = match.LeagueId,
+                HomeTeamId = match.HomeTeamId,
+                AwayTeamId = match.AwayTeamId,
                 Date = match.Date,
                 LeagueName = league?.Name ?? "Unknown League",
                 HomeTeamName = homeClub?.Name ?? "Unknown Home Team",

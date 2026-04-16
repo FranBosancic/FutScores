@@ -20,7 +20,7 @@
             <h1 class="text-4xl font-bold text-slate-50 mb-4">Rating #@Model.Id</h1>
             <div class="flex items-center space-x-4">
                 <span class="bg-amber-500 text-white text-2xl font-bold px-4 py-2 rounded-lg">@Model.Score</span>
-                <p class="text-slate-300">Rating by @Model.UserName</p>
+                <p class="text-slate-300">Rating by <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="text-emerald-400 hover:text-emerald-300 transition-colors">@Model.UserName</a></p>
             </div>
         </div>
 
@@ -33,17 +33,17 @@
                 <div class="space-y-4">
                     <div class="pb-4 border-b border-slate-700">
                         <p class="text-slate-400 text-sm mb-1">Player</p>
-                        <p class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors cursor-pointer">@Model.PlayerName</p>
+                        <a asp-controller="Player" asp-action="Details" asp-route-id="@Model.PlayerId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.PlayerName</a>
                     </div>
 
                     <div class="pb-4 border-b border-slate-700">
                         <p class="text-slate-400 text-sm mb-1">Match</p>
-                        <p class="text-slate-50 font-medium">@Model.MatchDescription</p>
+                        <a asp-controller="Match" asp-action="Details" asp-route-id="@Model.MatchId" class="text-slate-50 font-medium hover:text-emerald-300 transition-colors">@Model.MatchDescription</a>
                     </div>
 
                     <div class="pb-4 border-b border-slate-700">
                         <p class="text-slate-400 text-sm mb-1">Rated by</p>
-                        <p class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors cursor-pointer">@Model.UserName</p>
+                        <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.UserName</a>
                     </div>
 
                     <div>
@@ -84,15 +84,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="pb-4 md:border-r md:border-slate-700 md:pr-4">
                     <p class="text-slate-400 text-sm mb-2">Player</p>
-                    <a asp-controller="Player" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View all players →</a>
+                    <a asp-controller="Player" asp-action="Details" asp-route-id="@Model.PlayerId" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View player details →</a>
                 </div>
                 <div class="pb-4 md:border-r md:border-slate-700 md:pr-4">
                     <p class="text-slate-400 text-sm mb-2">Match</p>
-                    <a asp-controller="Match" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View all matches →</a>
+                    <a asp-controller="Match" asp-action="Details" asp-route-id="@Model.MatchId" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View match details →</a>
                 </div>
                 <div>
                     <p class="text-slate-400 text-sm mb-2">User</p>
-                    <a asp-controller="User" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View all users →</a>
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View user details →</a>
                 </div>
             </div>
         </div>

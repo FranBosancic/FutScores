@@ -35,7 +35,7 @@
 
                     <div class="pb-4 border-b border-slate-700">
                         <p class="text-slate-400 text-sm mb-1">League</p>
-                        <p class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors cursor-pointer">@Model.LeagueName</p>
+                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.LeagueName</a>
                     </div>
 
                     <div>
@@ -52,7 +52,7 @@
                 <div class="space-y-6">
                     <!-- Home Team -->
                     <div class="text-center pb-6 border-b border-slate-700">
-                        <p class="text-emerald-400 font-medium mb-2">@Model.HomeTeamName</p>
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.HomeTeamId" class="text-emerald-400 font-medium mb-2 inline-block hover:text-emerald-300 transition-colors">@Model.HomeTeamName</a>
                         <p class="text-4xl font-bold text-slate-50">@Model.HomeGoals</p>
                     </div>
 
@@ -64,7 +64,7 @@
 
                     <!-- Away Team -->
                     <div class="text-center pt-6 border-t border-slate-700">
-                        <p class="text-slate-50 font-medium mb-2">@Model.AwayTeamName</p>
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.AwayTeamId" class="text-slate-50 font-medium mb-2 inline-block hover:text-emerald-300 transition-colors">@Model.AwayTeamName</a>
                         <p class="text-4xl font-bold text-slate-50">@Model.AwayGoals</p>
                     </div>
                 </div>
@@ -78,11 +78,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="pb-6 md:border-r md:border-slate-700 md:pr-6">
                     <p class="text-slate-400 text-sm mb-2">Home Team</p>
-                    <p class="text-emerald-400 font-semibold text-lg hover:text-emerald-300 transition-colors cursor-pointer">@Model.HomeTeamName</p>
+                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.HomeTeamId" class="text-emerald-400 font-semibold text-lg hover:text-emerald-300 transition-colors">@Model.HomeTeamName</a>
                 </div>
                 <div>
                     <p class="text-slate-400 text-sm mb-2">Away Team</p>
-                    <p class="text-slate-50 font-semibold text-lg">@Model.AwayTeamName</p>
+                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.AwayTeamId" class="text-slate-50 font-semibold text-lg hover:text-emerald-300 transition-colors">@Model.AwayTeamName</a>
                 </div>
             </div>
         </div>

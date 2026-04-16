@@ -26,6 +26,7 @@ namespace ProbaMala.Controllers
                 return new PlayerDetailsViewModel
                 {
                     Id = player.Id,
+                    ClubId = player.ClubId,
                     FirstName = player.FirstName,
                     LastName = player.LastName,
                     DateOfBirth = player.DateOfBirth,
@@ -50,6 +51,7 @@ namespace ProbaMala.Controllers
             var viewModel = new PlayerDetailsViewModel
             {
                 Id = player.Id,
+                ClubId = player.ClubId,
                 FirstName = player.FirstName,
                 LastName = player.LastName,
                 DateOfBirth = player.DateOfBirth,

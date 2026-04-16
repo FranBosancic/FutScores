@@ -47,6 +47,9 @@ namespace ProbaMala.Controllers
                 return new RatingDetailsViewModel
                 {
                     Id = rating.Id,
+                    PlayerId = rating.PlayerId,
+                    MatchId = rating.MatchId,
+                    UserId = rating.UserId,
                     PlayerName = player != null ? $"{player.FirstName} {player.LastName}" : "Unknown Player",
                     MatchDescription = matchDescription,
                     UserName = user != null ? $"{user.FirstName} {user.LastName}" : "Unknown User",
@@ -81,6 +84,9 @@ namespace ProbaMala.Controllers
             var viewModel = new RatingDetailsViewModel
             {
                 Id = rating.Id,
+                PlayerId = rating.PlayerId,
+                MatchId = rating.MatchId,
+                UserId = rating.UserId,
                 PlayerName = player != null ? $"{player.FirstName} {player.LastName}" : "Unknown Player",
                 MatchDescription = matchDescription,
                 UserName = user != null ? $"{user.FirstName} {user.LastName}" : "Unknown User",

@@ -25,6 +25,7 @@ namespace ProbaMala.Controllers
                 return new ClubDetailsViewModel
                 {
                     Id = club.Id,
+                    LeagueId = club.LeagueId,
                     Name = club.Name,
                     FoundedDate = club.FoundedDate,
                     LeagueName = league?.Name ?? "Unknown"
@@ -46,6 +47,7 @@ namespace ProbaMala.Controllers
             var viewModel = new ClubDetailsViewModel
             {
                 Id = club.Id,
+                LeagueId = club.LeagueId,
                 Name = club.Name,
                 FoundedDate = club.FoundedDate,
                 LeagueName = league?.Name ?? "Unknown"

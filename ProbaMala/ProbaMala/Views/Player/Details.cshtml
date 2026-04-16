@@ -59,7 +59,7 @@
 
                     <div>
                         <p class="text-slate-400 text-sm mb-1">Club</p>
-                        <p class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors cursor-pointer">@Model.ClubName</p>
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.ClubName</a>
                     </div>
                 </div>
             </div>
@@ -76,7 +76,7 @@
 
                     <div>
                         <p class="text-slate-400 text-sm mb-2">Current Club</p>
-                        <p class="text-slate-300 text-sm">@Model.ClubName</p>
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-slate-300 text-sm hover:text-emerald-300 transition-colors">@Model.ClubName</a>
                     </div>
                 </div>
             </div>
