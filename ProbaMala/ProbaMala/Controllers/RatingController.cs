@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProbaMala.Data;
 using ProbaMala.Models.ViewModels;
+using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
     [Route("ocjene")]
     public class RatingController : Controller
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IRatingRepository _ratingRepository;
 
-        public RatingController(AppDbContext dbContext)
+        public RatingController(IRatingRepository ratingRepository)
         {
-            _dbContext = dbContext;
+            _ratingRepository = ratingRepository;
         }
 
         [HttpGet("")]
@@ -21,30 +20,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/ratings/list")]
         public IActionResult Index()
         {
-            var ratingViewModels = _dbContext.Ratings
-                .Include(rating => rating.Player)
-                .Include(rating => rating.User)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.HomeTeam)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.AwayTeam)
-                .OrderByDescending(rating => rating.Score)
-                .AsEnumerable()
-                .Select(rating => new RatingDetailsViewModel
-                {
-                    Id = rating.Id,
-                    PlayerId = rating.PlayerId,
-                    MatchId = rating.MatchId,
-                    UserId = rating.UserId,
-                    PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
-                    MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
-                    UserName = $"{rating.User.FirstName} {rating.User.LastName}",
-                    Score = rating.Score,
-                    Comment = rating.Comment
-                })
-                .ToList();
-
-            return View(ratingViewModels);
+            return View(_ratingRepository.GetAll());
         }
 
         [HttpGet("{id:int}")]
@@ -53,28 +29,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/ratings/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var viewModel = _dbContext.Ratings
-                .Include(rating => rating.Player)
-                .Include(rating => rating.User)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.HomeTeam)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.AwayTeam)
-                .Where(rating => rating.Id == id)
-                .AsEnumerable()
-                .Select(rating => new RatingDetailsViewModel
-                {
-                    Id = rating.Id,
-                    PlayerId = rating.PlayerId,
-                    MatchId = rating.MatchId,
-                    UserId = rating.UserId,
-                    PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
-                    MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
-                    UserName = $"{rating.User.FirstName} {rating.User.LastName}",
-                    Score = rating.Score,
-                    Comment = rating.Comment
-                })
-                .FirstOrDefault();
+            var viewModel = _ratingRepository.GetById(id);
 
             if (viewModel == null)
             {

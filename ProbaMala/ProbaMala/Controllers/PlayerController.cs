@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProbaMala.Data;
 using ProbaMala.Models.ViewModels;
+using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
     [Route("igraci")]
     public class PlayerController : Controller
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IPlayerRepository _playerRepository;
 
-        public PlayerController(AppDbContext dbContext)
+        public PlayerController(IPlayerRepository playerRepository)
         {
-            _dbContext = dbContext;
+            _playerRepository = playerRepository;
         }
 
         [HttpGet("")]
@@ -21,24 +20,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/players/list")]
         public IActionResult Index()
         {
-            var playerViewModels = _dbContext.Players
-                .Include(player => player.Club)
-                .OrderBy(player => player.LastName)
-                .ThenBy(player => player.FirstName)
-                .Select(player => new PlayerDetailsViewModel
-                {
-                    Id = player.Id,
-                    ClubId = player.ClubId,
-                    FirstName = player.FirstName,
-                    LastName = player.LastName,
-                    DateOfBirth = player.DateOfBirth,
-                    Position = player.Position,
-                    Nationality = player.Nationality,
-                    ClubName = player.Club.Name
-                })
-                .ToList();
-
-            return View(playerViewModels);
+            return View(_playerRepository.GetAll());
         }
 
         [HttpGet("{id:int}")]
@@ -47,21 +29,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/players/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var viewModel = _dbContext.Players
-                .Include(player => player.Club)
-                .Where(player => player.Id == id)
-                .Select(player => new PlayerDetailsViewModel
-                {
-                    Id = player.Id,
-                    ClubId = player.ClubId,
-                    FirstName = player.FirstName,
-                    LastName = player.LastName,
-                    DateOfBirth = player.DateOfBirth,
-                    Position = player.Position,
-                    Nationality = player.Nationality,
-                    ClubName = player.Club.Name
-                })
-                .FirstOrDefault();
+            var viewModel = _playerRepository.GetById(id);
 
             if (viewModel == null)
             {

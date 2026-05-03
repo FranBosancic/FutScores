@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProbaMala.Data;
 using ProbaMala.Models.ViewModels;
+using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
     [Route("klubovi")]
     public class ClubController : Controller
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IClubRepository _clubRepository;
 
-        public ClubController(AppDbContext dbContext)
+        public ClubController(IClubRepository clubRepository)
         {
-            _dbContext = dbContext;
+            _clubRepository = clubRepository;
         }
 
         [HttpGet("")]
@@ -21,20 +20,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/clubs/list")]
         public IActionResult Index()
         {
-            var clubViewModels = _dbContext.Clubs
-                .Include(club => club.League)
-                .OrderBy(club => club.Name)
-                .Select(club => new ClubDetailsViewModel
-                {
-                    Id = club.Id,
-                    LeagueId = club.LeagueId,
-                    Name = club.Name,
-                    FoundedDate = club.FoundedDate,
-                    LeagueName = club.League.Name
-                })
-                .ToList();
-
-            return View(clubViewModels);
+            return View(_clubRepository.GetAll());
         }
 
         [HttpGet("{id:int}")]
@@ -43,18 +29,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/clubs/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var viewModel = _dbContext.Clubs
-                .Include(club => club.League)
-                .Where(club => club.Id == id)
-                .Select(club => new ClubDetailsViewModel
-                {
-                    Id = club.Id,
-                    LeagueId = club.LeagueId,
-                    Name = club.Name,
-                    FoundedDate = club.FoundedDate,
-                    LeagueName = club.League.Name
-                })
-                .FirstOrDefault();
+            var viewModel = _clubRepository.GetById(id);
 
             if (viewModel == null)
             {

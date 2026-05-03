@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using ProbaMala.Data;
+using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
     [Route("lige")]
     public class LeagueController : Controller
     {
-        private readonly AppDbContext _dbContext;
+        private readonly ILeagueRepository _leagueRepository;
 
-        public LeagueController(AppDbContext dbContext)
+        public LeagueController(ILeagueRepository leagueRepository)
         {
-            _dbContext = dbContext;
+            _leagueRepository = leagueRepository;
         }
 
         [HttpGet("")]
@@ -19,11 +19,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/leagues/list")]
         public IActionResult Index()
         {
-            var leagues = _dbContext.Leagues
-                .OrderBy(league => league.Name)
-                .ToList();
-
-            return View(leagues);
+            return View(_leagueRepository.GetAll());
         }
 
         [HttpGet("{id:int}")]
@@ -32,7 +28,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/leagues/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var league = _dbContext.Leagues.Find(id);
+            var league = _leagueRepository.GetById(id);
             if (league == null)
             {
                 return NotFound();

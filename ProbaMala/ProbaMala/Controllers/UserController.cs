@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using ProbaMala.Data;
+using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
     [Route("korisnici")]
     public class UserController : Controller
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IUserRepository _userRepository;
 
-        public UserController(AppDbContext dbContext)
+        public UserController(IUserRepository userRepository)
         {
-            _dbContext = dbContext;
+            _userRepository = userRepository;
         }
 
         [HttpGet("")]
@@ -19,12 +19,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/users/list")]
         public IActionResult Index()
         {
-            var users = _dbContext.Users
-                .OrderBy(user => user.LastName)
-                .ThenBy(user => user.FirstName)
-                .ToList();
-
-            return View(users);
+            return View(_userRepository.GetAll());
         }
 
         [HttpGet("{id:int}")]
@@ -33,7 +28,7 @@ namespace ProbaMala.Controllers
         [HttpGet("~/users/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var user = _dbContext.Users.Find(id);
+            var user = _userRepository.GetById(id);
             if (user == null)
             {
                 return NotFound();
