@@ -6,9 +6,9 @@
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <nav class="text-sm text-slate-400">
-        <a asp-controller="Home" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
+        <a asp-route="home-index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
         <span class="px-2 text-slate-600">/</span>
-        <a asp-controller="User" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Users</a>
+        <a asp-route="users-index" class="font-medium text-lime-300 transition hover:text-lime-200">Users</a>
         <span class="px-2 text-slate-600">/</span>
         <span>@Model.FirstName @Model.LastName</span>
     </nav>
@@ -57,7 +57,7 @@
             <div class="grid gap-4">
                 <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
                     <div class="text-xs uppercase tracking-[0.22em] text-slate-500">View Ratings</div>
-                    <a asp-controller="Rating" asp-action="Index" class="mt-3 block text-lg font-semibold text-lime-300 transition hover:text-lime-200">Browse all ratings</a>
+                    <a asp-route="ratings-index" class="mt-3 block text-lg font-semibold text-lime-300 transition hover:text-lime-200">Browse all ratings</a>
                 </article>
                 <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
                     <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Account Status</div>
@@ -68,6 +68,6 @@
     </section>
 
     <div>
-        <a asp-controller="User" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all users</a>
+        <a asp-route="users-index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all users</a>
     </div>
 </section>

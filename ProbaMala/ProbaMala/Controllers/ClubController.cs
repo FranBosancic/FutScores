@@ -1,57 +1,65 @@
 using Microsoft.AspNetCore.Mvc;
-using ProbaMala.Models;
-using ProbaMala.Repositories;
+using Microsoft.EntityFrameworkCore;
+using ProbaMala.Data;
+using ProbaMala.Models.ViewModels;
 
 namespace ProbaMala.Controllers
 {
+    [Route("klubovi")]
     public class ClubController : Controller
     {
-        private readonly ClubMockRepository _clubRepository;
-        private readonly LeagueMockRepository _leagueRepository;
-        public ClubController(ClubMockRepository clubRepository, LeagueMockRepository leagueRepository)
+        private readonly AppDbContext _dbContext;
+
+        public ClubController(AppDbContext dbContext)
         {
-            _clubRepository = clubRepository;
-            _leagueRepository = leagueRepository;
+            _dbContext = dbContext;
         }
 
+        [HttpGet("")]
+        [HttpGet("popis")]
+        [HttpGet("~/clubs", Name = "clubs-index")]
+        [HttpGet("~/clubs/list")]
         public IActionResult Index()
         {
-            var clubs = _clubRepository.GetAll();
-
-            var clubViewModels = clubs.Select(club =>
-            {
-                var league = _leagueRepository.GetById(club.LeagueId);
-
-                return new ClubDetailsViewModel
+            var clubViewModels = _dbContext.Clubs
+                .Include(club => club.League)
+                .OrderBy(club => club.Name)
+                .Select(club => new ClubDetailsViewModel
                 {
                     Id = club.Id,
                     LeagueId = club.LeagueId,
                     Name = club.Name,
                     FoundedDate = club.FoundedDate,
-                    LeagueName = league?.Name ?? "Unknown"
-                };
-            }).ToList();
+                    LeagueName = club.League.Name
+                })
+                .ToList();
 
             return View(clubViewModels);
         }
 
+        [HttpGet("{id:int}")]
+        [HttpGet("detalji/{id:int}")]
+        [HttpGet("~/clubs/{id:int}", Name = "club-details")]
+        [HttpGet("~/clubs/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var club = _clubRepository.GetById(id);
-            if (club == null)
+            var viewModel = _dbContext.Clubs
+                .Include(club => club.League)
+                .Where(club => club.Id == id)
+                .Select(club => new ClubDetailsViewModel
+                {
+                    Id = club.Id,
+                    LeagueId = club.LeagueId,
+                    Name = club.Name,
+                    FoundedDate = club.FoundedDate,
+                    LeagueName = club.League.Name
+                })
+                .FirstOrDefault();
+
+            if (viewModel == null)
             {
                 return NotFound();
             }
-
-            var league = _leagueRepository.GetById(club.LeagueId);
-            var viewModel = new ClubDetailsViewModel
-            {
-                Id = club.Id,
-                LeagueId = club.LeagueId,
-                Name = club.Name,
-                FoundedDate = club.FoundedDate,
-                LeagueName = league?.Name ?? "Unknown"
-            };
 
             return View(viewModel);
         }

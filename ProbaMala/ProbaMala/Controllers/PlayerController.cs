@@ -1,29 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
-using ProbaMala.Models;
-using ProbaMala.Repositories;
+using Microsoft.EntityFrameworkCore;
+using ProbaMala.Data;
+using ProbaMala.Models.ViewModels;
 
 namespace ProbaMala.Controllers
 {
+    [Route("igraci")]
     public class PlayerController : Controller
     {
-        private readonly PlayerMockRepository _playerRepository;
-        private readonly ClubMockRepository _clubRepository;
+        private readonly AppDbContext _dbContext;
 
-        public PlayerController(PlayerMockRepository playerRepository, ClubMockRepository clubRepository)
+        public PlayerController(AppDbContext dbContext)
         {
-            _playerRepository = playerRepository;
-            _clubRepository = clubRepository;
+            _dbContext = dbContext;
         }
 
+        [HttpGet("")]
+        [HttpGet("popis")]
+        [HttpGet("~/players", Name = "players-index")]
+        [HttpGet("~/players/list")]
         public IActionResult Index()
         {
-            var players = _playerRepository.GetAll();
-
-            var playerViewModels = players.Select(player =>
-            {
-                var club = _clubRepository.GetById(player.ClubId);
-
-                return new PlayerDetailsViewModel
+            var playerViewModels = _dbContext.Players
+                .Include(player => player.Club)
+                .OrderBy(player => player.LastName)
+                .ThenBy(player => player.FirstName)
+                .Select(player => new PlayerDetailsViewModel
                 {
                     Id = player.Id,
                     ClubId = player.ClubId,
@@ -32,33 +34,39 @@ namespace ProbaMala.Controllers
                     DateOfBirth = player.DateOfBirth,
                     Position = player.Position,
                     Nationality = player.Nationality,
-                    ClubName = club?.Name ?? "Unknown"
-                };
-            }).ToList();
+                    ClubName = player.Club.Name
+                })
+                .ToList();
 
             return View(playerViewModels);
         }
 
+        [HttpGet("{id:int}")]
+        [HttpGet("detalji/{id:int}")]
+        [HttpGet("~/players/{id:int}", Name = "player-details")]
+        [HttpGet("~/players/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var player = _playerRepository.GetById(id);
-            if (player == null)
+            var viewModel = _dbContext.Players
+                .Include(player => player.Club)
+                .Where(player => player.Id == id)
+                .Select(player => new PlayerDetailsViewModel
+                {
+                    Id = player.Id,
+                    ClubId = player.ClubId,
+                    FirstName = player.FirstName,
+                    LastName = player.LastName,
+                    DateOfBirth = player.DateOfBirth,
+                    Position = player.Position,
+                    Nationality = player.Nationality,
+                    ClubName = player.Club.Name
+                })
+                .FirstOrDefault();
+
+            if (viewModel == null)
             {
                 return NotFound();
             }
-
-            var club = _clubRepository.GetById(player.ClubId);
-            var viewModel = new PlayerDetailsViewModel
-            {
-                Id = player.Id,
-                ClubId = player.ClubId,
-                FirstName = player.FirstName,
-                LastName = player.LastName,
-                DateOfBirth = player.DateOfBirth,
-                Position = player.Position,
-                Nationality = player.Nationality,
-                ClubName = club?.Name ?? "Unknown"
-            };
 
             return View(viewModel);
         }

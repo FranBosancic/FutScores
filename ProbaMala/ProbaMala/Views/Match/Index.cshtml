@@ -46,7 +46,7 @@
 
                     <footer class="mt-5 flex items-center justify-between gap-4">
                         <span class="font-['Oswald'] text-2xl text-white">@match.Score</span>
-                        <a asp-controller="Match" asp-action="Details" asp-route-id="@match.Id" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Open match</a>
+                        <a asp-route="match-details" asp-route-id="@match.Id" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Open match</a>
                     </footer>
                 </article>
             }

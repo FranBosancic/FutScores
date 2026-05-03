@@ -1,98 +1,85 @@
 using Microsoft.AspNetCore.Mvc;
-using ProbaMala.Models;
-using ProbaMala.Repositories;
+using Microsoft.EntityFrameworkCore;
+using ProbaMala.Data;
+using ProbaMala.Models.ViewModels;
 
 namespace ProbaMala.Controllers
 {
+    [Route("ocjene")]
     public class RatingController : Controller
     {
-        private readonly RatingMockRepository _ratingRepository;
-        private readonly PlayerMockRepository _playerRepository;
-        private readonly MatchMockRepository _matchRepository;
-        private readonly UserMockRepository _userRepository;
-        private readonly ClubMockRepository _clubRepository;
+        private readonly AppDbContext _dbContext;
 
-        public RatingController(
-            RatingMockRepository ratingRepository,
-            PlayerMockRepository playerRepository,
-            MatchMockRepository matchRepository,
-            UserMockRepository userRepository,
-            ClubMockRepository clubRepository)
+        public RatingController(AppDbContext dbContext)
         {
-            _ratingRepository = ratingRepository;
-            _playerRepository = playerRepository;
-            _matchRepository = matchRepository;
-            _userRepository = userRepository;
-            _clubRepository = clubRepository;
+            _dbContext = dbContext;
         }
 
+        [HttpGet("")]
+        [HttpGet("popis")]
+        [HttpGet("~/ratings", Name = "ratings-index")]
+        [HttpGet("~/ratings/list")]
         public IActionResult Index()
         {
-            var ratings = _ratingRepository.GetAll();
-
-            var ratingViewModels = ratings.Select(rating =>
-            {
-                var player = _playerRepository.GetById(rating.PlayerId);
-                var match = _matchRepository.GetById(rating.MatchId);
-                var user = _userRepository.GetById(rating.UserId);
-                var homeClub = match != null ? _clubRepository.GetById(match.HomeTeamId) : null;
-                var awayClub = match != null ? _clubRepository.GetById(match.AwayTeamId) : null;
-
-                string matchDescription = "Unknown match";
-                if (match != null)
-                {
-                    matchDescription = $"{homeClub?.Name ?? "Home"} vs {awayClub?.Name ?? "Away"} on {match.Date:yyyy-MM-dd}";
-                }
-
-                return new RatingDetailsViewModel
+            var ratingViewModels = _dbContext.Ratings
+                .Include(rating => rating.Player)
+                .Include(rating => rating.User)
+                .Include(rating => rating.Match)
+                    .ThenInclude(match => match.HomeTeam)
+                .Include(rating => rating.Match)
+                    .ThenInclude(match => match.AwayTeam)
+                .OrderByDescending(rating => rating.Score)
+                .AsEnumerable()
+                .Select(rating => new RatingDetailsViewModel
                 {
                     Id = rating.Id,
                     PlayerId = rating.PlayerId,
                     MatchId = rating.MatchId,
                     UserId = rating.UserId,
-                    PlayerName = player != null ? $"{player.FirstName} {player.LastName}" : "Unknown Player",
-                    MatchDescription = matchDescription,
-                    UserName = user != null ? $"{user.FirstName} {user.LastName}" : "Unknown User",
+                    PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
+                    MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
+                    UserName = $"{rating.User.FirstName} {rating.User.LastName}",
                     Score = rating.Score,
                     Comment = rating.Comment
-                };
-            }).ToList();
+                })
+                .ToList();
 
             return View(ratingViewModels);
         }
 
+        [HttpGet("{id:int}")]
+        [HttpGet("detalji/{id:int}")]
+        [HttpGet("~/ratings/{id:int}", Name = "rating-details")]
+        [HttpGet("~/ratings/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var rating = _ratingRepository.GetById(id);
-            if (rating == null)
+            var viewModel = _dbContext.Ratings
+                .Include(rating => rating.Player)
+                .Include(rating => rating.User)
+                .Include(rating => rating.Match)
+                    .ThenInclude(match => match.HomeTeam)
+                .Include(rating => rating.Match)
+                    .ThenInclude(match => match.AwayTeam)
+                .Where(rating => rating.Id == id)
+                .AsEnumerable()
+                .Select(rating => new RatingDetailsViewModel
+                {
+                    Id = rating.Id,
+                    PlayerId = rating.PlayerId,
+                    MatchId = rating.MatchId,
+                    UserId = rating.UserId,
+                    PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
+                    MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
+                    UserName = $"{rating.User.FirstName} {rating.User.LastName}",
+                    Score = rating.Score,
+                    Comment = rating.Comment
+                })
+                .FirstOrDefault();
+
+            if (viewModel == null)
             {
                 return NotFound();
             }
-
-            var player = _playerRepository.GetById(rating.PlayerId);
-            var match = _matchRepository.GetById(rating.MatchId);
-            var user = _userRepository.GetById(rating.UserId);
-
-            string matchDescription = "Unknown match";
-            if (match != null)
-            {
-                var homeClub = _clubRepository.GetById(match.HomeTeamId);
-                var awayClub = _clubRepository.GetById(match.AwayTeamId);
-                matchDescription = $"{homeClub?.Name ?? "Home"} vs {awayClub?.Name ?? "Away"} on {match.Date:yyyy-MM-dd}";
-            }
-
-            var viewModel = new RatingDetailsViewModel
-            {
-                Id = rating.Id,
-                PlayerId = rating.PlayerId,
-                MatchId = rating.MatchId,
-                UserId = rating.UserId,
-                PlayerName = player != null ? $"{player.FirstName} {player.LastName}" : "Unknown Player",
-                MatchDescription = matchDescription,
-                UserName = user != null ? $"{user.FirstName} {user.LastName}" : "Unknown User",
-                Score = rating.Score,
-                Comment = rating.Comment
-            };
 
             return View(viewModel);
         }

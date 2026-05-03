@@ -1,4 +1,4 @@
-namespace ProbaMala.Models
+namespace ProbaMala.Models.ViewModels
 {
     public class MatchDetailsViewModel
     {

@@ -1,4 +1,6 @@
-namespace ProbaMala.Models
+using ProbaMala.Models.Entities;
+
+namespace ProbaMala.Models.ViewModels
 {
     public class DashboardMatchCard
     {
@@ -29,6 +31,7 @@ namespace ProbaMala.Models
         public string Label { get; set; } = null!;
         public string Controller { get; set; } = null!;
         public string Action { get; set; } = null!;
+        public string RouteName { get; set; } = null!;
     }
 
     public class ClubFormEntry

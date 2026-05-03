@@ -23,7 +23,7 @@
                         <p class="mt-1 break-all text-sm text-slate-400">@user.Email</p>
                     </div>
                     <div class="mt-4 text-sm text-slate-300">User ID: #@user.Id</div>
-                    <a asp-controller="User" asp-action="Details" asp-route-id="@user.Id" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open user</a>
+                    <a asp-route="user-details" asp-route-id="@user.Id" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open user</a>
                 </article>
             }
         </div>

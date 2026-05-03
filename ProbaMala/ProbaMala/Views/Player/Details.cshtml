@@ -22,9 +22,9 @@
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <nav class="text-sm text-slate-400">
-        <a asp-controller="Home" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
+        <a asp-route="home-index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
         <span class="px-2 text-slate-600">/</span>
-        <a asp-controller="Player" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Players</a>
+        <a asp-route="players-index" class="font-medium text-lime-300 transition hover:text-lime-200">Players</a>
         <span class="px-2 text-slate-600">/</span>
         <span>@Model.FirstName @Model.LastName</span>
     </nav>
@@ -82,14 +82,14 @@
                     <span>Role: @Model.Position</span>
                 </div>
                 <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-lime-300 transition hover:text-lime-200">Open club</a>
-                    <a asp-controller="Player" asp-action="Index" class="text-lime-300 transition hover:text-lime-200">More players</a>
+                    <a asp-route="club-details" asp-route-id="@Model.ClubId" class="text-lime-300 transition hover:text-lime-200">Open club</a>
+                    <a asp-route="players-index" class="text-lime-300 transition hover:text-lime-200">More players</a>
                 </div>
             </article>
         </section>
     </section>
 
     <div>
-        <a asp-controller="Player" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all players</a>
+        <a asp-route="players-index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all players</a>
     </div>
 </section>

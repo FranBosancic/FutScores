@@ -32,8 +32,8 @@
                     </div>
 
                     <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-                        <a asp-controller="League" asp-action="Details" asp-route-id="@club.LeagueId" class="text-lime-300 transition hover:text-lime-200">Open league</a>
-                        <a asp-controller="Club" asp-action="Details" asp-route-id="@club.Id" class="text-lime-300 transition hover:text-lime-200">Open club</a>
+                        <a asp-route="league-details" asp-route-id="@club.LeagueId" class="text-lime-300 transition hover:text-lime-200">Open league</a>
+                        <a asp-route="club-details" asp-route-id="@club.Id" class="text-lime-300 transition hover:text-lime-200">Open club</a>
                     </div>
                 </article>
             }

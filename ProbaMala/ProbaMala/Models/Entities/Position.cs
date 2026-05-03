@@ -1,4 +1,4 @@
-namespace ProbaMala.Models
+namespace ProbaMala.Models.Entities
 {
     public enum Position
     {

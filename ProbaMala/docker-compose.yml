@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: probamala-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: probamala
+      POSTGRES_USER: probamala
+      POSTGRES_PASSWORD: probamala
+    ports:
+      - "5432:5432"
+    volumes:
+      - probamala-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U probamala -d probamala"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  probamala-postgres-data:

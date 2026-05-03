@@ -6,9 +6,9 @@
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <nav class="text-sm text-slate-400">
-        <a asp-controller="Home" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
+        <a asp-route="home-index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
         <span class="px-2 text-slate-600">/</span>
-        <a asp-controller="League" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Leagues</a>
+        <a asp-route="leagues-index" class="font-medium text-lime-300 transition hover:text-lime-200">Leagues</a>
         <span class="px-2 text-slate-600">/</span>
         <span>@Model.Name</span>
     </nav>
@@ -55,7 +55,7 @@
                         <h3 class="text-xl font-semibold text-white">Clubs</h3>
                         <p class="mt-1 text-sm text-slate-400">Browse all club hubs</p>
                     </div>
-                    <a asp-controller="Club" asp-action="Index" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open clubs</a>
+                    <a asp-route="clubs-index" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open clubs</a>
                 </article>
 
                 <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
@@ -63,13 +63,13 @@
                         <h3 class="text-xl font-semibold text-white">Matches</h3>
                         <p class="mt-1 text-sm text-slate-400">Follow competition results</p>
                     </div>
-                    <a asp-controller="Match" asp-action="Index" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open matches</a>
+                    <a asp-route="matches-index" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open matches</a>
                 </article>
             </div>
         </section>
     </section>
 
     <div>
-        <a asp-controller="League" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all leagues</a>
+        <a asp-route="leagues-index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all leagues</a>
     </div>
 </section>

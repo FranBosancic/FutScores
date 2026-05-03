@@ -1,36 +1,34 @@
 using Microsoft.AspNetCore.Mvc;
-using ProbaMala.Models;
-using ProbaMala.Repositories;
+using Microsoft.EntityFrameworkCore;
+using ProbaMala.Data;
+using ProbaMala.Models.ViewModels;
 
 namespace ProbaMala.Controllers
 {
+    [Route("utakmice")]
     public class MatchController : Controller
     {
-        private readonly MatchMockRepository _matchRepository;
-        private readonly LeagueMockRepository _leagueRepository;
-        private readonly ClubMockRepository _clubRepository;
+        private readonly AppDbContext _dbContext;
 
-        public MatchController(
-            MatchMockRepository matchRepository,
-            LeagueMockRepository leagueRepository,
-            ClubMockRepository clubRepository)
+        public MatchController(AppDbContext dbContext)
         {
-            _matchRepository = matchRepository;
-            _leagueRepository = leagueRepository;
-            _clubRepository = clubRepository;
+            _dbContext = dbContext;
         }
 
+        [HttpGet("")]
+        [HttpGet("popis")]
+        [HttpGet("~/matches", Name = "matches-index")]
+        [HttpGet("~/matches/list")]
         public IActionResult Index()
         {
-            var matches = _matchRepository.GetAll();
-
-            var matchViewModels = matches
+            var matchViewModels = _dbContext.Matches
+                .Include(match => match.League)
+                .Include(match => match.HomeTeam)
+                .Include(match => match.AwayTeam)
                 .OrderByDescending(match => match.Date)
+                .AsEnumerable()
                 .Select((match, index) =>
             {
-                var league = _leagueRepository.GetById(match.LeagueId);
-                var homeClub = _clubRepository.GetById(match.HomeTeamId);
-                var awayClub = _clubRepository.GetById(match.AwayTeamId);
                 var statusLabel = index == 0 ? "Featured" : index < 4 ? "Final" : "Recent";
                 var statusTone = index == 0 ? "live" : index < 4 ? "final" : "recent";
 
@@ -44,9 +42,9 @@ namespace ProbaMala.Controllers
                     KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
                     StatusLabel = statusLabel,
                     StatusTone = statusTone,
-                    LeagueName = league?.Name ?? "Unknown League",
-                    HomeTeamName = homeClub?.Name ?? "Unknown Home Team",
-                    AwayTeamName = awayClub?.Name ?? "Unknown Away Team",
+                    LeagueName = match.League.Name,
+                    HomeTeamName = match.HomeTeam.Name,
+                    AwayTeamName = match.AwayTeam.Name,
                     HomeGoals = match.HomeGoals,
                     AwayGoals = match.AwayGoals
                 };
@@ -55,34 +53,40 @@ namespace ProbaMala.Controllers
             return View(matchViewModels);
         }
 
+        [HttpGet("{id:int}")]
+        [HttpGet("detalji/{id:int}")]
+        [HttpGet("~/matches/{id:int}", Name = "match-details")]
+        [HttpGet("~/matches/details/{id:int}")]
         public IActionResult Details(int id)
         {
-            var match = _matchRepository.GetById(id);
-            if (match == null)
+            var viewModel = _dbContext.Matches
+                .Include(match => match.League)
+                .Include(match => match.HomeTeam)
+                .Include(match => match.AwayTeam)
+                .Where(match => match.Id == id)
+                .AsEnumerable()
+                .Select(match => new MatchDetailsViewModel
+                {
+                    Id = match.Id,
+                    LeagueId = match.LeagueId,
+                    HomeTeamId = match.HomeTeamId,
+                    AwayTeamId = match.AwayTeamId,
+                    Date = match.Date,
+                    KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
+                    StatusLabel = "Final",
+                    StatusTone = "final",
+                    LeagueName = match.League.Name,
+                    HomeTeamName = match.HomeTeam.Name,
+                    AwayTeamName = match.AwayTeam.Name,
+                    HomeGoals = match.HomeGoals,
+                    AwayGoals = match.AwayGoals
+                })
+                .FirstOrDefault();
+
+            if (viewModel == null)
             {
                 return NotFound();
             }
-
-            var league = _leagueRepository.GetById(match.LeagueId);
-            var homeClub = _clubRepository.GetById(match.HomeTeamId);
-            var awayClub = _clubRepository.GetById(match.AwayTeamId);
-
-            var viewModel = new MatchDetailsViewModel
-            {
-                Id = match.Id,
-                LeagueId = match.LeagueId,
-                HomeTeamId = match.HomeTeamId,
-                AwayTeamId = match.AwayTeamId,
-                Date = match.Date,
-                KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
-                StatusLabel = "Final",
-                StatusTone = "final",
-                LeagueName = league?.Name ?? "Unknown League",
-                HomeTeamName = homeClub?.Name ?? "Unknown Home Team",
-                AwayTeamName = awayClub?.Name ?? "Unknown Away Team",
-                HomeGoals = match.HomeGoals,
-                AwayGoals = match.AwayGoals
-            };
 
             return View(viewModel);
         }

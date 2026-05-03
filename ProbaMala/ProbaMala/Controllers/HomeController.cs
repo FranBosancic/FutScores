@@ -1,42 +1,36 @@
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using ProbaMala.Data;
 using ProbaMala.Models;
-using ProbaMala.Repositories;
+using ProbaMala.Models.Entities;
+using ProbaMala.Models.ViewModels;
 
 namespace ProbaMala.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly LeagueMockRepository _leagueRepository;
-        private readonly ClubMockRepository _clubRepository;
-        private readonly PlayerMockRepository _playerRepository;
-        private readonly MatchMockRepository _matchRepository;
-        private readonly RatingMockRepository _ratingRepository;
+        private readonly AppDbContext _dbContext;
 
         public HomeController(
             ILogger<HomeController> logger,
-            LeagueMockRepository leagueRepository,
-            ClubMockRepository clubRepository,
-            PlayerMockRepository playerRepository,
-            MatchMockRepository matchRepository,
-            RatingMockRepository ratingRepository)
+            AppDbContext dbContext)
         {
             _logger = logger;
-            _leagueRepository = leagueRepository;
-            _clubRepository = clubRepository;
-            _playerRepository = playerRepository;
-            _matchRepository = matchRepository;
-            _ratingRepository = ratingRepository;
+            _dbContext = dbContext;
         }
 
+        [HttpGet("", Name = "home-index")]
+        [HttpGet("nadzorna-ploca")]
+        [HttpGet("dashboard")]
         public IActionResult Index()
         {
-            var leagues = _leagueRepository.GetAll();
-            var clubs = _clubRepository.GetAll();
-            var players = _playerRepository.GetAll();
-            var matches = _matchRepository.GetAll();
-            var ratings = _ratingRepository.GetAll();
+            var leagues = _dbContext.Leagues.AsNoTracking().ToList();
+            var clubs = _dbContext.Clubs.AsNoTracking().ToList();
+            var players = _dbContext.Players.AsNoTracking().ToList();
+            var matches = _dbContext.Matches.AsNoTracking().ToList();
+            var ratings = _dbContext.Ratings.AsNoTracking().ToList();
 
             var recentMatches = matches
                 .OrderByDescending(match => match.Date)
@@ -90,10 +84,10 @@ namespace ProbaMala.Controllers
 
             var searchShortcuts = new List<DashboardSearchShortcut>
             {
-                new() { Label = "Matches", Controller = "Match", Action = "Index" },
-                new() { Label = "Players", Controller = "Player", Action = "Index" },
-                new() { Label = "Clubs", Controller = "Club", Action = "Index" },
-                new() { Label = "Leagues", Controller = "League", Action = "Index" }
+                new() { Label = "Matches", Controller = "Match", Action = "Index", RouteName = "matches-index" },
+                new() { Label = "Players", Controller = "Player", Action = "Index", RouteName = "players-index" },
+                new() { Label = "Clubs", Controller = "Club", Action = "Index", RouteName = "clubs-index" },
+                new() { Label = "Leagues", Controller = "League", Action = "Index", RouteName = "leagues-index" }
             };
 
             var clubForms = clubs.Select(club =>
@@ -135,9 +129,9 @@ namespace ProbaMala.Controllers
 
             return View(viewModel);
         }
-
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet("greska")]
+        [HttpGet("error", Name = "home-error")]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

@@ -1,17 +1,13 @@
-using ProbaMala.Repositories;
+using Microsoft.EntityFrameworkCore;
+using ProbaMala.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Register mock repositories
-builder.Services.AddSingleton<LeagueMockRepository>();
-builder.Services.AddSingleton<ClubMockRepository>();
-builder.Services.AddSingleton<PlayerMockRepository>();
-builder.Services.AddSingleton<MatchMockRepository>();
-builder.Services.AddSingleton<UserMockRepository>();
-builder.Services.AddSingleton<RatingMockRepository>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
 
 var app = builder.Build();
 
@@ -29,6 +25,14 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",
