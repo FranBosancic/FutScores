@@ -1,35 +1,31 @@
 @model List<User>
 
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "Users - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-slate-50 mb-2">Users</h1>
-            <p class="text-slate-300">@Model.Count item@(Model.Count != 1 ? "s" : "") found</p>
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Users</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">People behind the ratings and sentiment</h2>
+            </div>
+            <span class="text-sm text-slate-400">@Model.Count user@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
         </div>
 
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             @foreach (var user in Model)
             {
-                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-900 hover:border-emerald-500 transition-all duration-300 cursor-pointer">
-                    <h3 class="text-xl font-semibold text-slate-50 mb-2">@user.FirstName @user.LastName</h3>
-                    <p class="text-slate-300 mb-4 break-all">@user.Email</p>
-
-                    <div class="mb-4">
-                        <span class="text-slate-400 text-sm">User ID:</span>
-                        <p class="text-emerald-400 font-medium">#@user.Id</p>
+                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">@user.FirstName @user.LastName</h3>
+                        <p class="mt-1 break-all text-sm text-slate-400">@user.Email</p>
                     </div>
-
-                    <div class="flex justify-end">
-                        <a href="@Url.Action("Details", "User", new { id = user.Id })" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View Details →</a>
-                    </div>
-                </div>
+                    <div class="mt-4 text-sm text-slate-300">User ID: #@user.Id</div>
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@user.Id" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open user</a>
+                </article>
             }
         </div>
-    </div>
-</div>
+    </section>
+</section>

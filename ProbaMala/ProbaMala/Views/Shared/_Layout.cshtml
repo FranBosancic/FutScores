@@ -13,81 +13,77 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/tailwind.generated.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProbaMala.styles.css" asp-append-version="true" />
 </head>
-<body class="fs-app-shell">
-    <header class="fs-shell-header">
-        <div class="fs-topbar">
-            <div class="fs-shell-wrap">
-                <span class="fs-topbar-kicker">Live Match Center</span>
-                <span class="fs-topbar-copy">Dashboard-first football browsing built for match flow, club context, and player discovery.</span>
-            </div>
-        </div>
-
-        <div class="fs-shell-wrap fs-header-main">
-            <a asp-area="" asp-controller="Home" asp-action="Index" class="fs-brand-block">
-                <span class="fs-brand-mark">FS</span>
-                <span class="fs-brand-copy">
-                    <span class="fs-brand-name">FutScores</span>
-                    <span class="fs-brand-tag">Bold football stats and score tracking</span>
+<body class="min-h-screen bg-[radial-gradient(circle_at_top_right,rgba(34,197,94,0.18),transparent_26%),linear-gradient(180deg,#08121e_0%,#07111f_100%)] font-['Barlow'] text-slate-50">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
+        <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-6 lg:px-8">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-white transition hover:bg-white/10 sm:px-4">
+                <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lime-400 font-['Oswald'] text-lg font-bold text-slate-950 shadow-[0_10px_30px_rgba(34,197,94,0.25)]">FS</span>
+                <span class="grid min-w-0">
+                    <span class="truncate font-['Oswald'] text-3xl leading-none tracking-wide">FutScores</span>
+                    <span class="truncate text-sm text-slate-400">Scores, clubs, players, leagues</span>
                 </span>
             </a>
 
-            <form class="fs-shell-search" data-search-form>
-                <label class="fs-visually-hidden" for="shell-search-scope">Search scope</label>
-                <select id="shell-search-scope" class="fs-shell-search-select" data-search-scope>
+            <form class="hidden min-w-0 flex-1 grid-cols-[110px_minmax(0,1fr)_auto] gap-2 lg:grid" data-search-form>
+                <label class="sr-only" for="shell-search-scope">Search scope</label>
+                <select id="shell-search-scope" class="h-12 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" data-search-scope>
                     <option value="Match">Matches</option>
                     <option value="Player">Players</option>
                     <option value="Club">Clubs</option>
                     <option value="League">Leagues</option>
                 </select>
-                <label class="fs-visually-hidden" for="shell-search-query">Search query</label>
-                <input id="shell-search-query" class="fs-shell-search-input" type="search" placeholder="Search players, clubs, matches..." data-search-query />
-                <button class="fs-shell-search-button" type="submit">Go</button>
+                <label class="sr-only" for="shell-search-query">Search query</label>
+                <input id="shell-search-query" class="h-12 min-w-0 rounded-full border border-white/10 bg-white/5 px-5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" type="search" placeholder="Search players, clubs, matches..." data-search-query />
+                <button class="h-12 rounded-full bg-lime-400 px-5 text-sm font-semibold text-slate-950 transition hover:bg-lime-300" type="submit">Search</button>
             </form>
 
-            <button id="mobile-menu-btn" class="fs-mobile-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
-                <span class="fs-mobile-toggle-line"></span>
-                <span class="fs-mobile-toggle-line"></span>
-                <span class="fs-mobile-toggle-line"></span>
+            <button id="mobile-menu-btn" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 lg:hidden" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle navigation menu">
+                <span class="flex flex-col gap-1.5">
+                    <span class="block h-0.5 w-5 bg-current"></span>
+                    <span class="block h-0.5 w-5 bg-current"></span>
+                    <span class="block h-0.5 w-5 bg-current"></span>
+                </span>
             </button>
         </div>
 
-        <div class="fs-shell-wrap">
-            <nav class="fs-main-nav" aria-label="Primary">
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="fs-nav-link @(currentController == "Home" && currentAction == "Index" ? "is-active" : string.Empty)">Dashboard</a>
-                <a asp-area="" asp-controller="Match" asp-action="Index" class="fs-nav-link @(currentController == "Match" ? "is-active" : string.Empty)">Matches</a>
-                <a asp-area="" asp-controller="Player" asp-action="Index" class="fs-nav-link @(currentController == "Player" ? "is-active" : string.Empty)">Players</a>
-                <a asp-area="" asp-controller="Club" asp-action="Index" class="fs-nav-link @(currentController == "Club" ? "is-active" : string.Empty)">Clubs</a>
-                <a asp-area="" asp-controller="League" asp-action="Index" class="fs-nav-link @(currentController == "League" ? "is-active" : string.Empty)">Leagues</a>
-                <a asp-area="" asp-controller="Rating" asp-action="Index" class="fs-nav-link @(currentController == "Rating" ? "is-active" : string.Empty)">Ratings</a>
-                <a asp-area="" asp-controller="User" asp-action="Index" class="fs-nav-link fs-nav-link--minor @(currentController == "User" ? "is-active" : string.Empty)">Users</a>
+        <div class="mx-auto w-full max-w-7xl px-4 pb-4 sm:px-6 lg:px-8">
+            <nav class="hidden flex-wrap gap-2 lg:flex" aria-label="Primary">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Home" && currentAction == "Index" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Dashboard</a>
+                <a asp-area="" asp-controller="Match" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Match" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Matches</a>
+                <a asp-area="" asp-controller="Player" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Player" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Players</a>
+                <a asp-area="" asp-controller="Club" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Club" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Clubs</a>
+                <a asp-area="" asp-controller="League" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "League" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Leagues</a>
+                <a asp-area="" asp-controller="Rating" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Rating" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Ratings</a>
+                <a asp-area="" asp-controller="User" asp-action="Index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "User" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white")">Users</a>
             </nav>
         </div>
 
-        <div id="mobile-menu" class="fs-mobile-menu" hidden>
-            <div class="fs-shell-wrap fs-mobile-menu-inner">
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="fs-mobile-link">Dashboard</a>
-                <a asp-area="" asp-controller="Match" asp-action="Index" class="fs-mobile-link">Matches</a>
-                <a asp-area="" asp-controller="Player" asp-action="Index" class="fs-mobile-link">Players</a>
-                <a asp-area="" asp-controller="Club" asp-action="Index" class="fs-mobile-link">Clubs</a>
-                <a asp-area="" asp-controller="League" asp-action="Index" class="fs-mobile-link">Leagues</a>
-                <a asp-area="" asp-controller="Rating" asp-action="Index" class="fs-mobile-link">Ratings</a>
-                <a asp-area="" asp-controller="User" asp-action="Index" class="fs-mobile-link">Users</a>
+        <div id="mobile-menu" class="border-t border-white/10 bg-slate-950/95 lg:hidden" hidden>
+            <div class="mx-auto grid w-full max-w-7xl gap-2 px-4 py-4 sm:px-6 lg:px-8">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Dashboard</a>
+                <a asp-area="" asp-controller="Match" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Matches</a>
+                <a asp-area="" asp-controller="Player" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Players</a>
+                <a asp-area="" asp-controller="Club" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Clubs</a>
+                <a asp-area="" asp-controller="League" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Leagues</a>
+                <a asp-area="" asp-controller="Rating" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Ratings</a>
+                <a asp-area="" asp-controller="User" asp-action="Index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Users</a>
             </div>
         </div>
     </header>
 
-    <main class="fs-shell-main" role="main">
+    <main class="py-8" role="main">
         @RenderBody()
     </main>
 
-    <footer class="fs-footer">
-        <div class="fs-shell-wrap fs-footer-inner">
-            <div>
+    <footer class="border-t border-white/10 bg-slate-950/60">
+        <div class="mx-auto flex w-full max-w-7xl flex-col justify-between gap-3 px-4 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:px-6 lg:px-8">
+            <div class="flex flex-col gap-1">
                 <strong>FutScores</strong>
-                <span class="fs-footer-copy">Football match center shell built for real data next.</span>
+                <span>Football data browser ready for real APIs next.</span>
             </div>
             <div>&copy; 2026 FutScores</div>
         </div>

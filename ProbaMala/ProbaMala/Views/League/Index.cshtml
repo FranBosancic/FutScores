@@ -4,41 +4,39 @@
     ViewData["Title"] = "Leagues - Match Center";
 }
 
-<section class="fs-dashboard">
-    <div class="fs-shell-wrap fs-dashboard-stack">
-        <section class="fs-section">
-            <div class="fs-section-heading">
-                <div>
-                    <span class="fs-section-kicker">Leagues</span>
-                    <h2>Competition hubs for club and match browsing</h2>
-                </div>
-                <span class="fs-match-kickoff">@Model.Count league@(Model.Count != 1 ? "s" : string.Empty) available</span>
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Leagues</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Competition hubs for club and match browsing</h2>
             </div>
+            <span class="text-sm text-slate-400">@Model.Count league@(Model.Count != 1 ? "s" : string.Empty) available</span>
+        </div>
 
-            <div class="fs-player-grid fs-player-grid--wide">
-                @foreach (var league in Model)
-                {
-                    <article class="fs-player-card fs-player-card--entity">
-                        <div class="fs-player-card-top">
-                            <div>
-                                <h3>@league.Name</h3>
-                                <p>Competition overview</p>
-                            </div>
-                            <span class="fs-tone-pill fs-tone-pill--neutral">League</span>
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            @foreach (var league in Model)
+            {
+                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">@league.Name</h3>
+                            <p class="mt-1 text-sm text-slate-400">Competition overview</p>
                         </div>
+                        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">League</span>
+                    </div>
 
-                        <div class="fs-player-meta fs-player-meta--stacked">
-                            <span>Competition ID: #@league.Id</span>
-                            <span>Use this page as the hub for clubs and matches</span>
-                        </div>
+                    <div class="mt-4 grid gap-2 text-sm text-slate-300">
+                        <span>Competition ID: #@league.Id</span>
+                        <span>Use this page as the hub for clubs and matches</span>
+                    </div>
 
-                        <div class="fs-entity-links">
-                            <a asp-controller="Match" asp-action="Index" class="fs-card-link">Open matches</a>
-                            <a asp-controller="League" asp-action="Details" asp-route-id="@league.Id" class="fs-card-link">Open league</a>
-                        </div>
-                    </article>
-                }
-            </div>
-        </section>
-    </div>
+                    <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+                        <a asp-controller="Match" asp-action="Index" class="text-lime-300 transition hover:text-lime-200">Open matches</a>
+                        <a asp-controller="League" asp-action="Details" asp-route-id="@league.Id" class="text-lime-300 transition hover:text-lime-200">Open league</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
 </section>

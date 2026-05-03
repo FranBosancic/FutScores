@@ -4,82 +4,72 @@
     ViewData["Title"] = "League Details - Match Center";
 }
 
-<section class="fs-dashboard">
-    <div class="fs-shell-wrap fs-dashboard-stack">
-        <nav class="fs-match-kickoff">
-            <a asp-controller="Home" asp-action="Index" class="fs-card-link">Home</a>
-            <span> / </span>
-            <a asp-controller="League" asp-action="Index" class="fs-card-link">Leagues</a>
-            <span> / </span>
-            <span>@Model.Name</span>
-        </nav>
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <nav class="text-sm text-slate-400">
+        <a asp-controller="Home" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
+        <span class="px-2 text-slate-600">/</span>
+        <a asp-controller="League" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Leagues</a>
+        <span class="px-2 text-slate-600">/</span>
+        <span>@Model.Name</span>
+    </nav>
 
-        <section class="fs-section">
-            <div class="fs-entity-hero">
-                <div>
-                    <span class="fs-section-kicker">League Focus</span>
-                    <h2>@Model.Name</h2>
-                    <p class="fs-match-kickoff">Competition hub for clubs, players, and results.</p>
-                </div>
-                <span class="fs-tone-pill fs-tone-pill--neutral">League #@Model.Id</span>
-            </div>
-        </section>
-
-        <section class="fs-section fs-two-column">
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-                <div class="fs-section-heading">
-                    <div>
-                        <span class="fs-section-kicker">League Information</span>
-                        <h2>Core competition identity</h2>
-                    </div>
-                </div>
-
-                <div class="fs-detail-panel-grid">
-                    <article class="fs-detail-info-card">
-                        <span class="fs-match-kickoff">League Name</span>
-                        <strong>@Model.Name</strong>
-                    </article>
-                    <article class="fs-detail-info-card">
-                        <span class="fs-match-kickoff">Competition ID</span>
-                        <strong>#@Model.Id</strong>
-                    </article>
-                </div>
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">League Focus</span>
+                <h2 class="mt-2 font-['Oswald'] text-4xl leading-none text-white">@Model.Name</h2>
+                <p class="mt-3 text-sm text-slate-400">Competition hub for clubs, players, and results.</p>
             </div>
-
-            <div>
-                <div class="fs-section-heading">
-                    <div>
-                        <span class="fs-section-kicker">Quick Routes</span>
-                        <h2>Move through the competition</h2>
-                    </div>
-                </div>
-
-                <div class="fs-player-grid">
-                    <article class="fs-player-card fs-player-card--entity">
-                        <div class="fs-player-card-top">
-                            <div>
-                                <h3>Clubs</h3>
-                                <p>Browse all club hubs</p>
-                            </div>
-                        </div>
-                        <a asp-controller="Club" asp-action="Index" class="fs-card-link">Open clubs</a>
-                    </article>
-
-                    <article class="fs-player-card fs-player-card--entity">
-                        <div class="fs-player-card-top">
-                            <div>
-                                <h3>Matches</h3>
-                                <p>Follow competition results</p>
-                            </div>
-                        </div>
-                        <a asp-controller="Match" asp-action="Index" class="fs-card-link">Open matches</a>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <div>
-            <a asp-controller="League" asp-action="Index" class="fs-card-link">Back to all leagues</a>
+            <span class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">League #@Model.Id</span>
         </div>
+    </section>
+
+    <section class="grid gap-8 xl:grid-cols-2">
+        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+            <div class="mb-5">
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">League Information</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Core competition identity</h2>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                    <div class="text-xs uppercase tracking-[0.22em] text-slate-500">League Name</div>
+                    <strong class="mt-3 block text-lg text-white">@Model.Name</strong>
+                </article>
+                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                    <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Competition ID</div>
+                    <strong class="mt-3 block text-lg text-white">#@Model.Id</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+            <div class="mb-5">
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Quick Routes</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Move through the competition</h2>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Clubs</h3>
+                        <p class="mt-1 text-sm text-slate-400">Browse all club hubs</p>
+                    </div>
+                    <a asp-controller="Club" asp-action="Index" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open clubs</a>
+                </article>
+
+                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Matches</h3>
+                        <p class="mt-1 text-sm text-slate-400">Follow competition results</p>
+                    </div>
+                    <a asp-controller="Match" asp-action="Index" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open matches</a>
+                </article>
+            </div>
+        </section>
+    </section>
+
+    <div>
+        <a asp-controller="League" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all leagues</a>
     </div>
 </section>

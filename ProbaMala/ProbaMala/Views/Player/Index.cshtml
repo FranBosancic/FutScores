@@ -4,50 +4,48 @@
     ViewData["Title"] = "Players - Match Center";
 }
 
-<section class="fs-dashboard">
-    <div class="fs-shell-wrap fs-dashboard-stack">
-        <section class="fs-section">
-            <div class="fs-section-heading">
-                <div>
-                    <span class="fs-section-kicker">Players</span>
-                    <h2>Player browsing with club context built in</h2>
-                </div>
-                <span class="fs-match-kickoff">@Model.Count player@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Players</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Player browsing with club context built in</h2>
             </div>
+            <span class="text-sm text-slate-400">@Model.Count player@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
+        </div>
 
-            <div class="fs-player-grid fs-player-grid--wide">
-                @foreach (var player in Model)
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            @foreach (var player in Model)
+            {
+                var toneClass = player.Position switch
                 {
-                    var toneClass = player.Position switch
-                    {
-                        Position.Goalkeeper => "fs-tone-pill--keeper",
-                        Position.Defender => "fs-tone-pill--defender",
-                        Position.Midfielder => "fs-tone-pill--midfielder",
-                        Position.Forward => "fs-tone-pill--forward",
-                        _ => "fs-tone-pill--neutral"
-                    };
+                    Position.Goalkeeper => "border-indigo-400/20 bg-indigo-500/10 text-indigo-200",
+                    Position.Defender => "border-emerald-400/20 bg-emerald-500/10 text-emerald-200",
+                    Position.Midfielder => "border-amber-400/20 bg-amber-500/10 text-amber-200",
+                    Position.Forward => "border-rose-400/20 bg-rose-500/10 text-rose-200",
+                    _ => "border-white/10 bg-white/5 text-slate-200"
+                };
 
-                    <article class="fs-player-card fs-player-card--entity">
-                        <div class="fs-player-card-top">
-                            <div>
-                                <h3>@player.FirstName @player.LastName</h3>
-                                <p>@player.ClubName</p>
-                            </div>
-                            <span class="fs-tone-pill @toneClass">@player.Position</span>
+                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">@player.FirstName @player.LastName</h3>
+                            <p class="mt-1 text-sm text-slate-400">@player.ClubName</p>
                         </div>
+                        <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @toneClass">@player.Position</span>
+                    </div>
 
-                        <div class="fs-player-meta fs-player-meta--stacked">
-                            <span>Nationality: @player.Nationality</span>
-                            <span>Born: @player.DateOfBirth.ToString("MMM dd, yyyy")</span>
-                        </div>
+                    <div class="mt-4 grid gap-2 text-sm text-slate-300">
+                        <span>Nationality: @player.Nationality</span>
+                        <span>Born: @player.DateOfBirth.ToString("MMM dd, yyyy")</span>
+                    </div>
 
-                        <div class="fs-entity-links">
-                            <a asp-controller="Club" asp-action="Details" asp-route-id="@player.ClubId" class="fs-card-link">Open club</a>
-                            <a asp-controller="Player" asp-action="Details" asp-route-id="@player.Id" class="fs-card-link">Open player</a>
-                        </div>
-                    </article>
-                }
-            </div>
-        </section>
-    </div>
+                    <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@player.ClubId" class="text-lime-300 transition hover:text-lime-200">Open club</a>
+                        <a asp-controller="Player" asp-action="Details" asp-route-id="@player.Id" class="text-lime-300 transition hover:text-lime-200">Open player</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
 </section>

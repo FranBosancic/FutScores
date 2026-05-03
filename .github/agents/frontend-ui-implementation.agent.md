@@ -35,14 +35,19 @@ Your job is to take an approved UI/UX direction and turn it into concrete fronte
 - Preserve working routes and backend behavior unless a small UI-supporting adjustment is required.
 - Keep backend changes minimal and directly tied to the frontend.
 - Favor focused implementation slices over broad rewrites.
+- Default to Tailwind-first composition when Tailwind is available, especially for layout, spacing, responsiveness, and rapid iteration.
+- Introduce or extend shared CSS only when repeated patterns, reusable tokens, or readability justify it; do not add manual CSS for isolated one-off styling without a reuse case.
+- Preserve strong product identity and avoid flattening the UI into generic component-library defaults.
+- Carry forward stable user-corrected frontend preferences when they are still compatible with the active brief.
 
 ## Implementation Approach
 
 1. Identify the exact page, layout, or shared surface to update.
 2. Read the nearby controller, model, and Razor files needed to support that slice.
-3. Implement the smallest coherent UI change that matches the approved direction.
-4. Reuse or introduce shared patterns when repeated structure is apparent.
-5. Validate the touched files and summarize what was implemented.
+3. Decide whether the slice should stay purely in Tailwind utilities or whether an existing shared CSS layer should be extended for reuse.
+4. Implement the smallest coherent UI change that matches the approved direction.
+5. Reuse or introduce shared patterns when repeated structure is apparent.
+6. Validate the touched files and summarize what was implemented.
 
 ## Output Format
 

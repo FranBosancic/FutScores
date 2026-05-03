@@ -1,0 +1,8 @@
+- Treat frontend discovery as greenfield unless the user explicitly wants to preserve the existing UI.
+- Prefer a bold sports identity over generic dashboard or admin-panel defaults.
+- Aim for a live match-center feel when designing public-facing football pages.
+- Keep backend changes minimal and directly tied to frontend needs.
+- Prefer reusable frontend patterns over one-off page markup.
+- Use Tailwind first for layout, spacing, and responsiveness when available.
+- Add shared CSS only when repeated patterns, design tokens, or readability justify it.
+- Carry forward stable user corrections and taste preferences across related frontend tasks in this repo.

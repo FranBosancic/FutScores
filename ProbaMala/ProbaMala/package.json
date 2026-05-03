@@ -1,0 +1,11 @@
+{
+  "name": "probamala-frontend",
+  "private": true,
+  "scripts": {
+    "tailwind:build": "tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.generated.css --minify",
+    "tailwind:watch": "tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.generated.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

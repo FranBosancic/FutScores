@@ -4,116 +4,102 @@
     ViewData["Title"] = "Rating Details - Match Center";
 }
 
-<section class="fs-dashboard">
-    <div class="fs-shell-wrap fs-dashboard-stack">
-        <nav class="fs-match-kickoff">
-            <a asp-controller="Home" asp-action="Index" class="fs-card-link">Home</a>
-            <span> / </span>
-            <a asp-controller="Rating" asp-action="Index" class="fs-card-link">Ratings</a>
-            <span> / </span>
-            <span>Rating #@Model.Id</span>
-        </nav>
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <nav class="text-sm text-slate-400">
+        <a asp-controller="Home" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Home</a>
+        <span class="px-2 text-slate-600">/</span>
+        <a asp-controller="Rating" asp-action="Index" class="font-medium text-lime-300 transition hover:text-lime-200">Ratings</a>
+        <span class="px-2 text-slate-600">/</span>
+        <span>Rating #@Model.Id</span>
+    </nav>
 
-        <section class="fs-section">
-            <div class="fs-entity-hero">
-                <div>
-                    <span class="fs-section-kicker">Rating Focus</span>
-                    <h2>@Model.PlayerName</h2>
-                    <p class="fs-match-kickoff">Assessment tied to @Model.MatchDescription</p>
-                </div>
-                <span class="fs-rating-pill fs-rating-pill--large">@Model.Score</span>
-            </div>
-        </section>
-
-        <section class="fs-section fs-two-column">
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-                <div class="fs-section-heading">
-                    <div>
-                        <span class="fs-section-kicker">Rating Information</span>
-                        <h2>Who and what this score belongs to</h2>
-                    </div>
-                </div>
-
-                <div class="fs-detail-panel-grid">
-                    <article class="fs-detail-info-card">
-                        <span class="fs-match-kickoff">Player</span>
-                        <a asp-controller="Player" asp-action="Details" asp-route-id="@Model.PlayerId" class="fs-card-link">@Model.PlayerName</a>
-                    </article>
-                    <article class="fs-detail-info-card">
-                        <span class="fs-match-kickoff">Match</span>
-                        <a asp-controller="Match" asp-action="Details" asp-route-id="@Model.MatchId" class="fs-card-link">@Model.MatchDescription</a>
-                    </article>
-                    <article class="fs-detail-info-card">
-                        <span class="fs-match-kickoff">Rated By</span>
-                        <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="fs-card-link">@Model.UserName</a>
-                    </article>
-                </div>
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Rating Focus</span>
+                <h2 class="mt-2 font-['Oswald'] text-4xl leading-none text-white">@Model.PlayerName</h2>
+                <p class="mt-3 text-sm text-slate-400">Assessment tied to @Model.MatchDescription</p>
             </div>
-
-            <div>
-                <div class="fs-section-heading">
-                    <div>
-                        <span class="fs-section-kicker">Review</span>
-                        <h2>Written context</h2>
-                    </div>
-                </div>
-
-                <article class="fs-detail-info-card fs-detail-info-card--tall">
-                    @if (!string.IsNullOrWhiteSpace(Model.Comment))
-                    {
-                        <p class="fs-review-copy">@Model.Comment</p>
-                    }
-                    else
-                    {
-                        <p class="fs-review-copy fs-review-copy--muted">No comment provided for this rating.</p>
-                    }
-                </article>
-            </div>
-        </section>
-
-        <section class="fs-section">
-            <div class="fs-section-heading">
-                <div>
-                    <span class="fs-section-kicker">Related Entities</span>
-                    <h2>Jump to connected pages</h2>
-                </div>
-            </div>
-
-            <div class="fs-player-grid">
-                <article class="fs-player-card fs-player-card--entity">
-                    <div class="fs-player-card-top">
-                        <div>
-                            <h3>Player</h3>
-                            <p>@Model.PlayerName</p>
-                        </div>
-                    </div>
-                    <a asp-controller="Player" asp-action="Details" asp-route-id="@Model.PlayerId" class="fs-card-link">Open player</a>
-                </article>
-
-                <article class="fs-player-card fs-player-card--entity">
-                    <div class="fs-player-card-top">
-                        <div>
-                            <h3>Match</h3>
-                            <p>@Model.MatchDescription</p>
-                        </div>
-                    </div>
-                    <a asp-controller="Match" asp-action="Details" asp-route-id="@Model.MatchId" class="fs-card-link">Open match</a>
-                </article>
-
-                <article class="fs-player-card fs-player-card--entity">
-                    <div class="fs-player-card-top">
-                        <div>
-                            <h3>User</h3>
-                            <p>@Model.UserName</p>
-                        </div>
-                    </div>
-                    <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="fs-card-link">Open user</a>
-                </article>
-            </div>
-        </section>
-
-        <div>
-            <a asp-controller="Rating" asp-action="Index" class="fs-card-link">Back to all ratings</a>
+            <span class="inline-flex h-16 min-w-[4rem] items-center justify-center rounded-full bg-amber-400/15 px-5 font-['Oswald'] text-3xl text-amber-200">@Model.Score</span>
         </div>
+    </section>
+
+    <section class="grid gap-8 xl:grid-cols-2">
+        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+            <div class="mb-5">
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Rating Information</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Who and what this score belongs to</h2>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                    <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Player</div>
+                    <a asp-controller="Player" asp-action="Details" asp-route-id="@Model.PlayerId" class="mt-3 block text-lg font-semibold text-lime-300 transition hover:text-lime-200">@Model.PlayerName</a>
+                </article>
+                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                    <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Match</div>
+                    <a asp-controller="Match" asp-action="Details" asp-route-id="@Model.MatchId" class="mt-3 block text-lg font-semibold text-lime-300 transition hover:text-lime-200">@Model.MatchDescription</a>
+                </article>
+                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 sm:col-span-2 xl:col-span-1">
+                    <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Rated By</div>
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="mt-3 block text-lg font-semibold text-lime-300 transition hover:text-lime-200">@Model.UserName</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+            <div class="mb-5">
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Review</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Written context</h2>
+            </div>
+
+            <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                @if (!string.IsNullOrWhiteSpace(Model.Comment))
+                {
+                    <p class="text-base leading-7 text-slate-200">@Model.Comment</p>
+                }
+                else
+                {
+                    <p class="text-base italic leading-7 text-slate-400">No comment provided for this rating.</p>
+                }
+            </article>
+        </section>
+    </section>
+
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-5">
+            <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Related Entities</span>
+            <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Jump to connected pages</h2>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-3">
+            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">Player</h3>
+                    <p class="mt-1 text-sm text-slate-400">@Model.PlayerName</p>
+                </div>
+                <a asp-controller="Player" asp-action="Details" asp-route-id="@Model.PlayerId" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open player</a>
+            </article>
+
+            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">Match</h3>
+                    <p class="mt-1 text-sm text-slate-400">@Model.MatchDescription</p>
+                </div>
+                <a asp-controller="Match" asp-action="Details" asp-route-id="@Model.MatchId" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open match</a>
+            </article>
+
+            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">User</h3>
+                    <p class="mt-1 text-sm text-slate-400">@Model.UserName</p>
+                </div>
+                <a asp-controller="User" asp-action="Details" asp-route-id="@Model.UserId" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open user</a>
+            </article>
+        </div>
+    </section>
+
+    <div>
+        <a asp-controller="Rating" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all ratings</a>
     </div>
 </section>

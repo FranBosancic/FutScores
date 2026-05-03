@@ -3,180 +3,208 @@
     ViewData["Title"] = "FutScores - Match Center";
 }
 
-<section class="fs-dashboard">
-    <div class="fs-shell-wrap fs-dashboard-stack">
-        <section class="fs-hero">
-            <div class="fs-hero-grid">
-                <div class="fs-hero-copy">
-                    <span class="fs-hero-kicker">Dashboard First</span>
-                    <h1>Football match flow, club context, and player heat all in one view.</h1>
-                    <p>
-                        Use the match center to scan recent results first, then move outward into clubs, leagues, players, and ratings.
-                        The shell is built to absorb live API data later without changing the page logic.
-                    </p>
+<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <section class="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 shadow-[0_24px_80px_rgba(0,0,0,0.35)] lg:grid-cols-[1.35fr_0.95fr]">
+        <div class="flex flex-col justify-between gap-6 px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
+            <div class="space-y-4">
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.28em] text-lime-400">Dashboard</span>
+                <h1 class="max-w-3xl font-['Oswald'] text-4xl leading-none text-white sm:text-5xl lg:text-6xl">Football scores, club context, and player form in one board.</h1>
+                <p class="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+                    Use the home page as the fast scan surface, then move into matches, clubs, players, leagues, and ratings.
+                    This version stays Tailwind-first so the styling decisions are visible directly in the page.
+                </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-3">
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Match flow</div>
+                    <div class="mt-2 text-sm font-medium text-slate-100">Score-first cards for fast scanning</div>
                 </div>
-
-                <div class="fs-search-panel">
-                    <h2>Jump Into The Board</h2>
-                    <p>Start from the surface you care about, then fan out into related entities.</p>
-                    <form class="fs-dashboard-search" data-search-form>
-                        <select class="fs-shell-search-select" data-search-scope>
-                            <option value="Match">Matches</option>
-                            <option value="Player">Players</option>
-                            <option value="Club">Clubs</option>
-                            <option value="League">Leagues</option>
-                        </select>
-                        <input class="fs-shell-search-input" type="search" placeholder="Search the match center..." data-search-query />
-                        <button class="fs-shell-search-button" type="submit">Open</button>
-                    </form>
-
-                    <div class="fs-shortcut-grid">
-                        @foreach (var shortcut in Model.SearchShortcuts)
-                        {
-                            <a asp-controller="@shortcut.Controller" asp-action="@shortcut.Action" class="fs-shortcut-card">
-                                <span class="fs-shortcut-label">@shortcut.Label</span>
-                                <span class="fs-shortcut-action">Browse now</span>
-                            </a>
-                        }
-                    </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Club context</div>
+                    <div class="mt-2 text-sm font-medium text-slate-100">Related pages stay one click away</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Player heat</div>
+                    <div class="mt-2 text-sm font-medium text-slate-100">Top-rated players surface early</div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section class="fs-section">
-            <div class="fs-section-heading">
+        <div class="border-t border-white/10 bg-white/[0.04] px-6 py-8 sm:px-8 lg:border-l lg:border-t-0 lg:px-8">
+            <div class="space-y-5">
                 <div>
-                    <span class="fs-section-kicker">Key Numbers</span>
-                    <h2>Fast read on the board</h2>
+                    <h2 class="font-['Oswald'] text-3xl text-white">Jump into the board</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-400">Start from the surface you care about, then move through related entities.</p>
+                </div>
+
+                <form class="grid gap-3 sm:grid-cols-[120px_minmax(0,1fr)_auto]" data-search-form>
+                    <select class="h-12 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" data-search-scope>
+                        <option value="Match">Matches</option>
+                        <option value="Player">Players</option>
+                        <option value="Club">Clubs</option>
+                        <option value="League">Leagues</option>
+                    </select>
+                    <input class="h-12 min-w-0 rounded-full border border-white/10 bg-white/5 px-5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" type="search" placeholder="Search the board..." data-search-query />
+                    <button class="h-12 rounded-full bg-lime-400 px-5 text-sm font-semibold text-slate-950 transition hover:bg-lime-300" type="submit">Open</button>
+                </form>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    @foreach (var shortcut in Model.SearchShortcuts)
+                    {
+                        <a asp-controller="@shortcut.Controller" asp-action="@shortcut.Action" class="group rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-4 transition hover:border-lime-400/40 hover:bg-white/10">
+                            <div class="text-sm font-semibold text-white">@shortcut.Label</div>
+                            <div class="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-lime-300">Browse now</div>
+                        </a>
+                    }
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="fs-stat-grid">
-                <a asp-controller="Club" asp-action="Index" class="fs-stat-card">
-                    <span class="fs-stat-label">Clubs</span>
-                    <strong class="fs-stat-value">@Model.TotalClubs</strong>
-                    <span class="fs-stat-meta">Browse all clubs</span>
-                </a>
-                <a asp-controller="Player" asp-action="Index" class="fs-stat-card">
-                    <span class="fs-stat-label">Players</span>
-                    <strong class="fs-stat-value">@Model.TotalPlayers</strong>
-                    <span class="fs-stat-meta">Move into player pages</span>
-                </a>
-                <a asp-controller="Match" asp-action="Index" class="fs-stat-card">
-                    <span class="fs-stat-label">Matches</span>
-                    <strong class="fs-stat-value">@Model.TotalMatches</strong>
-                    <span class="fs-stat-meta">See the latest results</span>
-                </a>
-                <a asp-controller="Rating" asp-action="Index" class="fs-stat-card fs-stat-card--accent">
-                    <span class="fs-stat-label">Avg Rating</span>
-                    <strong class="fs-stat-value">@Model.AverageRating</strong>
-                    <span class="fs-stat-meta">Track sentiment and form</span>
-                </a>
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-5">
+            <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Key Numbers</span>
+            <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Fast read on the board</h2>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <a asp-controller="Club" asp-action="Index" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Clubs</div>
+                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.TotalClubs</div>
+                <div class="mt-3 text-sm text-slate-400">Browse all clubs</div>
+            </a>
+            <a asp-controller="Player" asp-action="Index" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Players</div>
+                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.TotalPlayers</div>
+                <div class="mt-3 text-sm text-slate-400">Move into player pages</div>
+            </a>
+            <a asp-controller="Match" asp-action="Index" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Matches</div>
+                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.TotalMatches</div>
+                <div class="mt-3 text-sm text-slate-400">See the latest results</div>
+            </a>
+            <a asp-controller="Rating" asp-action="Index" class="rounded-[1.5rem] border border-amber-400/20 bg-amber-400/10 p-5 transition hover:bg-amber-400/15">
+                <div class="text-xs uppercase tracking-[0.22em] text-amber-200/70">Avg Rating</div>
+                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.AverageRating</div>
+                <div class="mt-3 text-sm text-amber-100/80">Track sentiment and form</div>
+            </a>
+        </div>
+    </section>
+
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Recent Results</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Match center stream</h2>
             </div>
-        </section>
+            <a asp-controller="Match" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Open all matches</a>
+        </div>
 
-        <section class="fs-section">
-            <div class="fs-section-heading">
-                <div>
-                    <span class="fs-section-kicker">Recent Results</span>
-                    <h2>Match center stream</h2>
-                </div>
-                <a asp-controller="Match" asp-action="Index" class="fs-section-link">Open all matches</a>
-            </div>
-
-            <div class="fs-match-grid">
-                @foreach (var match in Model.RecentMatches)
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            @foreach (var match in Model.RecentMatches)
+            {
+                var badgeClass = match.StatusTone switch
                 {
-                    <article class="fs-match-card">
-                        <header class="fs-match-card-top">
-                            <div>
-                                <span class="fs-match-league">@match.LeagueName</span>
-                                <span class="fs-match-kickoff">@match.KickoffLabel</span>
-                            </div>
-                            <span class="fs-badge fs-badge--@match.StatusTone">@match.StatusLabel</span>
-                        </header>
+                    "live" => "border-red-400/20 bg-red-500/10 text-red-200",
+                    "recent" => "border-sky-400/20 bg-sky-500/10 text-sky-200",
+                    _ => "border-white/10 bg-white/5 text-slate-200"
+                };
 
-                        <div class="fs-match-body">
-                            <div class="fs-team-row">
-                                <span class="fs-team-name">@match.HomeTeamName</span>
-                                <span class="fs-team-score">@match.HomeGoals</span>
-                            </div>
-                            <div class="fs-team-row">
-                                <span class="fs-team-name fs-team-name--away">@match.AwayTeamName</span>
-                                <span class="fs-team-score">@match.AwayGoals</span>
-                            </div>
+                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.2)]">
+                    <header class="flex items-start justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="font-['Oswald'] text-xs uppercase tracking-[0.22em] text-slate-500">@match.LeagueName</div>
+                            <div class="text-sm text-slate-400">@match.KickoffLabel</div>
                         </div>
+                        <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @badgeClass">@match.StatusLabel</span>
+                    </header>
 
-                        <footer class="fs-match-footer">
-                            <span class="fs-match-scoreline">@match.HomeGoals - @match.AwayGoals</span>
-                            <a asp-controller="Match" asp-action="Details" asp-route-id="@match.MatchId" class="fs-card-link">View match</a>
-                        </footer>
+                    <div class="mt-6 space-y-3">
+                        <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-950/40 px-4 py-3 text-white">
+                            <span class="text-base font-semibold">@match.HomeTeamName</span>
+                            <span class="font-['Oswald'] text-3xl leading-none">@match.HomeGoals</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-950/20 px-4 py-3 text-white">
+                            <span class="text-base font-semibold text-slate-300">@match.AwayTeamName</span>
+                            <span class="font-['Oswald'] text-3xl leading-none text-slate-100">@match.AwayGoals</span>
+                        </div>
+                    </div>
+
+                    <footer class="mt-5 flex items-center justify-between gap-4">
+                        <span class="font-['Oswald'] text-2xl text-white">@match.HomeGoals - @match.AwayGoals</span>
+                        <a asp-controller="Match" asp-action="Details" asp-route-id="@match.MatchId" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">View match</a>
+                    </footer>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="grid gap-8 xl:grid-cols-2">
+        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Top Rated Players</span>
+                    <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Players with momentum</h2>
+                </div>
+                <a asp-controller="Player" asp-action="Index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">See all players</a>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                @foreach (var player in Model.FeaturedPlayers)
+                {
+                    <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h3 class="text-xl font-semibold text-white">@player.FullName</h3>
+                                <p class="mt-1 text-sm text-slate-400">@player.ClubName</p>
+                            </div>
+                            <span class="inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full bg-amber-400/15 px-3 font-['Oswald'] text-xl text-amber-200">@player.AverageRating</span>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-300">
+                            <span class="rounded-full border border-white/10 px-3 py-1">@player.Position</span>
+                            <span class="rounded-full border border-white/10 px-3 py-1">@player.Nationality</span>
+                        </div>
+                        <a asp-controller="Player" asp-action="Details" asp-route-id="@player.PlayerId" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open player</a>
                     </article>
                 }
             </div>
         </section>
 
-        <section class="fs-section fs-two-column">
-            <div>
-                <div class="fs-section-heading">
-                    <div>
-                        <span class="fs-section-kicker">Top Rated Players</span>
-                        <h2>Players with momentum</h2>
-                    </div>
-                    <a asp-controller="Player" asp-action="Index" class="fs-section-link">See all players</a>
-                </div>
-
-                <div class="fs-player-grid">
-                    @foreach (var player in Model.FeaturedPlayers)
-                    {
-                        <article class="fs-player-card">
-                            <div class="fs-player-card-top">
-                                <div>
-                                    <h3>@player.FullName</h3>
-                                    <p>@player.ClubName</p>
-                                </div>
-                                <span class="fs-rating-pill">@player.AverageRating</span>
-                            </div>
-                            <div class="fs-player-meta">
-                                <span>@player.Position</span>
-                                <span>@player.Nationality</span>
-                            </div>
-                            <a asp-controller="Player" asp-action="Details" asp-route-id="@player.PlayerId" class="fs-card-link">Open player</a>
-                        </article>
-                    }
-                </div>
+        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+            <div class="mb-5">
+                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Club Form</span>
+                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Momentum by club</h2>
             </div>
 
-            <div>
-                <div class="fs-section-heading">
-                    <div>
-                        <span class="fs-section-kicker">Club Form</span>
-                        <h2>Momentum by club</h2>
-                    </div>
-                </div>
+            <div class="space-y-3">
+                @foreach (var entry in Model.ClubForms)
+                {
+                    var wins = entry.Results.Count(result => result == "W");
+                    var draws = entry.Results.Count(result => result == "D");
+                    var losses = entry.Results.Count(result => result == "L");
 
-                <div class="fs-form-table">
-                    @foreach (var entry in Model.ClubForms)
-                    {
-                        var wins = entry.Results.Count(result => result == "W");
-                        var draws = entry.Results.Count(result => result == "D");
-                        var losses = entry.Results.Count(result => result == "L");
-
-                        <div class="fs-form-row">
-                            <div class="fs-form-row-main">
-                                <strong>@entry.ClubName</strong>
-                                <div class="fs-form-badges">
-                                    @foreach (var result in entry.Results)
+                    <div class="flex flex-col gap-4 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <strong class="text-base text-white">@entry.ClubName</strong>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                @foreach (var result in entry.Results)
+                                {
+                                    var formClass = result switch
                                     {
-                                        <span class="fs-form-badge fs-form-badge--@result.ToLowerInvariant()">@result</span>
-                                    }
-                                </div>
+                                        "W" => "bg-lime-400/15 text-lime-300 border-lime-400/20",
+                                        "D" => "bg-amber-400/15 text-amber-200 border-amber-400/20",
+                                        _ => "bg-red-500/15 text-red-200 border-red-400/20"
+                                    };
+
+                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold @formClass">@result</span>
+                                }
                             </div>
-                            <div class="fs-form-record">@wins/@draws/@losses</div>
                         </div>
-                    }
-                </div>
+                        <div class="font-['Oswald'] text-3xl text-white">@wins/@draws/@losses</div>
+                    </div>
+                }
             </div>
         </section>
-    </div>
+    </section>
 </section>
