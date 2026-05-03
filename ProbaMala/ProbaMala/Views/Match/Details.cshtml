@@ -1,95 +1,116 @@
 @model MatchDetailsViewModel
 
 @{
-    ViewData["Title"] = "Match Details";
+    ViewData["Title"] = "Match Details - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb -->
-        <nav class="mb-6">
-            <a asp-controller="Home" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Home</a>
-            <span class="text-slate-500 mx-2">›</span>
-            <a asp-controller="Match" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Matches</a>
-            <span class="text-slate-500 mx-2">›</span>
-            <span class="text-slate-300">Match #@Model.Id</span>
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <nav class="fs-match-kickoff">
+            <a asp-controller="Home" asp-action="Index" class="fs-card-link">Home</a>
+            <span> / </span>
+            <a asp-controller="Match" asp-action="Index" class="fs-card-link">Matches</a>
+            <span> / </span>
+            <span>Match #@Model.Id</span>
         </nav>
 
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-slate-50 mb-4">Match #@Model.Id</h1>
-            <p class="text-slate-300 text-lg">@Model.Date.ToString("MMMM dd, yyyy")</p>
-        </div>
-
-        <!-- Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Match Details Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Match Information</h2>
-
-                <div class="space-y-4">
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Date</p>
-                        <p class="text-slate-50 font-medium">@Model.Date.ToString("MMMM dd, yyyy")</p>
-                    </div>
-
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">League</p>
-                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.LeagueName</a>
-                    </div>
-
-                    <div>
-                        <p class="text-slate-400 text-sm mb-1">Status</p>
-                        <p class="text-slate-50 font-medium">Completed</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Score Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Final Score</h2>
-
-                <div class="space-y-6">
-                    <!-- Home Team -->
-                    <div class="text-center pb-6 border-b border-slate-700">
-                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.HomeTeamId" class="text-emerald-400 font-medium mb-2 inline-block hover:text-emerald-300 transition-colors">@Model.HomeTeamName</a>
-                        <p class="text-4xl font-bold text-slate-50">@Model.HomeGoals</p>
-                    </div>
-
-                    <!-- Result -->
-                    <div class="text-center py-4">
-                        <p class="text-emerald-400 text-lg font-bold mb-1">Final Result</p>
-                        <p class="text-2xl font-bold text-slate-50">@Model.HomeGoals - @Model.AwayGoals</p>
-                    </div>
-
-                    <!-- Away Team -->
-                    <div class="text-center pt-6 border-t border-slate-700">
-                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.AwayTeamId" class="text-slate-50 font-medium mb-2 inline-block hover:text-emerald-300 transition-colors">@Model.AwayTeamName</a>
-                        <p class="text-4xl font-bold text-slate-50">@Model.AwayGoals</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Teams Card -->
-        <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold text-slate-50 mb-6">Teams</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="pb-6 md:border-r md:border-slate-700 md:pr-6">
-                    <p class="text-slate-400 text-sm mb-2">Home Team</p>
-                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.HomeTeamId" class="text-emerald-400 font-semibold text-lg hover:text-emerald-300 transition-colors">@Model.HomeTeamName</a>
-                </div>
+        <section class="fs-section">
+            <div class="fs-section-heading">
                 <div>
-                    <p class="text-slate-400 text-sm mb-2">Away Team</p>
-                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.AwayTeamId" class="text-slate-50 font-semibold text-lg hover:text-emerald-300 transition-colors">@Model.AwayTeamName</a>
+                    <span class="fs-section-kicker">Match Breakdown</span>
+                    <h2>@Model.HomeTeamName vs @Model.AwayTeamName</h2>
+                </div>
+                <span class="fs-badge fs-badge--@Model.StatusTone">@Model.StatusLabel</span>
+            </div>
+
+            <div class="fs-detail-scoreboard">
+                <div class="fs-detail-team-block">
+                    <span class="fs-match-kickoff">Home Club</span>
+                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.HomeTeamId" class="fs-detail-team-name">@Model.HomeTeamName</a>
+                    <strong class="fs-detail-team-score">@Model.HomeGoals</strong>
+                </div>
+
+                <div class="fs-detail-center-block">
+                    <span class="fs-match-league">@Model.LeagueName</span>
+                    <strong class="fs-detail-scoreline">@Model.Score</strong>
+                    <span class="fs-match-kickoff">@Model.KickoffLabel</span>
+                </div>
+
+                <div class="fs-detail-team-block">
+                    <span class="fs-match-kickoff">Away Club</span>
+                    <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.AwayTeamId" class="fs-detail-team-name">@Model.AwayTeamName</a>
+                    <strong class="fs-detail-team-score">@Model.AwayGoals</strong>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Action Buttons -->
-        <div class="mt-8">
-            <a asp-controller="Match" asp-action="Index" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md transition-colors font-medium inline-block">← Back to Matches</a>
+        <section class="fs-section fs-two-column">
+            <div>
+                <div class="fs-section-heading">
+                    <div>
+                        <span class="fs-section-kicker">Match Information</span>
+                        <h2>Context on the fixture</h2>
+                    </div>
+                </div>
+
+                <div class="fs-detail-panel-grid">
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Competition</span>
+                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="fs-card-link">@Model.LeagueName</a>
+                    </article>
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Kickoff</span>
+                        <strong>@Model.Date.ToString("MMMM dd, yyyy")</strong>
+                    </article>
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Status</span>
+                        <strong>@Model.StatusLabel</strong>
+                    </article>
+                </div>
+            </div>
+
+            <div>
+                <div class="fs-section-heading">
+                    <div>
+                        <span class="fs-section-kicker">Related Clubs</span>
+                        <h2>Move deeper into the matchup</h2>
+                    </div>
+                </div>
+
+                <div class="fs-player-grid">
+                    <article class="fs-player-card">
+                        <div class="fs-player-card-top">
+                            <div>
+                                <h3>@Model.HomeTeamName</h3>
+                                <p>Home club context</p>
+                            </div>
+                        </div>
+                        <div class="fs-player-meta">
+                            <span>League: @Model.LeagueName</span>
+                            <span>Goals: @Model.HomeGoals</span>
+                        </div>
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.HomeTeamId" class="fs-card-link">Open home club</a>
+                    </article>
+
+                    <article class="fs-player-card">
+                        <div class="fs-player-card-top">
+                            <div>
+                                <h3>@Model.AwayTeamName</h3>
+                                <p>Away club context</p>
+                            </div>
+                        </div>
+                        <div class="fs-player-meta">
+                            <span>League: @Model.LeagueName</span>
+                            <span>Goals: @Model.AwayGoals</span>
+                        </div>
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.AwayTeamId" class="fs-card-link">Open away club</a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <div>
+            <a asp-controller="Match" asp-action="Index" class="fs-card-link">Back to all matches</a>
         </div>
     </div>
-</div>
+</section>

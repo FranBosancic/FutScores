@@ -24,11 +24,15 @@ namespace ProbaMala.Controllers
         {
             var matches = _matchRepository.GetAll();
 
-            var matchViewModels = matches.Select(match =>
+            var matchViewModels = matches
+                .OrderByDescending(match => match.Date)
+                .Select((match, index) =>
             {
                 var league = _leagueRepository.GetById(match.LeagueId);
                 var homeClub = _clubRepository.GetById(match.HomeTeamId);
                 var awayClub = _clubRepository.GetById(match.AwayTeamId);
+                var statusLabel = index == 0 ? "Featured" : index < 4 ? "Final" : "Recent";
+                var statusTone = index == 0 ? "live" : index < 4 ? "final" : "recent";
 
                 return new MatchDetailsViewModel
                 {
@@ -37,6 +41,9 @@ namespace ProbaMala.Controllers
                     HomeTeamId = match.HomeTeamId,
                     AwayTeamId = match.AwayTeamId,
                     Date = match.Date,
+                    KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
+                    StatusLabel = statusLabel,
+                    StatusTone = statusTone,
                     LeagueName = league?.Name ?? "Unknown League",
                     HomeTeamName = homeClub?.Name ?? "Unknown Home Team",
                     AwayTeamName = awayClub?.Name ?? "Unknown Away Team",
@@ -67,6 +74,9 @@ namespace ProbaMala.Controllers
                 HomeTeamId = match.HomeTeamId,
                 AwayTeamId = match.AwayTeamId,
                 Date = match.Date,
+                KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
+                StatusLabel = "Final",
+                StatusTone = "final",
                 LeagueName = league?.Name ?? "Unknown League",
                 HomeTeamName = homeClub?.Name ?? "Unknown Home Team",
                 AwayTeamName = awayClub?.Name ?? "Unknown Away Team",

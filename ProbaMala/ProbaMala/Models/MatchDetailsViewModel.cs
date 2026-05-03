@@ -7,6 +7,9 @@ namespace ProbaMala.Models
         public int HomeTeamId { get; set; }
         public int AwayTeamId { get; set; }
         public DateTime Date { get; set; }
+        public string KickoffLabel { get; set; } = null!;
+        public string StatusLabel { get; set; } = null!;
+        public string StatusTone { get; set; } = null!;
         public string LeagueName { get; set; } = null!;
         public string HomeTeamName { get; set; } = null!;
         public string AwayTeamName { get; set; } = null!;

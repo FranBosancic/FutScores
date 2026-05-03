@@ -1,47 +1,50 @@
 @model List<RatingDetailsViewModel>
 
 @{
-    ViewData["Title"] = "Ratings";
+    ViewData["Title"] = "Ratings - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-slate-50 mb-2">Ratings</h1>
-            <p class="text-slate-300">@Model.Count item@(Model.Count != 1 ? "s" : "") found</p>
-        </div>
-
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var rating in Model)
-            {
-                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-900 hover:border-emerald-500 transition-all duration-300 cursor-pointer">
-                    <h3 class="text-xl font-semibold text-slate-50 mb-2">@rating.PlayerName</h3>
-                    <p class="text-slate-300 mb-4">@rating.MatchDescription</p>
-
-                    <!-- Score Badge -->
-                    <div class="mb-4 flex items-center justify-between">
-                        <div>
-                            <span class="text-slate-400 text-sm">Rating:</span>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <span class="bg-amber-500 text-white text-lg font-bold px-3 py-1 rounded-lg">@rating.Score</span>
-                                <span class="text-slate-400 text-sm">/ 10</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- User Info -->
-                    <div class="pb-4 border-t border-slate-700 pt-4 mb-4">
-                        <p class="text-slate-400 text-sm mb-1">Rated by</p>
-                        <p class="text-emerald-400 font-medium">@rating.UserName</p>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <a href="@Url.Action("Details", "Rating", new { id = rating.Id })" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View Details →</a>
-                    </div>
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <section class="fs-section">
+            <div class="fs-section-heading">
+                <div>
+                    <span class="fs-section-kicker">Ratings</span>
+                    <h2>Player sentiment layered onto match context</h2>
                 </div>
-            }
-        </div>
+                <span class="fs-match-kickoff">@Model.Count rating@(Model.Count != 1 ? "s" : string.Empty) tracked</span>
+            </div>
+
+            <div class="fs-player-grid fs-player-grid--wide">
+                @foreach (var rating in Model)
+                {
+                    <article class="fs-player-card fs-player-card--entity">
+                        <div class="fs-player-card-top">
+                            <div>
+                                <h3>@rating.PlayerName</h3>
+                                <p>@rating.MatchDescription</p>
+                            </div>
+                            <span class="fs-rating-pill">@rating.Score</span>
+                        </div>
+
+                        <div class="fs-player-meta fs-player-meta--stacked">
+                            <span>Rated by: @rating.UserName</span>
+                            @if (!string.IsNullOrWhiteSpace(rating.Comment))
+                            {
+                                <span>"@rating.Comment"</span>
+                            }
+                            else
+                            {
+                                <span>No written comment provided</span>
+                            }
+                        </div>
+
+                        <div class="fs-entity-links">
+                            <a asp-controller="Rating" asp-action="Details" asp-route-id="@rating.Id" class="fs-card-link">Open rating</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
     </div>
-</div>
+</section>

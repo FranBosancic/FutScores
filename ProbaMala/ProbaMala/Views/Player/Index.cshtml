@@ -1,46 +1,53 @@
 @model List<PlayerDetailsViewModel>
 
 @{
-    ViewData["Title"] = "Players";
+    ViewData["Title"] = "Players - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-slate-50 mb-2">Players</h1>
-            <p class="text-slate-300">@Model.Count item@(Model.Count != 1 ? "s" : "") found</p>
-        </div>
-
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var player in Model)
-            {
-                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-900 hover:border-emerald-500 transition-all duration-300 cursor-pointer">
-                    <h3 class="text-xl font-semibold text-slate-50 mb-2">@player.FirstName @player.LastName</h3>
-                    <p class="text-slate-300 mb-4">@player.Nationality</p>
-
-                    <!-- Position Badge -->
-                    <div class="mb-4 flex items-center justify-between">
-                        @{
-                            string positionColor = player.Position switch
-                            {
-                                Position.Goalkeeper => "bg-indigo-500",
-                                Position.Defender => "bg-emerald-500",
-                                Position.Midfielder => "bg-amber-500",
-                                Position.Forward => "bg-red-500",
-                                _ => "bg-slate-600"
-                            };
-                        }
-                        <span class="@positionColor text-white text-xs font-bold px-3 py-1 rounded-full">@player.Position</span>
-                        <span class="text-slate-400 text-sm">@player.ClubName</span>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <a href="@Url.Action("Details", "Player", new { id = player.Id })" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View Details →</a>
-                    </div>
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <section class="fs-section">
+            <div class="fs-section-heading">
+                <div>
+                    <span class="fs-section-kicker">Players</span>
+                    <h2>Player browsing with club context built in</h2>
                 </div>
-            }
-        </div>
+                <span class="fs-match-kickoff">@Model.Count player@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
+            </div>
+
+            <div class="fs-player-grid fs-player-grid--wide">
+                @foreach (var player in Model)
+                {
+                    var toneClass = player.Position switch
+                    {
+                        Position.Goalkeeper => "fs-tone-pill--keeper",
+                        Position.Defender => "fs-tone-pill--defender",
+                        Position.Midfielder => "fs-tone-pill--midfielder",
+                        Position.Forward => "fs-tone-pill--forward",
+                        _ => "fs-tone-pill--neutral"
+                    };
+
+                    <article class="fs-player-card fs-player-card--entity">
+                        <div class="fs-player-card-top">
+                            <div>
+                                <h3>@player.FirstName @player.LastName</h3>
+                                <p>@player.ClubName</p>
+                            </div>
+                            <span class="fs-tone-pill @toneClass">@player.Position</span>
+                        </div>
+
+                        <div class="fs-player-meta fs-player-meta--stacked">
+                            <span>Nationality: @player.Nationality</span>
+                            <span>Born: @player.DateOfBirth.ToString("MMM dd, yyyy")</span>
+                        </div>
+
+                        <div class="fs-entity-links">
+                            <a asp-controller="Club" asp-action="Details" asp-route-id="@player.ClubId" class="fs-card-link">Open club</a>
+                            <a asp-controller="Player" asp-action="Details" asp-route-id="@player.Id" class="fs-card-link">Open player</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
     </div>
-</div>
+</section>

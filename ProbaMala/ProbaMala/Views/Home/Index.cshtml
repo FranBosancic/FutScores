@@ -1,119 +1,182 @@
 ﻿@model ProbaMala.Models.HomeViewModel
 @{
-    ViewData["Title"] = "FutScores – Dashboard";
+    ViewData["Title"] = "FutScores - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <section class="fs-hero">
+            <div class="fs-hero-grid">
+                <div class="fs-hero-copy">
+                    <span class="fs-hero-kicker">Dashboard First</span>
+                    <h1>Football match flow, club context, and player heat all in one view.</h1>
+                    <p>
+                        Use the match center to scan recent results first, then move outward into clubs, leagues, players, and ratings.
+                        The shell is built to absorb live API data later without changing the page logic.
+                    </p>
+                </div>
 
-        <!-- Hero -->
-        <div class="mb-10">
-            <h1 class="text-4xl font-bold text-slate-50 mb-2">FutScores Dashboard</h1>
-            <p class="text-slate-400 text-lg">Live stats, club form, and match ratings — all in one place.</p>
-        </div>
+                <div class="fs-search-panel">
+                    <h2>Jump Into The Board</h2>
+                    <p>Start from the surface you care about, then fan out into related entities.</p>
+                    <form class="fs-dashboard-search" data-search-form>
+                        <select class="fs-shell-search-select" data-search-scope>
+                            <option value="Match">Matches</option>
+                            <option value="Player">Players</option>
+                            <option value="Club">Clubs</option>
+                            <option value="League">Leagues</option>
+                        </select>
+                        <input class="fs-shell-search-input" type="search" placeholder="Search the match center..." data-search-query />
+                        <button class="fs-shell-search-button" type="submit">Open</button>
+                    </form>
 
-        <!-- Stat Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 flex flex-col gap-2">
-                <span class="text-slate-400 text-sm uppercase tracking-widest">Clubs</span>
-                <span class="text-4xl font-bold text-emerald-400">@Model.TotalClubs</span>
-                <a asp-controller="Club" asp-action="Index" class="text-slate-500 text-xs hover:text-emerald-400 transition-colors mt-1">View all →</a>
-            </div>
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 flex flex-col gap-2">
-                <span class="text-slate-400 text-sm uppercase tracking-widest">Players</span>
-                <span class="text-4xl font-bold text-emerald-400">@Model.TotalPlayers</span>
-                <a asp-controller="Player" asp-action="Index" class="text-slate-500 text-xs hover:text-emerald-400 transition-colors mt-1">View all →</a>
-            </div>
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 flex flex-col gap-2">
-                <span class="text-slate-400 text-sm uppercase tracking-widest">Matches</span>
-                <span class="text-4xl font-bold text-emerald-400">@Model.TotalMatches</span>
-                <a asp-controller="Match" asp-action="Index" class="text-slate-500 text-xs hover:text-emerald-400 transition-colors mt-1">View all →</a>
-            </div>
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 flex flex-col gap-2">
-                <span class="text-slate-400 text-sm uppercase tracking-widest">Avg Rating</span>
-                <span class="text-4xl font-bold text-amber-400">@Model.AverageRating</span>
-                <a asp-controller="Rating" asp-action="Index" class="text-slate-500 text-xs hover:text-emerald-400 transition-colors mt-1">View all →</a>
-            </div>
-        </div>
-
-        <!-- Club Form Table -->
-        <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 class="text-2xl font-semibold text-slate-50 mb-1">Club Form</h2>
-            <p class="text-slate-500 text-sm mb-6">Last 5 results per club — most recent on the right</p>
-
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b border-slate-700">
-                            <th class="text-left text-slate-400 text-xs uppercase tracking-widest pb-3 pr-6">Club</th>
-                            <th class="text-left text-slate-400 text-xs uppercase tracking-widest pb-3">Form</th>
-                            <th class="text-right text-slate-400 text-xs uppercase tracking-widest pb-3 pl-6">Record</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var entry in Model.ClubForms)
+                    <div class="fs-shortcut-grid">
+                        @foreach (var shortcut in Model.SearchShortcuts)
                         {
-                            var wins = entry.Results.Count(r => r == "W");
-                            var draws = entry.Results.Count(r => r == "D");
-                            var losses = entry.Results.Count(r => r == "L");
-
-                            <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
-                                <td class="py-4 pr-6">
-                                    <span class="text-slate-100 font-medium">@entry.ClubName</span>
-                                </td>
-                                <td class="py-4">
-                                    <div class="flex gap-1.5 items-center">
-                                        @foreach (var result in entry.Results)
-                                        {
-                                            if (result == "W")
-                                            {
-                                                <span class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold" title="Win">W</span>
-                                            }
-                                            else if (result == "D")
-                                            {
-                                                <span class="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs font-bold" title="Draw">D</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold" title="Loss">L</span>
-                                            }
-                                        }
-                                        @if (!entry.Results.Any())
-                                        {
-                                            <span class="text-slate-600 text-sm italic">No matches</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="py-4 pl-6 text-right">
-                                    <span class="text-emerald-400 font-semibold">@wins</span>
-                                    <span class="text-slate-600 mx-1">/</span>
-                                    <span class="text-amber-400 font-semibold">@draws</span>
-                                    <span class="text-slate-600 mx-1">/</span>
-                                    <span class="text-red-400 font-semibold">@losses</span>
-                                    <span class="text-slate-600 text-xs ml-2">W/D/L</span>
-                                </td>
-                            </tr>
+                            <a asp-controller="@shortcut.Controller" asp-action="@shortcut.Action" class="fs-shortcut-card">
+                                <span class="fs-shortcut-label">@shortcut.Label</span>
+                                <span class="fs-shortcut-action">Browse now</span>
+                            </a>
                         }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Legend -->
-            <div class="flex gap-4 mt-5 pt-4 border-t border-slate-700">
-                <div class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-                    <span class="text-slate-400 text-xs">Win</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
-                    <span class="text-slate-400 text-xs">Draw</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
-                    <span class="text-slate-400 text-xs">Loss</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
+        <section class="fs-section">
+            <div class="fs-section-heading">
+                <div>
+                    <span class="fs-section-kicker">Key Numbers</span>
+                    <h2>Fast read on the board</h2>
+                </div>
+            </div>
+
+            <div class="fs-stat-grid">
+                <a asp-controller="Club" asp-action="Index" class="fs-stat-card">
+                    <span class="fs-stat-label">Clubs</span>
+                    <strong class="fs-stat-value">@Model.TotalClubs</strong>
+                    <span class="fs-stat-meta">Browse all clubs</span>
+                </a>
+                <a asp-controller="Player" asp-action="Index" class="fs-stat-card">
+                    <span class="fs-stat-label">Players</span>
+                    <strong class="fs-stat-value">@Model.TotalPlayers</strong>
+                    <span class="fs-stat-meta">Move into player pages</span>
+                </a>
+                <a asp-controller="Match" asp-action="Index" class="fs-stat-card">
+                    <span class="fs-stat-label">Matches</span>
+                    <strong class="fs-stat-value">@Model.TotalMatches</strong>
+                    <span class="fs-stat-meta">See the latest results</span>
+                </a>
+                <a asp-controller="Rating" asp-action="Index" class="fs-stat-card fs-stat-card--accent">
+                    <span class="fs-stat-label">Avg Rating</span>
+                    <strong class="fs-stat-value">@Model.AverageRating</strong>
+                    <span class="fs-stat-meta">Track sentiment and form</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="fs-section">
+            <div class="fs-section-heading">
+                <div>
+                    <span class="fs-section-kicker">Recent Results</span>
+                    <h2>Match center stream</h2>
+                </div>
+                <a asp-controller="Match" asp-action="Index" class="fs-section-link">Open all matches</a>
+            </div>
+
+            <div class="fs-match-grid">
+                @foreach (var match in Model.RecentMatches)
+                {
+                    <article class="fs-match-card">
+                        <header class="fs-match-card-top">
+                            <div>
+                                <span class="fs-match-league">@match.LeagueName</span>
+                                <span class="fs-match-kickoff">@match.KickoffLabel</span>
+                            </div>
+                            <span class="fs-badge fs-badge--@match.StatusTone">@match.StatusLabel</span>
+                        </header>
+
+                        <div class="fs-match-body">
+                            <div class="fs-team-row">
+                                <span class="fs-team-name">@match.HomeTeamName</span>
+                                <span class="fs-team-score">@match.HomeGoals</span>
+                            </div>
+                            <div class="fs-team-row">
+                                <span class="fs-team-name fs-team-name--away">@match.AwayTeamName</span>
+                                <span class="fs-team-score">@match.AwayGoals</span>
+                            </div>
+                        </div>
+
+                        <footer class="fs-match-footer">
+                            <span class="fs-match-scoreline">@match.HomeGoals - @match.AwayGoals</span>
+                            <a asp-controller="Match" asp-action="Details" asp-route-id="@match.MatchId" class="fs-card-link">View match</a>
+                        </footer>
+                    </article>
+                }
+            </div>
+        </section>
+
+        <section class="fs-section fs-two-column">
+            <div>
+                <div class="fs-section-heading">
+                    <div>
+                        <span class="fs-section-kicker">Top Rated Players</span>
+                        <h2>Players with momentum</h2>
+                    </div>
+                    <a asp-controller="Player" asp-action="Index" class="fs-section-link">See all players</a>
+                </div>
+
+                <div class="fs-player-grid">
+                    @foreach (var player in Model.FeaturedPlayers)
+                    {
+                        <article class="fs-player-card">
+                            <div class="fs-player-card-top">
+                                <div>
+                                    <h3>@player.FullName</h3>
+                                    <p>@player.ClubName</p>
+                                </div>
+                                <span class="fs-rating-pill">@player.AverageRating</span>
+                            </div>
+                            <div class="fs-player-meta">
+                                <span>@player.Position</span>
+                                <span>@player.Nationality</span>
+                            </div>
+                            <a asp-controller="Player" asp-action="Details" asp-route-id="@player.PlayerId" class="fs-card-link">Open player</a>
+                        </article>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <div class="fs-section-heading">
+                    <div>
+                        <span class="fs-section-kicker">Club Form</span>
+                        <h2>Momentum by club</h2>
+                    </div>
+                </div>
+
+                <div class="fs-form-table">
+                    @foreach (var entry in Model.ClubForms)
+                    {
+                        var wins = entry.Results.Count(result => result == "W");
+                        var draws = entry.Results.Count(result => result == "D");
+                        var losses = entry.Results.Count(result => result == "L");
+
+                        <div class="fs-form-row">
+                            <div class="fs-form-row-main">
+                                <strong>@entry.ClubName</strong>
+                                <div class="fs-form-badges">
+                                    @foreach (var result in entry.Results)
+                                    {
+                                        <span class="fs-form-badge fs-form-badge--@result.ToLowerInvariant()">@result</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="fs-form-record">@wins/@draws/@losses</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
     </div>
-</div>
+</section>

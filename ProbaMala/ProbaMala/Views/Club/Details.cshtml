@@ -1,71 +1,85 @@
 @model ClubDetailsViewModel
 
 @{
-    ViewData["Title"] = "Club Details";
+    ViewData["Title"] = "Club Details - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb -->
-        <nav class="mb-6">
-            <a asp-controller="Home" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Home</a>
-            <span class="text-slate-500 mx-2">›</span>
-            <a asp-controller="Club" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Clubs</a>
-            <span class="text-slate-500 mx-2">›</span>
-            <span class="text-slate-300">@Model.Name</span>
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <nav class="fs-match-kickoff">
+            <a asp-controller="Home" asp-action="Index" class="fs-card-link">Home</a>
+            <span> / </span>
+            <a asp-controller="Club" asp-action="Index" class="fs-card-link">Clubs</a>
+            <span> / </span>
+            <span>@Model.Name</span>
         </nav>
 
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-slate-50 mb-2">@Model.Name</h1>
-            <p class="text-slate-300 text-lg">Founded in @Model.FoundedDate.Year</p>
-        </div>
+        <section class="fs-section">
+            <div class="fs-entity-hero">
+                <div>
+                    <span class="fs-section-kicker">Club Focus</span>
+                    <h2>@Model.Name</h2>
+                    <p class="fs-match-kickoff">Competing in @Model.LeagueName since @Model.FoundedDate.Year</p>
+                </div>
+                <span class="fs-rating-pill">@Model.FoundedDate.Year</span>
+            </div>
+        </section>
 
-        <!-- Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Club Information Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Club Information</h2>
-
-                <div class="space-y-4">
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Club Name</p>
-                        <p class="text-slate-50 font-medium">@Model.Name</p>
-                    </div>
-
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Founded</p>
-                        <p class="text-slate-50 font-medium">@Model.FoundedDate.ToString("MMMM dd, yyyy")</p>
-                    </div>
-
+        <section class="fs-section fs-two-column">
+            <div>
+                <div class="fs-section-heading">
                     <div>
-                        <p class="text-slate-400 text-sm mb-1">League</p>
-                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.LeagueName</a>
+                        <span class="fs-section-kicker">Club Information</span>
+                        <h2>Identity and timeline</h2>
                     </div>
+                </div>
+
+                <div class="fs-detail-panel-grid">
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Club Name</span>
+                        <strong>@Model.Name</strong>
+                    </article>
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Founded</span>
+                        <strong>@Model.FoundedDate.ToString("MMMM dd, yyyy")</strong>
+                    </article>
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">League</span>
+                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="fs-card-link">@Model.LeagueName</a>
+                    </article>
                 </div>
             </div>
 
-            <!-- League Information Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-slate-50 mb-6">League Details</h2>
-
-                <div class="space-y-4">
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">League Name</p>
-                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="text-slate-50 font-medium hover:text-emerald-300 transition-colors">@Model.LeagueName</a>
-                    </div>
-
+            <div>
+                <div class="fs-section-heading">
                     <div>
-                        <p class="text-slate-400 text-sm mb-2">Navigate to League</p>
-                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View league details →</a>
+                        <span class="fs-section-kicker">Related Entity</span>
+                        <h2>League-first navigation</h2>
+                    </div>
+                </div>
+
+                <div class="fs-player-card fs-player-card--entity">
+                    <div class="fs-player-card-top">
+                        <div>
+                            <h3>@Model.LeagueName</h3>
+                            <p>Competition context</p>
+                        </div>
+                        <span class="fs-tone-pill fs-tone-pill--neutral">League</span>
+                    </div>
+                    <div class="fs-player-meta fs-player-meta--stacked">
+                        <span>Club: @Model.Name</span>
+                        <span>Founded: @Model.FoundedDate.Year</span>
+                    </div>
+                    <div class="fs-entity-links">
+                        <a asp-controller="League" asp-action="Details" asp-route-id="@Model.LeagueId" class="fs-card-link">Open league</a>
+                        <a asp-controller="Club" asp-action="Index" class="fs-card-link">More clubs</a>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Action Buttons -->
-        <div class="mt-8">
-            <a asp-controller="Club" asp-action="Index" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md transition-colors font-medium inline-block">← Back to Clubs</a>
+        <div>
+            <a asp-controller="Club" asp-action="Index" class="fs-card-link">Back to all clubs</a>
         </div>
     </div>
-</div>
+</section>

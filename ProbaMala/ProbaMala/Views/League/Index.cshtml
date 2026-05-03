@@ -1,35 +1,44 @@
 @model List<League>
 
 @{
-    ViewData["Title"] = "Leagues";
+    ViewData["Title"] = "Leagues - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-slate-50 mb-2">Leagues</h1>
-            <p class="text-slate-300">@Model.Count item@(Model.Count != 1 ? "s" : "") found</p>
-        </div>
-
-        <!-- Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var league in Model)
-            {
-                <div class="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:bg-slate-900 hover:border-emerald-500 transition-all duration-300 cursor-pointer">
-                    <h3 class="text-xl font-semibold text-slate-50 mb-2">@league.Name</h3>
-                    <p class="text-slate-300 mb-4">Football League</p>
-
-                    <div class="mb-4">
-                        <span class="text-slate-400 text-sm">ID:</span>
-                        <p class="text-emerald-400 font-medium">@league.Id</p>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <a href="@Url.Action("Details", "League", new { id = league.Id })" class="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View Details →</a>
-                    </div>
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <section class="fs-section">
+            <div class="fs-section-heading">
+                <div>
+                    <span class="fs-section-kicker">Leagues</span>
+                    <h2>Competition hubs for club and match browsing</h2>
                 </div>
-            }
-        </div>
+                <span class="fs-match-kickoff">@Model.Count league@(Model.Count != 1 ? "s" : string.Empty) available</span>
+            </div>
+
+            <div class="fs-player-grid fs-player-grid--wide">
+                @foreach (var league in Model)
+                {
+                    <article class="fs-player-card fs-player-card--entity">
+                        <div class="fs-player-card-top">
+                            <div>
+                                <h3>@league.Name</h3>
+                                <p>Competition overview</p>
+                            </div>
+                            <span class="fs-tone-pill fs-tone-pill--neutral">League</span>
+                        </div>
+
+                        <div class="fs-player-meta fs-player-meta--stacked">
+                            <span>Competition ID: #@league.Id</span>
+                            <span>Use this page as the hub for clubs and matches</span>
+                        </div>
+
+                        <div class="fs-entity-links">
+                            <a asp-controller="Match" asp-action="Index" class="fs-card-link">Open matches</a>
+                            <a asp-controller="League" asp-action="Details" asp-route-id="@league.Id" class="fs-card-link">Open league</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
     </div>
-</div>
+</section>

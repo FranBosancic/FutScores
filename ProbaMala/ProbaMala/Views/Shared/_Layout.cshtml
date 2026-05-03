@@ -1,115 +1,95 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FutScores</title>
-    
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Bootstrap (kept for potential use in other components) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProbaMala.styles.css" asp-append-version="true" />
-    
-    <style>
-        /* Smooth transitions for navbar links */
-        .nav-link-transition {
-            transition: color 300ms ease;
-        }
-    </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex flex-col">
-    <header>
-        <!-- Dark Modern Navbar with Tailwind -->
-        <nav class="bg-slate-900 border-b border-slate-700 h-16 shadow-lg">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-                <div class="flex items-center justify-between h-full">
-                    <!-- Brand/Logo -->
-                    <div class="flex-shrink-0">
-                        <a asp-area="" asp-controller="Home" asp-action="Index" class="text-2xl font-bold text-emerald-400 hover:text-emerald-300 transition-colors duration-300">
-                            FutScores
-                        </a>
-                    </div>
-
-                    <!-- Desktop Navigation Links -->
-                    <div class="hidden md:flex items-center space-x-1">
-                        <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Dashboard
-                        </a>
-                        <a asp-area="" asp-controller="Player" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Players
-                        </a>
-                        <a asp-area="" asp-controller="Club" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Clubs
-                        </a>
-                        <a asp-area="" asp-controller="League" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Leagues
-                        </a>
-                        <a asp-area="" asp-controller="Match" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Matches
-                        </a>
-                        <a asp-area="" asp-controller="Rating" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Ratings
-                        </a>
-                        <a asp-area="" asp-controller="User" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                            Users
-                        </a>
-                    </div>
-
-                    <!-- Mobile menu button -->
-                    <div class="md:hidden">
-                        <button id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-slate-200 hover:text-emerald-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-400 transition-colors duration-300" aria-expanded="false">
-                            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                            <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+<body class="fs-app-shell">
+    <header class="fs-shell-header">
+        <div class="fs-topbar">
+            <div class="fs-shell-wrap">
+                <span class="fs-topbar-kicker">Live Match Center</span>
+                <span class="fs-topbar-copy">Dashboard-first football browsing built for match flow, club context, and player discovery.</span>
             </div>
+        </div>
 
-            <!-- Mobile Navigation Menu -->
-            <div id="mobile-menu" class="hidden md:hidden bg-slate-800 border-t border-slate-700">
-                <div class="px-2 pt-2 pb-3 space-y-1">
-                    <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Dashboard
-                    </a>
-                    <a asp-area="" asp-controller="Player" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Players
-                    </a>
-                    <a asp-area="" asp-controller="Club" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Clubs
-                    </a>
-                    <a asp-area="" asp-controller="League" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Leagues
-                    </a>
-                    <a asp-area="" asp-controller="Match" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Matches
-                    </a>
-                    <a asp-area="" asp-controller="Rating" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Ratings
-                    </a>
-                    <a asp-area="" asp-controller="User" asp-action="Index" class="nav-link-transition text-slate-200 hover:text-emerald-400 hover:bg-slate-700 block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-300">
-                        Users
-                    </a>
-                </div>
+        <div class="fs-shell-wrap fs-header-main">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="fs-brand-block">
+                <span class="fs-brand-mark">FS</span>
+                <span class="fs-brand-copy">
+                    <span class="fs-brand-name">FutScores</span>
+                    <span class="fs-brand-tag">Bold football stats and score tracking</span>
+                </span>
+            </a>
+
+            <form class="fs-shell-search" data-search-form>
+                <label class="fs-visually-hidden" for="shell-search-scope">Search scope</label>
+                <select id="shell-search-scope" class="fs-shell-search-select" data-search-scope>
+                    <option value="Match">Matches</option>
+                    <option value="Player">Players</option>
+                    <option value="Club">Clubs</option>
+                    <option value="League">Leagues</option>
+                </select>
+                <label class="fs-visually-hidden" for="shell-search-query">Search query</label>
+                <input id="shell-search-query" class="fs-shell-search-input" type="search" placeholder="Search players, clubs, matches..." data-search-query />
+                <button class="fs-shell-search-button" type="submit">Go</button>
+            </form>
+
+            <button id="mobile-menu-btn" class="fs-mobile-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+                <span class="fs-mobile-toggle-line"></span>
+                <span class="fs-mobile-toggle-line"></span>
+                <span class="fs-mobile-toggle-line"></span>
+            </button>
+        </div>
+
+        <div class="fs-shell-wrap">
+            <nav class="fs-main-nav" aria-label="Primary">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="fs-nav-link @(currentController == "Home" && currentAction == "Index" ? "is-active" : string.Empty)">Dashboard</a>
+                <a asp-area="" asp-controller="Match" asp-action="Index" class="fs-nav-link @(currentController == "Match" ? "is-active" : string.Empty)">Matches</a>
+                <a asp-area="" asp-controller="Player" asp-action="Index" class="fs-nav-link @(currentController == "Player" ? "is-active" : string.Empty)">Players</a>
+                <a asp-area="" asp-controller="Club" asp-action="Index" class="fs-nav-link @(currentController == "Club" ? "is-active" : string.Empty)">Clubs</a>
+                <a asp-area="" asp-controller="League" asp-action="Index" class="fs-nav-link @(currentController == "League" ? "is-active" : string.Empty)">Leagues</a>
+                <a asp-area="" asp-controller="Rating" asp-action="Index" class="fs-nav-link @(currentController == "Rating" ? "is-active" : string.Empty)">Ratings</a>
+                <a asp-area="" asp-controller="User" asp-action="Index" class="fs-nav-link fs-nav-link--minor @(currentController == "User" ? "is-active" : string.Empty)">Users</a>
+            </nav>
+        </div>
+
+        <div id="mobile-menu" class="fs-mobile-menu" hidden>
+            <div class="fs-shell-wrap fs-mobile-menu-inner">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="fs-mobile-link">Dashboard</a>
+                <a asp-area="" asp-controller="Match" asp-action="Index" class="fs-mobile-link">Matches</a>
+                <a asp-area="" asp-controller="Player" asp-action="Index" class="fs-mobile-link">Players</a>
+                <a asp-area="" asp-controller="Club" asp-action="Index" class="fs-mobile-link">Clubs</a>
+                <a asp-area="" asp-controller="League" asp-action="Index" class="fs-mobile-link">Leagues</a>
+                <a asp-area="" asp-controller="Rating" asp-action="Index" class="fs-mobile-link">Ratings</a>
+                <a asp-area="" asp-controller="User" asp-action="Index" class="fs-mobile-link">Users</a>
             </div>
-        </nav>
+        </div>
     </header>
 
-    <div class="container mx-auto flex-grow">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <main class="fs-shell-main" role="main">
+        @RenderBody()
+    </main>
 
-    <footer class="border-t border-slate-700 bg-slate-800 text-slate-300 mt-0">
-        <div class="container mx-auto px-4 py-6">
-            &copy; 2026 - FutScores
+    <footer class="fs-footer">
+        <div class="fs-shell-wrap fs-footer-inner">
+            <div>
+                <strong>FutScores</strong>
+                <span class="fs-footer-copy">Football match center shell built for real data next.</span>
+            </div>
+            <div>&copy; 2026 FutScores</div>
         </div>
     </footer>
 
@@ -118,33 +98,6 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     
-    <!-- Mobile Menu Toggle Script -->
-    <script>
-        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const menuBtn = this;
-            
-            mobileMenu.classList.toggle('hidden');
-            
-            // Toggle SVG icons
-            const openIcon = menuBtn.querySelector('svg:first-of-type');
-            const closeIcon = menuBtn.querySelector('svg:last-of-type');
-            openIcon.classList.toggle('hidden');
-            closeIcon.classList.toggle('hidden');
-        });
-
-        // Close mobile menu when a link is clicked
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', function() {
-                document.getElementById('mobile-menu').classList.add('hidden');
-                const openIcon = document.querySelector('#mobile-menu-btn svg:first-of-type');
-                const closeIcon = document.querySelector('#mobile-menu-btn svg:last-of-type');
-                openIcon.classList.remove('hidden');
-                closeIcon.classList.add('hidden');
-            });
-        });
-    </script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

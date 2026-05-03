@@ -1,90 +1,101 @@
 @model PlayerDetailsViewModel
 
 @{
-    ViewData["Title"] = "Player Details";
+    ViewData["Title"] = "Player Details - Match Center";
 }
 
-<div class="bg-slate-900 pb-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb -->
-        <nav class="mb-6">
-            <a asp-controller="Home" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Home</a>
-            <span class="text-slate-500 mx-2">›</span>
-            <a asp-controller="Player" asp-action="Index" class="text-emerald-400 hover:text-emerald-300 transition-colors">Players</a>
-            <span class="text-slate-500 mx-2">›</span>
-            <span class="text-slate-300">@Model.FirstName @Model.LastName</span>
+@{
+    var toneClass = Model.Position switch
+    {
+        Position.Goalkeeper => "fs-tone-pill--keeper",
+        Position.Defender => "fs-tone-pill--defender",
+        Position.Midfielder => "fs-tone-pill--midfielder",
+        Position.Forward => "fs-tone-pill--forward",
+        _ => "fs-tone-pill--neutral"
+    };
+    var age = DateTime.Today.Year - Model.DateOfBirth.Year;
+    if (Model.DateOfBirth.Date > DateTime.Today.AddYears(-age))
+    {
+        age--;
+    }
+}
+
+<section class="fs-dashboard">
+    <div class="fs-shell-wrap fs-dashboard-stack">
+        <nav class="fs-match-kickoff">
+            <a asp-controller="Home" asp-action="Index" class="fs-card-link">Home</a>
+            <span> / </span>
+            <a asp-controller="Player" asp-action="Index" class="fs-card-link">Players</a>
+            <span> / </span>
+            <span>@Model.FirstName @Model.LastName</span>
         </nav>
 
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-start justify-between mb-4">
+        <section class="fs-section">
+            <div class="fs-entity-hero">
                 <div>
-                    <h1 class="text-4xl font-bold text-slate-50 mb-2">@Model.FirstName @Model.LastName</h1>
-                    @{
-                        string positionColor = Model.Position switch
-                        {
-                            Position.Goalkeeper => "bg-indigo-500",
-                            Position.Defender => "bg-emerald-500",
-                            Position.Midfielder => "bg-amber-500",
-                            Position.Forward => "bg-red-500",
-                            _ => "bg-slate-600"
-                        };
-                    }
-                    <span class="@positionColor text-white text-sm font-bold px-4 py-1 rounded-full">@Model.Position</span>
+                    <span class="fs-section-kicker">Player Focus</span>
+                    <h2>@Model.FirstName @Model.LastName</h2>
+                    <p class="fs-match-kickoff">@Model.ClubName · @Model.Nationality</p>
                 </div>
+                <span class="fs-tone-pill @toneClass">@Model.Position</span>
             </div>
-        </div>
+        </section>
 
-        <!-- Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Player Information Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Player Information</h2>
-
-                <div class="space-y-4">
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Position</p>
-                        <p class="text-slate-50 font-medium">@Model.Position</p>
-                    </div>
-
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Nationality</p>
-                        <p class="text-slate-50 font-medium">@Model.Nationality</p>
-                    </div>
-
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Date of Birth</p>
-                        <p class="text-slate-50 font-medium">@Model.DateOfBirth.ToString("MMMM dd, yyyy")</p>
-                    </div>
-
+        <section class="fs-section fs-two-column">
+            <div>
+                <div class="fs-section-heading">
                     <div>
-                        <p class="text-slate-400 text-sm mb-1">Club</p>
-                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">@Model.ClubName</a>
+                        <span class="fs-section-kicker">Player Information</span>
+                        <h2>Identity and context</h2>
                     </div>
+                </div>
+
+                <div class="fs-detail-panel-grid">
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Position</span>
+                        <strong>@Model.Position</strong>
+                    </article>
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Nationality</span>
+                        <strong>@Model.Nationality</strong>
+                    </article>
+                    <article class="fs-detail-info-card">
+                        <span class="fs-match-kickoff">Born</span>
+                        <strong>@Model.DateOfBirth.ToString("MMMM dd, yyyy")</strong>
+                    </article>
                 </div>
             </div>
 
-            <!-- Related Information Card -->
-            <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-slate-50 mb-6">Quick Stats</h2>
-
-                <div class="space-y-4">
-                    <div class="pb-4 border-b border-slate-700">
-                        <p class="text-slate-400 text-sm mb-1">Age</p>
-                        <p class="text-slate-50 font-medium">@((DateTime.Now.Year - Model.DateOfBirth.Year)) years old</p>
-                    </div>
-
+            <div>
+                <div class="fs-section-heading">
                     <div>
-                        <p class="text-slate-400 text-sm mb-2">Current Club</p>
-                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="text-slate-300 text-sm hover:text-emerald-300 transition-colors">@Model.ClubName</a>
+                        <span class="fs-section-kicker">Related Entity</span>
+                        <h2>Club-first navigation</h2>
+                    </div>
+                </div>
+
+                <div class="fs-player-card fs-player-card--entity">
+                    <div class="fs-player-card-top">
+                        <div>
+                            <h3>@Model.ClubName</h3>
+                            <p>Current club context</p>
+                        </div>
+                        <span class="fs-rating-pill">@age</span>
+                    </div>
+                    <div class="fs-player-meta fs-player-meta--stacked">
+                        <span>Age: @age</span>
+                        <span>Role: @Model.Position</span>
+                    </div>
+                    <div class="fs-entity-links">
+                        <a asp-controller="Club" asp-action="Details" asp-route-id="@Model.ClubId" class="fs-card-link">Open club</a>
+                        <a asp-controller="Player" asp-action="Index" class="fs-card-link">More players</a>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Action Buttons -->
-        <div class="mt-8">
-            <a asp-controller="Player" asp-action="Index" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md transition-colors font-medium inline-block">← Back to Players</a>
+        <div>
+            <a asp-controller="Player" asp-action="Index" class="fs-card-link">Back to all players</a>
         </div>
     </div>
-</div>
+</section>
