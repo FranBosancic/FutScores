@@ -18,9 +18,18 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/ratings", Name = "ratings-index")]
         [HttpGet("~/ratings/list")]
-        public IActionResult Index()
+        public IActionResult Index(string? q)
         {
-            return View(_ratingRepository.GetAll());
+            ViewData["FilterQuery"] = q;
+            return View(_ratingRepository.GetAll(q));
+        }
+
+        [HttpGet("filter")]
+        [HttpGet("~/ratings/filter", Name = "ratings-filter")]
+        public IActionResult Filter(string? q)
+        {
+            ViewData["FilterQuery"] = q;
+            return PartialView("_RatingList", _ratingRepository.GetAll(q));
         }
 
         [HttpGet("{id:int}")]
@@ -44,6 +53,13 @@ namespace ProbaMala.Controllers
         public IActionResult Create()
         {
             return View(_ratingRepository.BuildFormModel());
+        }
+
+        [HttpGet("igraci/pretraga")]
+        [HttpGet("~/ratings/players/search", Name = "rating-player-search")]
+        public IActionResult SearchPlayers(string? q)
+        {
+            return Json(_ratingRepository.SearchPlayers(q));
         }
 
         [HttpPost("novo")]

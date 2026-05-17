@@ -2,52 +2,28 @@
 
 @{
     ViewData["Title"] = "Ratings - Match Center";
+    var filterQuery = ViewData["FilterQuery"]?.ToString() ?? string.Empty;
 }
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Ratings</span>
-                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Player sentiment layered onto match context</h2>
-            </div>
-            <div class="flex flex-col items-start gap-3 sm:items-end">
-                <span class="text-sm text-slate-400">@Model.Count rating@(Model.Count != 1 ? "s" : string.Empty) tracked</span>
-                <a asp-route="rating-create" class="inline-flex items-center rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Add rating</a>
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-xl">
+                <label for="ratings-filter" class="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Live Search</label>
+                <input id="ratings-filter"
+                       type="search"
+                       value="@filterQuery"
+                       placeholder="Filter by player, user, club, score, or comment"
+                       class="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
+                       data-live-filter-input
+                       data-filter-url="@Url.RouteUrl("ratings-filter")"
+                       data-filter-target="ratings-filter-results" />
+                <p class="mt-2 text-sm text-slate-500">Results update automatically while you type.</p>
             </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            @foreach (var rating in Model)
-            {
-                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h3 class="text-xl font-semibold text-white">@rating.PlayerName</h3>
-                            <p class="mt-1 text-sm text-slate-400">@rating.MatchDescription</p>
-                        </div>
-                        <span class="inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full bg-amber-400/15 px-3 font-['Oswald'] text-xl text-amber-200">@rating.Score</span>
-                    </div>
-
-                    <div class="mt-4 grid gap-2 text-sm text-slate-300">
-                        <span>Rated by: @rating.UserName</span>
-                        @if (!string.IsNullOrWhiteSpace(rating.Comment))
-                        {
-                            <span>"@rating.Comment"</span>
-                        }
-                        else
-                        {
-                            <span>No written comment provided</span>
-                        }
-                    </div>
-
-                    <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-                        <a asp-route="rating-details" asp-route-id="@rating.Id" class="text-lime-300 transition hover:text-lime-200">Open rating</a>
-                        <a asp-route="rating-edit" asp-route-id="@rating.Id" class="text-lime-300 transition hover:text-lime-200">Edit</a>
-                        <a asp-route="rating-delete" asp-route-id="@rating.Id" class="text-rose-300 transition hover:text-rose-200">Delete</a>
-                    </div>
-                </article>
-            }
+        <div id="ratings-filter-results" data-live-filter-results>
+            <partial name="_RatingList" model="Model" />
         </div>
     </section>
 </section>

@@ -7,9 +7,19 @@
 <div class="grid gap-6 lg:grid-cols-2">
     <div>
         <label asp-for="PlayerId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <select asp-for="PlayerId" asp-items="Model.PlayerOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
-            <option value="">Select a player</option>
-        </select>
+        <partial name="_AutocompleteField" model='new AutocompleteFieldViewModel
+        {
+            Label = "Player",
+            HiddenInputName = nameof(Model.PlayerId),
+            HiddenInputId = Html.IdFor(model => model.PlayerId).ToString(),
+            HiddenValue = Model.PlayerId,
+            VisibleInputName = nameof(Model.PlayerLabel),
+            VisibleInputId = Html.IdFor(model => model.PlayerLabel).ToString(),
+            VisibleValue = Model.PlayerLabel,
+            SearchUrl = Url.RouteUrl("rating-player-search") ?? string.Empty,
+            Placeholder = "Search players by first or last name",
+            EmptyStateText = "No players found."
+        }' />
         <span asp-validation-for="PlayerId" class="mt-2 block text-sm text-rose-300"></span>
     </div>
 

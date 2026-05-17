@@ -1,31 +1,29 @@
-@model List<User>
+@model List<UserDetailsViewModel>
 
 @{
     ViewData["Title"] = "Users - Match Center";
+    var filterQuery = ViewData["FilterQuery"]?.ToString() ?? string.Empty;
 }
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Users</span>
-                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">People behind the ratings and sentiment</h2>
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-xl">
+                <label for="users-filter" class="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Live Search</label>
+                <input id="users-filter"
+                       type="search"
+                       value="@filterQuery"
+                       placeholder="Filter by first name, last name, or email"
+                       class="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
+                       data-live-filter-input
+                       data-filter-url="@Url.RouteUrl("users-filter")"
+                       data-filter-target="users-filter-results" />
+                <p class="mt-2 text-sm text-slate-500">Results update automatically while you type.</p>
             </div>
-            <span class="text-sm text-slate-400">@Model.Count user@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            @foreach (var user in Model)
-            {
-                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                    <div>
-                        <h3 class="text-xl font-semibold text-white">@user.FirstName @user.LastName</h3>
-                        <p class="mt-1 break-all text-sm text-slate-400">@user.Email</p>
-                    </div>
-                    <div class="mt-4 text-sm text-slate-300">User ID: #@user.Id</div>
-                    <a asp-route="user-details" asp-route-id="@user.Id" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open user</a>
-                </article>
-            }
+        <div id="users-filter-results" data-live-filter-results>
+            <partial name="_UserList" model="Model" />
         </div>
     </section>
 </section>

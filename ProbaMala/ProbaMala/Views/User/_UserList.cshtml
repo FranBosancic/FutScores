@@ -1,0 +1,42 @@
+@model List<UserDetailsViewModel>
+
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Users</span>
+        <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">People behind the ratings and sentiment</h2>
+    </div>
+    <div class="flex flex-col items-start gap-3 sm:items-end">
+        <span class="text-sm text-slate-400">@Model.Count user@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
+        <a asp-route="user-create" class="inline-flex items-center rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Add user</a>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="mt-6 rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 px-5 py-8 text-center text-slate-300">
+        No users match the current search.
+    </div>
+}
+else
+{
+    <div class="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        @foreach (var user in Model)
+        {
+            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">@user.FirstName @user.LastName</h3>
+                    <p class="mt-1 break-all text-sm text-slate-400">@user.Email</p>
+                </div>
+                <div class="mt-4 grid gap-1 text-sm text-slate-300">
+                    <span>User ID: #@user.Id</span>
+                    <span>Ratings authored: @user.RatingCount</span>
+                </div>
+                <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+                    <a asp-route="user-details" asp-route-id="@user.Id" class="text-lime-300 transition hover:text-lime-200">Open user</a>
+                    <a asp-route="user-edit" asp-route-id="@user.Id" class="text-lime-300 transition hover:text-lime-200">Edit</a>
+                    <a asp-route="user-delete" asp-route-id="@user.Id" class="text-rose-300 transition hover:text-rose-200">Delete</a>
+                </div>
+            </article>
+        }
+    </div>
+}

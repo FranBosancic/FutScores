@@ -1,42 +1,29 @@
-@model List<League>
+@model List<LeagueDetailsViewModel>
 
 @{
     ViewData["Title"] = "Leagues - Match Center";
+    var filterQuery = ViewData["FilterQuery"]?.ToString() ?? string.Empty;
 }
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Leagues</span>
-                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Competition hubs for club and match browsing</h2>
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-xl">
+                <label for="leagues-filter" class="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Live Search</label>
+                <input id="leagues-filter"
+                       type="search"
+                       value="@filterQuery"
+                       placeholder="Filter leagues by name"
+                       class="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
+                       data-live-filter-input
+                       data-filter-url="@Url.RouteUrl("leagues-filter")"
+                       data-filter-target="league-filter-results" />
+                <p class="mt-2 text-sm text-slate-500">Results update automatically while you type.</p>
             </div>
-            <span class="text-sm text-slate-400">@Model.Count league@(Model.Count != 1 ? "s" : string.Empty) available</span>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            @foreach (var league in Model)
-            {
-                <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h3 class="text-xl font-semibold text-white">@league.Name</h3>
-                            <p class="mt-1 text-sm text-slate-400">Competition overview</p>
-                        </div>
-                        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">League</span>
-                    </div>
-
-                    <div class="mt-4 grid gap-2 text-sm text-slate-300">
-                        <span>Competition ID: #@league.Id</span>
-                        <span>Use this page as the hub for clubs and matches</span>
-                    </div>
-
-                    <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-                        <a asp-route="matches-index" class="text-lime-300 transition hover:text-lime-200">Open matches</a>
-                        <a asp-route="league-details" asp-route-id="@league.Id" class="text-lime-300 transition hover:text-lime-200">Open league</a>
-                    </div>
-                </article>
-            }
+        <div id="league-filter-results" data-live-filter-results>
+            <partial name="_LeagueList" model="Model" />
         </div>
     </section>
 </section>

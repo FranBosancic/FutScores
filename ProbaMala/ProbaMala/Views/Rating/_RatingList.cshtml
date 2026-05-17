@@ -1,0 +1,54 @@
+@model List<RatingDetailsViewModel>
+
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Ratings</span>
+        <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Player sentiment layered onto match context</h2>
+    </div>
+    <div class="flex flex-col items-start gap-3 sm:items-end">
+        <span class="text-sm text-slate-400">@Model.Count rating@(Model.Count != 1 ? "s" : string.Empty) tracked</span>
+        <a asp-route="rating-create" class="inline-flex items-center rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Add rating</a>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="mt-6 rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 px-5 py-8 text-center text-slate-300">
+        No ratings match the current search.
+    </div>
+}
+else
+{
+    <div class="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        @foreach (var rating in Model)
+        {
+            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">@rating.PlayerName</h3>
+                        <p class="mt-1 text-sm text-slate-400">@rating.MatchDescription</p>
+                    </div>
+                    <span class="inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full bg-amber-400/15 px-3 font-['Oswald'] text-xl text-amber-200">@rating.Score</span>
+                </div>
+
+                <div class="mt-4 grid gap-2 text-sm text-slate-300">
+                    <span>Rated by: @rating.UserName</span>
+                    @if (!string.IsNullOrWhiteSpace(rating.Comment))
+                    {
+                        <span>"@rating.Comment"</span>
+                    }
+                    else
+                    {
+                        <span>No written comment provided</span>
+                    }
+                </div>
+
+                <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+                    <a asp-route="rating-details" asp-route-id="@rating.Id" class="text-lime-300 transition hover:text-lime-200">Open rating</a>
+                    <a asp-route="rating-edit" asp-route-id="@rating.Id" class="text-lime-300 transition hover:text-lime-200">Edit</a>
+                    <a asp-route="rating-delete" asp-route-id="@rating.Id" class="text-rose-300 transition hover:text-rose-200">Delete</a>
+                </div>
+            </article>
+        }
+    </div>
+}

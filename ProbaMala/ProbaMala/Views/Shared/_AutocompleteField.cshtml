@@ -1,0 +1,15 @@
+@model AutocompleteFieldViewModel
+
+<div class="relative" data-autocomplete-root data-search-url="@Model.SearchUrl" data-empty-state="@Model.EmptyStateText">
+    <input type="hidden" name="@Model.HiddenInputName" id="@Model.HiddenInputId" value="@Model.HiddenValue" data-autocomplete-hidden />
+    <input type="text"
+           name="@Model.VisibleInputName"
+           id="@Model.VisibleInputId"
+           value="@Model.VisibleValue"
+           placeholder="@Model.Placeholder"
+           autocomplete="off"
+           spellcheck="false"
+           class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
+           data-autocomplete-input />
+    <div class="mt-2 hidden overflow-hidden rounded-[1.25rem] border border-white/10 bg-slate-950/95 shadow-[0_18px_40px_rgba(0,0,0,0.35)]" data-autocomplete-results></div>
+</div>

@@ -31,7 +31,6 @@ namespace ProbaMala.Models.ViewModels
         public string? MatchLabel { get; set; }
         public string? UserLabel { get; set; }
 
-        public IEnumerable<SelectListItem> PlayerOptions { get; set; } = [];
         public IEnumerable<SelectListItem> MatchOptions { get; set; } = [];
         public IEnumerable<SelectListItem> UserOptions { get; set; } = [];
     }

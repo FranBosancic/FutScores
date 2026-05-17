@@ -8,11 +8,12 @@ namespace ProbaMala.Repositories
 {
     public interface IRatingRepository
     {
-        List<RatingDetailsViewModel> GetAll();
+        List<RatingDetailsViewModel> GetAll(string? query = null);
         RatingDetailsViewModel? GetById(int id);
         RatingFormViewModel BuildFormModel();
         RatingFormViewModel? GetFormById(int id);
         void PopulateFormOptions(RatingFormViewModel model);
+        List<AutocompleteOptionViewModel> SearchPlayers(string? query, int limit = 10);
         bool PlayerExists(int playerId);
         bool MatchExists(int matchId);
         bool UserExists(int userId);
@@ -31,9 +32,9 @@ namespace ProbaMala.Repositories
             _dbContext = dbContext;
         }
 
-        public List<RatingDetailsViewModel> GetAll()
+        public List<RatingDetailsViewModel> GetAll(string? query = null)
         {
-            return _dbContext.Ratings
+            var ratingsQuery = _dbContext.Ratings
                 .AsNoTracking()
                 .Include(rating => rating.Player)
                 .Include(rating => rating.User)
@@ -41,6 +42,25 @@ namespace ProbaMala.Repositories
                     .ThenInclude(match => match.HomeTeam)
                 .Include(rating => rating.Match)
                     .ThenInclude(match => match.AwayTeam)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var normalizedQuery = query.Trim().ToLower();
+                var parsedScore = int.TryParse(normalizedQuery, out var score);
+
+                ratingsQuery = ratingsQuery.Where(rating =>
+                    rating.Player.FirstName.ToLower().Contains(normalizedQuery) ||
+                    rating.Player.LastName.ToLower().Contains(normalizedQuery) ||
+                    rating.User.FirstName.ToLower().Contains(normalizedQuery) ||
+                    rating.User.LastName.ToLower().Contains(normalizedQuery) ||
+                    rating.Match.HomeTeam.Name.ToLower().Contains(normalizedQuery) ||
+                    rating.Match.AwayTeam.Name.ToLower().Contains(normalizedQuery) ||
+                    (rating.Comment != null && rating.Comment.ToLower().Contains(normalizedQuery)) ||
+                    (parsedScore && rating.Score == score));
+            }
+
+            return ratingsQuery
                 .OrderByDescending(rating => rating.Score)
                 .AsEnumerable()
                 .Select(rating => new RatingDetailsViewModel
@@ -128,18 +148,6 @@ namespace ProbaMala.Repositories
 
         public void PopulateFormOptions(RatingFormViewModel model)
         {
-            model.PlayerOptions = _dbContext.Players
-                .AsNoTracking()
-                .OrderBy(player => player.LastName)
-                .ThenBy(player => player.FirstName)
-                .Select(player => new SelectListItem
-                {
-                    Value = player.Id.ToString(),
-                    Text = player.FirstName + " " + player.LastName,
-                    Selected = model.PlayerId == player.Id
-                })
-                .ToList();
-
             model.MatchOptions = _dbContext.Matches
                 .AsNoTracking()
                 .Include(match => match.HomeTeam)
@@ -163,6 +171,33 @@ namespace ProbaMala.Repositories
                     Value = user.Id.ToString(),
                     Text = user.FirstName + " " + user.LastName,
                     Selected = model.UserId == user.Id
+                })
+                .ToList();
+        }
+
+        public List<AutocompleteOptionViewModel> SearchPlayers(string? query, int limit = 10)
+        {
+            var normalizedQuery = query?.Trim();
+
+            var playersQuery = _dbContext.Players
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(normalizedQuery))
+            {
+                var loweredQuery = normalizedQuery.ToLower();
+                playersQuery = playersQuery.Where(player =>
+                    (player.FirstName + " " + player.LastName).ToLower().Contains(loweredQuery) ||
+                    (player.LastName + " " + player.FirstName).ToLower().Contains(loweredQuery));
+            }
+
+            return playersQuery
+                .OrderBy(player => player.LastName)
+                .ThenBy(player => player.FirstName)
+                .Take(limit)
+                .Select(player => new AutocompleteOptionViewModel
+                {
+                    Id = player.Id,
+                    Label = player.FirstName + " " + player.LastName
                 })
                 .ToList();
         }
