@@ -8,6 +8,17 @@
 		};
 	};
 
+	const getPreferredLocale = () => {
+		const languages = Array.isArray(window.navigator.languages) && window.navigator.languages.length > 0
+			? window.navigator.languages
+			: [window.navigator.language || "en-US"];
+
+		return languages.find((language) => typeof language === "string" && language.length > 0) || "en-US";
+	};
+
+	const preferredLocale = getPreferredLocale();
+	const isCroatianLocale = preferredLocale.toLowerCase().startsWith("hr");
+
 	const mobileToggle = document.getElementById("mobile-menu-btn");
 	const mobileMenu = document.getElementById("mobile-menu");
 
@@ -204,4 +215,43 @@
 			loadFilteredResults();
 		});
 	});
+
+	if (window.jQuery?.validator) {
+		window.jQuery.validator.setDefaults({
+			ignore: []
+		});
+	}
+
+	if (window.flatpickr) {
+		document.querySelectorAll("[data-date-time-picker]").forEach((inputElement) => {
+			if (!(inputElement instanceof HTMLInputElement)) {
+				return;
+			}
+
+			const enableTime = inputElement.getAttribute("data-enable-time") !== "false";
+			const minuteIncrement = Number.parseInt(inputElement.getAttribute("data-minute-increment") || "5", 10);
+
+			window.flatpickr(inputElement, {
+				allowInput: true,
+				altInput: true,
+				altInputClass: "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10",
+				altFormat: enableTime
+					? (isCroatianLocale ? "d.m.Y. H:i" : "m/d/Y h:i K")
+					: (isCroatianLocale ? "d.m.Y." : "m/d/Y"),
+				dateFormat: enableTime ? "Y-m-d\\TH:i:S" : "Y-m-d",
+				enableTime,
+				time_24hr: isCroatianLocale,
+				locale: isCroatianLocale && window.flatpickr.l10ns.hr ? window.flatpickr.l10ns.hr : "default",
+				minuteIncrement: Number.isNaN(minuteIncrement) ? 5 : minuteIncrement,
+				onReady: (_, __, instance) => {
+					instance.altInput?.setAttribute("placeholder", inputElement.getAttribute("placeholder") || "Select date and time");
+				},
+				onClose: (_, __, instance) => {
+					if (window.jQuery) {
+						window.jQuery(instance.input).valid();
+					}
+				}
+			});
+		});
+	}
 });

@@ -1,0 +1,11 @@
+@model DateTimePickerViewModel
+
+<input name="@Model.InputName"
+       id="@Model.InputId"
+       value="@(Model.Value?.ToString("yyyy-MM-ddTHH:mm:ss") ?? string.Empty)"
+       placeholder="@Model.Placeholder"
+       class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
+       data-date-time-picker
+       data-enable-time="@Model.EnableTime.ToString().ToLowerInvariant()"
+       data-minute-increment="@Model.MinuteIncrement"
+       type="text" />

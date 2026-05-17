@@ -21,7 +21,16 @@
 
     <div>
         <label asp-for="FoundedDate" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <input asp-for="FoundedDate" type="date" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" />
+        <partial name="_DateTimePicker" model='new DateTimePickerViewModel
+        {
+            InputName = nameof(Model.FoundedDate),
+            InputId = Html.IdFor(model => model.FoundedDate).ToString(),
+            Value = Model.FoundedDate,
+            Placeholder = "Choose founded date",
+            EnableTime = false,
+            MinuteIncrement = 5
+        }' />
+        <p class="mt-2 text-xs text-slate-500">This custom control adapts its date format to the browser language.</p>
         <span asp-validation-for="FoundedDate" class="mt-2 block text-sm text-rose-300"></span>
     </div>
 </div>
