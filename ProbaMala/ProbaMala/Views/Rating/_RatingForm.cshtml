@@ -1,0 +1,43 @@
+@model RatingFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="mb-5 rounded-[1.25rem] border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"></div>
+
+<input asp-for="Id" type="hidden" />
+
+<div class="grid gap-6 lg:grid-cols-2">
+    <div>
+        <label asp-for="PlayerId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="PlayerId" asp-items="Model.PlayerOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a player</option>
+        </select>
+        <span asp-validation-for="PlayerId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="MatchId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="MatchId" asp-items="Model.MatchOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a match</option>
+        </select>
+        <span asp-validation-for="MatchId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="UserId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="UserId" asp-items="Model.UserOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a user</option>
+        </select>
+        <span asp-validation-for="UserId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="Score" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="Score" type="number" min="1" max="10" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="Score" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div class="lg:col-span-2">
+        <label asp-for="Comment" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <textarea asp-for="Comment" rows="5" class="w-full rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" placeholder="Optional context for the score"></textarea>
+        <span asp-validation-for="Comment" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+</div>

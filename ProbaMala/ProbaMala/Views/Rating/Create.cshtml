@@ -1,0 +1,35 @@
+@model RatingFormViewModel
+
+@{
+    ViewData["Title"] = "Create Rating - Match Center";
+}
+
+<section class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <nav class="text-sm text-slate-400">
+        <a asp-route="ratings-index" class="font-medium text-lime-300 transition hover:text-lime-200">Ratings</a>
+        <span class="px-2 text-slate-600">/</span>
+        <span>Create</span>
+    </nav>
+
+    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-6">
+            <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Ratings</span>
+            <h1 class="mt-2 font-['Oswald'] text-4xl leading-none text-white">Create a new rating</h1>
+            <p class="mt-3 text-sm text-slate-400">Start with the simple write flow first. Autocomplete can replace the selects later without changing the controller contract.</p>
+        </div>
+
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+            <partial name="_RatingForm" model="Model" />
+
+            <div class="flex flex-wrap gap-4">
+                <button type="submit" class="inline-flex items-center rounded-full bg-lime-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Save rating</button>
+                <a asp-route="ratings-index" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10">Cancel</a>
+            </div>
+        </form>
+    </section>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

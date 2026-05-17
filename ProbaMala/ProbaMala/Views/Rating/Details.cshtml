@@ -99,7 +99,9 @@
         </div>
     </section>
 
-    <div>
+    <div class="flex flex-wrap items-center gap-4">
         <a asp-route="ratings-index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Back to all ratings</a>
+        <a asp-route="rating-edit" asp-route-id="@Model.Id" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Edit rating</a>
+        <a asp-route="rating-delete" asp-route-id="@Model.Id" class="text-sm font-medium text-rose-300 transition hover:text-rose-200">Delete rating</a>
     </div>
 </section>
