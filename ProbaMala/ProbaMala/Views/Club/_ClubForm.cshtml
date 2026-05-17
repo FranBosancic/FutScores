@@ -1,0 +1,27 @@
+@model ClubFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="mb-5 rounded-[1.25rem] border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"></div>
+
+<input asp-for="Id" type="hidden" />
+
+<div class="grid gap-6 lg:grid-cols-2">
+    <div class="lg:col-span-2">
+        <label asp-for="Name" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="Name" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="Name" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="LeagueId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="LeagueId" asp-items="Model.LeagueOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a league</option>
+        </select>
+        <span asp-validation-for="LeagueId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="FoundedDate" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="FoundedDate" type="date" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="FoundedDate" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+</div>

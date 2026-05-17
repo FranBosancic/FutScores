@@ -1,0 +1,59 @@
+@model ClubDetailsViewModel
+
+@{
+    ViewData["Title"] = "Delete Club - Match Center";
+}
+
+<section class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+    <nav class="text-sm text-slate-400">
+        <a asp-route="clubs-index" class="font-medium text-lime-300 transition hover:text-lime-200">Clubs</a>
+        <span class="px-2 text-slate-600">/</span>
+        <a asp-route="club-details" asp-route-id="@Model.Id" class="font-medium text-lime-300 transition hover:text-lime-200">Club #@Model.Id</a>
+        <span class="px-2 text-slate-600">/</span>
+        <span>Delete</span>
+    </nav>
+
+    <section class="rounded-[1.75rem] border border-rose-400/20 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
+        <div class="mb-6">
+            <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-rose-300">Danger Zone</span>
+            <h1 class="mt-2 font-['Oswald'] text-4xl leading-none text-white">Delete @Model.Name</h1>
+            <p class="mt-3 text-sm text-slate-400">This removes the club from the database only when no dependent players or matches still reference it.</p>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="mb-5 rounded-[1.25rem] border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"></div>
+
+        <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-slate-200">
+            <div class="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                    <div class="text-xs uppercase tracking-[0.18em] text-slate-500">Club</div>
+                    <div class="mt-1">@Model.Name</div>
+                </div>
+                <div>
+                    <div class="text-xs uppercase tracking-[0.18em] text-slate-500">League</div>
+                    <div class="mt-1">@Model.LeagueName</div>
+                </div>
+                <div>
+                    <div class="text-xs uppercase tracking-[0.18em] text-slate-500">Players</div>
+                    <div class="mt-1">@Model.PlayerCount</div>
+                </div>
+                <div>
+                    <div class="text-xs uppercase tracking-[0.18em] text-slate-500">Matches</div>
+                    <div class="mt-1">@Model.MatchCount</div>
+                </div>
+            </div>
+
+            @if (!Model.CanDelete)
+            {
+                <div class="mt-4 rounded-[1.25rem] border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                    Delete is blocked because this club still has related players or scheduled matches. Remove or reassign those records first.
+                </div>
+            }
+        </article>
+
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="mt-6 flex flex-wrap gap-4">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="inline-flex items-center rounded-full bg-rose-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-rose-300" @(Model.CanDelete ? null : "disabled")>Delete club</button>
+            <a asp-route="club-details" asp-route-id="@Model.Id" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10">Cancel</a>
+        </form>
+    </section>
+</section>
