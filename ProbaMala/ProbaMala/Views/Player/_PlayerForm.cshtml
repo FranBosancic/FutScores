@@ -1,0 +1,55 @@
+@model PlayerFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="mb-5 rounded-[1.25rem] border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"></div>
+
+<input asp-for="Id" type="hidden" />
+
+<div class="grid gap-6 lg:grid-cols-2">
+    <div>
+        <label asp-for="FirstName" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="FirstName" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="FirstName" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="LastName" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="LastName" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="LastName" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="ClubId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="ClubId" asp-items="Model.ClubOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a club</option>
+        </select>
+        <span asp-validation-for="ClubId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="Position" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="Position" asp-items="Model.PositionOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a position</option>
+        </select>
+        <span asp-validation-for="Position" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="DateOfBirth" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <partial name="_DateTimePicker" model='new DateTimePickerViewModel
+        {
+            InputName = nameof(Model.DateOfBirth),
+            InputId = Html.IdFor(model => model.DateOfBirth).ToString(),
+            Value = Model.DateOfBirth,
+            Placeholder = "Choose date of birth",
+            EnableTime = false,
+            MinuteIncrement = 5
+        }' />
+        <span asp-validation-for="DateOfBirth" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="Nationality" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="Nationality" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="Nationality" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+</div>

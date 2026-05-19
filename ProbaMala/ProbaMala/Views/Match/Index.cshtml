@@ -2,54 +2,28 @@
 
 @{
     ViewData["Title"] = "Matches - Match Center";
+    var filterQuery = ViewData["FilterQuery"]?.ToString() ?? string.Empty;
 }
 
 <section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
     <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Match Center</span>
-                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Every result in one score-first stream</h2>
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-xl">
+                <label for="matches-filter" class="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Live Search</label>
+                <input id="matches-filter"
+                       type="search"
+                       value="@filterQuery"
+                       placeholder="Filter by league, teams, or goal count"
+                       class="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
+                       data-live-filter-input
+                       data-filter-url="@Url.RouteUrl("matches-filter")"
+                       data-filter-target="matches-filter-results" />
+                <p class="mt-2 text-sm text-slate-500">Results update automatically while you type.</p>
             </div>
-            <span class="text-sm text-slate-400">@Model.Count match@(Model.Count != 1 ? "es" : string.Empty) on the board</span>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            @foreach (var match in Model)
-            {
-                var badgeClass = match.StatusTone switch
-                {
-                    "live" => "border-red-400/20 bg-red-500/10 text-red-200",
-                    "recent" => "border-sky-400/20 bg-sky-500/10 text-sky-200",
-                    _ => "border-white/10 bg-white/5 text-slate-200"
-                };
-
-                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.2)]">
-                    <header class="flex items-start justify-between gap-4">
-                        <div class="space-y-1">
-                            <div class="font-['Oswald'] text-xs uppercase tracking-[0.22em] text-slate-500">@match.LeagueName</div>
-                            <div class="text-sm text-slate-400">@match.KickoffLabel</div>
-                        </div>
-                        <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @badgeClass">@match.StatusLabel</span>
-                    </header>
-
-                    <div class="mt-6 space-y-3">
-                        <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-950/40 px-4 py-3 text-white">
-                            <span class="text-base font-semibold">@match.HomeTeamName</span>
-                            <span class="font-['Oswald'] text-3xl leading-none">@match.HomeGoals</span>
-                        </div>
-                        <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-950/20 px-4 py-3 text-white">
-                            <span class="text-base font-semibold text-slate-300">@match.AwayTeamName</span>
-                            <span class="font-['Oswald'] text-3xl leading-none text-slate-100">@match.AwayGoals</span>
-                        </div>
-                    </div>
-
-                    <footer class="mt-5 flex items-center justify-between gap-4">
-                        <span class="font-['Oswald'] text-2xl text-white">@match.Score</span>
-                        <a asp-route="match-details" asp-route-id="@match.Id" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Open match</a>
-                    </footer>
-                </article>
-            }
+        <div id="matches-filter-results" data-live-filter-results>
+            <partial name="_MatchList" model="Model" />
         </div>
     </section>
 </section>

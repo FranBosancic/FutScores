@@ -1,0 +1,57 @@
+@model MatchFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="mb-5 rounded-[1.25rem] border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"></div>
+
+<input asp-for="Id" type="hidden" />
+
+<div class="grid gap-6 lg:grid-cols-2">
+    <div>
+        <label asp-for="LeagueId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="LeagueId" asp-items="Model.LeagueOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a league</option>
+        </select>
+        <span asp-validation-for="LeagueId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="Date" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <partial name="_DateTimePicker" model='new DateTimePickerViewModel
+        {
+            InputName = nameof(Model.Date),
+            InputId = Html.IdFor(model => model.Date).ToString(),
+            Value = Model.Date,
+            Placeholder = "Choose kickoff date and time",
+            EnableTime = true,
+            MinuteIncrement = 5
+        }' />
+        <span asp-validation-for="Date" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="HomeTeamId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="HomeTeamId" asp-items="Model.ClubOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select a home team</option>
+        </select>
+        <span asp-validation-for="HomeTeamId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="AwayTeamId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="AwayTeamId" asp-items="Model.ClubOptions" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10">
+            <option value="">Select an away team</option>
+        </select>
+        <span asp-validation-for="AwayTeamId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="HomeGoals" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="HomeGoals" type="number" min="0" max="99" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="HomeGoals" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
+        <label asp-for="AwayGoals" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <input asp-for="AwayGoals" type="number" min="0" max="99" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" />
+        <span asp-validation-for="AwayGoals" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+</div>

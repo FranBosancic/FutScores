@@ -12,5 +12,6 @@ namespace ProbaMala.Models.ViewModels
         public Position Position { get; set; }
         public string Nationality { get; set; } = null!;
         public string ClubName { get; set; } = null!;
+        public int RatingCount { get; set; }
     }
 }
