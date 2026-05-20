@@ -144,3 +144,5 @@ One user can create many ratings. Each rating belongs to exactly one user.
 - The model uses EF Core annotations such as `Key`, `Required`, `MaxLength`, `ForeignKey`, and `InverseProperty`.
 - `Position` is an enum in the domain model, not a separate entity table.
 - `Match` contains two separate references to `Club`, so home and away relationships are explicitly modeled.
+- In `AppDbContext`, `Match.HomeTeamId` and `Match.AwayTeamId` are configured with `DeleteBehavior.Restrict`, so a club cannot be deleted while related matches still reference it.
+- Date properties such as `Club.FoundedDate`, `Player.DateOfBirth`, and `Match.Date` are mapped as `timestamp without time zone` in the EF Core model configuration.

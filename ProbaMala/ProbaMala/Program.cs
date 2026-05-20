@@ -1,11 +1,26 @@
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Data;
 using ProbaMala.Repositories;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+var supportedCultures = new[]
+{
+    new CultureInfo("hr"),
+    new CultureInfo("en-US")
+};
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("hr");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
@@ -30,6 +45,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseRequestLocalization();
 
 app.UseRouting();
 

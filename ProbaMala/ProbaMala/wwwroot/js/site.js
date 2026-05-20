@@ -18,6 +18,42 @@
 
 	const preferredLocale = getPreferredLocale();
 	const isCroatianLocale = preferredLocale.toLowerCase().startsWith("hr");
+	const transitionDelay = 180;
+
+	const animateAutocompleteOpen = (resultsElement) => {
+		resultsElement.classList.add("autocomplete-panel");
+		resultsElement.classList.remove("hidden");
+		window.requestAnimationFrame(() => {
+			resultsElement.classList.add("is-open");
+		});
+	};
+
+	const animateAutocompleteClose = (resultsElement) => {
+		if (resultsElement.classList.contains("hidden")) {
+			return;
+		}
+
+		resultsElement.classList.remove("is-open");
+		window.setTimeout(() => {
+			if (!resultsElement.classList.contains("is-open")) {
+				resultsElement.classList.add("hidden");
+			}
+		}, transitionDelay);
+	};
+
+	const animateFilterRefresh = (resultsElement, html) => {
+		resultsElement.classList.add("live-filter-panel", "is-loading");
+
+		window.setTimeout(() => {
+			resultsElement.innerHTML = html;
+			resultsElement.classList.remove("is-loading");
+			resultsElement.classList.add("is-entering");
+
+			window.setTimeout(() => {
+				resultsElement.classList.remove("is-entering");
+			}, 220);
+		}, 90);
+	};
 
 	const mobileToggle = document.getElementById("mobile-menu-btn");
 	const mobileMenu = document.getElementById("mobile-menu");
@@ -69,14 +105,16 @@
 			return;
 		}
 
+		results.classList.add("autocomplete-panel");
+
 		const hideResults = () => {
 			results.innerHTML = "";
-			results.classList.add("hidden");
+			animateAutocompleteClose(results);
 		};
 
 		const showEmptyState = () => {
 			results.innerHTML = `<div class="px-4 py-3 text-sm text-slate-400">${emptyStateText}</div>`;
-			results.classList.remove("hidden");
+			animateAutocompleteOpen(results);
 		};
 
 		const selectOption = (option) => {
@@ -106,7 +144,7 @@
 				results.appendChild(button);
 			});
 
-			results.classList.remove("hidden");
+			animateAutocompleteOpen(results);
 		};
 
 		const loadResults = debounce(async () => {
@@ -183,6 +221,8 @@
 			return;
 		}
 
+		resultsElement.classList.add("live-filter-panel");
+
 		const loadFilteredResults = debounce(async () => {
 			const query = inputElement.value.trim();
 			const targetUrl = query
@@ -201,7 +241,7 @@
 				}
 
 				const html = await response.text();
-				resultsElement.innerHTML = html;
+				animateFilterRefresh(resultsElement, html);
 				const url = query
 					? `${window.location.pathname}?q=${encodeURIComponent(query)}`
 					: window.location.pathname;
@@ -254,4 +294,110 @@
 			});
 		});
 	}
+
+	const getRatingToneClass = (score) => {
+		if (score >= 9) {
+			return "border-emerald-400/20 bg-emerald-500/10 text-emerald-200";
+		}
+
+		if (score >= 7) {
+			return "border-lime-400/20 bg-lime-500/10 text-lime-200";
+		}
+
+		if (score >= 5) {
+			return "border-amber-400/20 bg-amber-500/10 text-amber-200";
+		}
+
+		return "border-rose-400/20 bg-rose-500/10 text-rose-200";
+	};
+
+	const getRatingLabel = (score) => {
+		if (score >= 9) {
+			return "Standout display";
+		}
+
+		if (score >= 7) {
+			return "Strong performance";
+		}
+
+		if (score >= 5) {
+			return "Mixed return";
+		}
+
+		return "Underwhelming night";
+	};
+
+	document.querySelectorAll("[data-rating-score-root]").forEach((root) => {
+		const rangeInput = root.querySelector("[data-rating-score-range]");
+		const numberInput = root.querySelector("[data-rating-score-input]");
+		const scoreChip = document.querySelector("[data-rating-score-chip]");
+		const scoreLabel = document.querySelector("[data-rating-score-label]");
+
+		if (!(rangeInput instanceof HTMLInputElement) || !(numberInput instanceof HTMLInputElement) || !(scoreChip instanceof HTMLElement) || !(scoreLabel instanceof HTMLElement)) {
+			return;
+		}
+
+		const toneClasses = [
+			"border-emerald-400/20", "bg-emerald-500/10", "text-emerald-200",
+			"border-lime-400/20", "bg-lime-500/10", "text-lime-200",
+			"border-amber-400/20", "bg-amber-500/10", "text-amber-200",
+			"border-rose-400/20", "bg-rose-500/10", "text-rose-200"
+		];
+
+		const syncScore = (rawValue) => {
+			const parsed = Number.parseInt(rawValue, 10);
+			const score = Number.isNaN(parsed) ? 1 : Math.min(10, Math.max(1, parsed));
+
+			rangeInput.value = String(score);
+			numberInput.value = String(score);
+			scoreChip.textContent = String(score);
+			scoreLabel.textContent = getRatingLabel(score);
+			scoreChip.classList.remove(...toneClasses);
+			scoreChip.classList.add(...getRatingToneClass(score).split(" "));
+		};
+
+		syncScore(numberInput.value || rangeInput.value);
+
+		rangeInput.addEventListener("input", () => {
+			syncScore(rangeInput.value);
+			if (window.jQuery) {
+				window.jQuery(numberInput).valid();
+			}
+		});
+
+		numberInput.addEventListener("input", () => {
+			syncScore(numberInput.value);
+		});
+
+		numberInput.addEventListener("blur", () => {
+			syncScore(numberInput.value);
+			if (window.jQuery) {
+				window.jQuery(numberInput).valid();
+			}
+		});
+	});
+
+	document.querySelectorAll("[data-rating-comment-input]").forEach((inputElement) => {
+		if (!(inputElement instanceof HTMLTextAreaElement)) {
+			return;
+		}
+
+		const counter = inputElement.closest("div")?.querySelector("[data-rating-comment-count]");
+
+		if (!(counter instanceof HTMLElement)) {
+			return;
+		}
+
+		const syncCount = () => {
+			counter.textContent = String(inputElement.value.length);
+		};
+
+		syncCount();
+		inputElement.addEventListener("input", syncCount);
+		inputElement.addEventListener("blur", () => {
+			if (window.jQuery) {
+				window.jQuery(inputElement).valid();
+			}
+		});
+	});
 });

@@ -17,7 +17,7 @@
         <div class="mb-6">
             <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Ratings</span>
             <h1 class="mt-2 font-['Oswald'] text-4xl leading-none text-white">Edit rating #@Model.Id</h1>
-            <p class="mt-3 text-sm text-slate-400">Current selection: @Model.PlayerLabel, @Model.MatchLabel, rated by @Model.UserLabel.</p>
+            <p class="mt-3 max-w-2xl text-sm text-slate-400">Refine the judgement for @Model.PlayerLabel in @Model.MatchLabel, originally submitted by @Model.UserLabel.</p>
         </div>
 
         <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="space-y-6">

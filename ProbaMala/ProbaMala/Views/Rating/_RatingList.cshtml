@@ -22,28 +22,45 @@ else
     <div class="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         @foreach (var rating in Model)
         {
-            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
+            var scoreToneClass = rating.Score switch
+            {
+                >= 9 => "border-emerald-400/20 bg-emerald-500/10 text-emerald-200",
+                >= 7 => "border-lime-400/20 bg-lime-500/10 text-lime-200",
+                >= 5 => "border-amber-400/20 bg-amber-500/10 text-amber-200",
+                _ => "border-rose-400/20 bg-rose-500/10 text-rose-200"
+            };
+
+            var summaryLabel = rating.Score switch
+            {
+                >= 9 => "Standout display",
+                >= 7 => "Strong performance",
+                >= 5 => "Mixed return",
+                _ => "Underwhelming night"
+            };
+
+            <article class="group flex h-full flex-col rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-5 transition duration-200 hover:-translate-y-1 hover:border-white/15 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04))]">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <h3 class="text-xl font-semibold text-white">@rating.PlayerName</h3>
                         <p class="mt-1 text-sm text-slate-400">@rating.MatchDescription</p>
+                        <span class="mt-3 inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @scoreToneClass">@summaryLabel</span>
                     </div>
-                    <span class="inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full bg-amber-400/15 px-3 font-['Oswald'] text-xl text-amber-200">@rating.Score</span>
+                    <span class="inline-flex h-14 min-w-[3.2rem] items-center justify-center rounded-full border px-4 font-['Oswald'] text-2xl @scoreToneClass">@rating.Score</span>
                 </div>
 
-                <div class="mt-4 grid gap-2 text-sm text-slate-300">
-                    <span>Rated by: @rating.UserName</span>
+                <div class="mt-5 grid gap-3 text-sm text-slate-300">
+                    <span class="text-slate-400">Rated by <strong class="font-semibold text-slate-100">@rating.UserName</strong></span>
                     @if (!string.IsNullOrWhiteSpace(rating.Comment))
                     {
-                        <span>"@rating.Comment"</span>
+                        <blockquote class="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 leading-6 text-slate-200">"@rating.Comment"</blockquote>
                     }
                     else
                     {
-                        <span>No written comment provided</span>
+                        <span class="rounded-2xl border border-dashed border-white/10 px-4 py-3 text-slate-500">No written comment provided</span>
                     }
                 </div>
 
-                <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
+                <div class="mt-6 flex flex-wrap gap-4 text-sm font-medium">
                     <a asp-route="rating-details" asp-route-id="@rating.Id" class="text-lime-300 transition hover:text-lime-200">Open rating</a>
                     <a asp-route="rating-edit" asp-route-id="@rating.Id" class="text-lime-300 transition hover:text-lime-200">Edit</a>
                     <a asp-route="rating-delete" asp-route-id="@rating.Id" class="text-rose-300 transition hover:text-rose-200">Delete</a>
