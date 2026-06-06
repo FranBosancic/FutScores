@@ -10,5 +10,9 @@ namespace ProbaMala.Models.ViewModels
         public int PlayerCount { get; set; }
         public int MatchCount { get; set; }
         public bool CanDelete { get; set; }
+
+        // Only populated on the Details page (null on the Index list),
+        // mirroring how LeagueDetailsViewModel carries its child collections.
+        public List<PlayerDetailsViewModel>? Players { get; set; }
     }
 }

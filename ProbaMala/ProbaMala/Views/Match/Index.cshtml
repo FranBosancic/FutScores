@@ -1,29 +1,35 @@
-@model List<MatchDetailsViewModel>
-
+@model List<ProbaMala.Models.ViewModels.MatchDetailsViewModel>
 @{
-    ViewData["Title"] = "Matches - Match Center";
+    ViewData["Title"] = "Matches";
     var filterQuery = ViewData["FilterQuery"]?.ToString() ?? string.Empty;
+    var leagueId = ViewData["LeagueId"] as int?;
+    var filterUrl = leagueId.HasValue
+        ? Url.RouteUrl("matches-filter") + "?leagueId=" + leagueId.Value
+        : Url.RouteUrl("matches-filter");
 }
 
-<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
-    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-xl">
-                <label for="matches-filter" class="mb-2 block text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Live Search</label>
-                <input id="matches-filter"
-                       type="search"
-                       value="@filterQuery"
-                       placeholder="Filter by league, teams, or goal count"
-                       class="w-full rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10"
-                       data-live-filter-input
-                       data-filter-url="@Url.RouteUrl("matches-filter")"
-                       data-filter-target="matches-filter-results" />
-                <p class="mt-2 text-sm text-slate-500">Results update automatically while you type.</p>
-            </div>
+<div class="mx-auto w-full max-w-3xl px-4 sm:px-6">
+    <div class="mb-4 flex items-center gap-4">
+        <h1 class="shrink-0 text-lg font-semibold text-white">@(leagueId.HasValue ? "Matches" : "All Matches")</h1>
+        <div class="relative flex-1">
+            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                 fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+            </svg>
+            <input id="matches-filter"
+                   type="search"
+                   value="@filterQuery"
+                   placeholder="Search matches…"
+                   class="w-full rounded-lg border border-slate-800 bg-slate-900 py-2 pl-9 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-slate-700 focus:bg-slate-800"
+                   data-live-filter-input
+                   data-filter-url="@filterUrl"
+                   data-filter-target="matches-filter-results" />
         </div>
+    </div>
 
-        <div id="matches-filter-results" data-live-filter-results>
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+        <div id="matches-filter-results">
             <partial name="_MatchList" model="Model" />
         </div>
-    </section>
-</section>
+    </div>
+</div>

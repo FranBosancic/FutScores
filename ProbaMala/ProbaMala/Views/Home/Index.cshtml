@@ -1,210 +1,192 @@
-﻿@model ProbaMala.Models.ViewModels.HomeViewModel
+@using ProbaMala.Models.Entities
+@model ProbaMala.Models.ViewModels.HomeViewModel
 @{
-    ViewData["Title"] = "FutScores - Match Center";
+    ViewData["Title"] = "Dashboard";
 }
 
-<section class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
-    <section class="grid gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 shadow-[0_24px_80px_rgba(0,0,0,0.35)] lg:grid-cols-[1.35fr_0.95fr]">
-        <div class="flex flex-col justify-between gap-6 px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
-            <div class="space-y-4">
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.28em] text-lime-400">Dashboard</span>
-                <h1 class="max-w-3xl font-['Oswald'] text-4xl leading-none text-white sm:text-5xl lg:text-6xl">Football scores, club context, and player form in one board.</h1>
-                <p class="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                    Use the home page as the fast scan surface, then move into matches, clubs, players, leagues, and ratings.
-                    This version stays Tailwind-first so the styling decisions are visible directly in the page.
-                </p>
+<div class="mx-auto w-full max-w-3xl space-y-4 px-4 sm:px-6">
+
+    @* ── Stats bar: 4 chips in a panel ── *@
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+        <div class="grid grid-cols-4 divide-x divide-slate-800">
+
+            <div class="flex flex-col items-center gap-0.5 px-4 py-4">
+                <span class="text-xl font-bold tabular-nums text-slate-100">@Model.TotalClubs</span>
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-500">Clubs</span>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-3">
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Match flow</div>
-                    <div class="mt-2 text-sm font-medium text-slate-100">Score-first cards for fast scanning</div>
-                </div>
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Club context</div>
-                    <div class="mt-2 text-sm font-medium text-slate-100">Related pages stay one click away</div>
-                </div>
-                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Player heat</div>
-                    <div class="mt-2 text-sm font-medium text-slate-100">Top-rated players surface early</div>
-                </div>
+            <div class="flex flex-col items-center gap-0.5 px-4 py-4">
+                <span class="text-xl font-bold tabular-nums text-slate-100">@Model.TotalPlayers</span>
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-500">Players</span>
             </div>
-        </div>
 
-        <div class="border-t border-white/10 bg-white/[0.04] px-6 py-8 sm:px-8 lg:border-l lg:border-t-0 lg:px-8">
-            <div class="space-y-5">
-                <div>
-                    <h2 class="font-['Oswald'] text-3xl text-white">Jump into the board</h2>
-                    <p class="mt-2 text-sm leading-6 text-slate-400">Start from the surface you care about, then move through related entities.</p>
-                </div>
-
-                <form class="grid gap-3 sm:grid-cols-[120px_minmax(0,1fr)_auto]" data-search-form>
-                    <select class="h-12 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" data-search-scope>
-                        <option value="Match">Matches</option>
-                        <option value="Player">Players</option>
-                        <option value="Club">Clubs</option>
-                        <option value="League">Leagues</option>
-                    </select>
-                    <input class="h-12 min-w-0 rounded-full border border-white/10 bg-white/5 px-5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" type="search" placeholder="Search the board..." data-search-query />
-                    <button class="h-12 rounded-full bg-lime-400 px-5 text-sm font-semibold text-slate-950 transition hover:bg-lime-300" type="submit">Open</button>
-                </form>
-
-                <div class="grid gap-3 sm:grid-cols-2">
-                    @foreach (var shortcut in Model.SearchShortcuts)
-                    {
-                        <a asp-route="@shortcut.RouteName" class="group rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-4 transition hover:border-lime-400/40 hover:bg-white/10">
-                            <div class="text-sm font-semibold text-white">@shortcut.Label</div>
-                            <div class="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-lime-300">Browse now</div>
-                        </a>
-                    }
-                </div>
+            <div class="flex flex-col items-center gap-0.5 px-4 py-4">
+                <span class="text-xl font-bold tabular-nums text-slate-100">@Model.TotalMatches</span>
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-500">Matches</span>
             </div>
-        </div>
-    </section>
 
-    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-5">
-            <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Key Numbers</span>
-            <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Fast read on the board</h2>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <a asp-route="clubs-index" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Clubs</div>
-                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.TotalClubs</div>
-                <div class="mt-3 text-sm text-slate-400">Browse all clubs</div>
-            </a>
-            <a asp-route="players-index" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Players</div>
-                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.TotalPlayers</div>
-                <div class="mt-3 text-sm text-slate-400">Move into player pages</div>
-            </a>
-            <a asp-route="matches-index" class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Matches</div>
-                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.TotalMatches</div>
-                <div class="mt-3 text-sm text-slate-400">See the latest results</div>
-            </a>
-            <a asp-route="ratings-index" class="rounded-[1.5rem] border border-amber-400/20 bg-amber-400/10 p-5 transition hover:bg-amber-400/15">
-                <div class="text-xs uppercase tracking-[0.22em] text-amber-200/70">Avg Rating</div>
-                <div class="mt-4 font-['Oswald'] text-5xl leading-none text-white">@Model.AverageRating</div>
-                <div class="mt-3 text-sm text-amber-100/80">Track sentiment and form</div>
-            </a>
-        </div>
-    </section>
-
-    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Recent Results</span>
-                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Match center stream</h2>
+            <div class="flex flex-col items-center gap-0.5 px-4 py-4">
+                <span class="text-xl font-bold tabular-nums text-lime-400">@Model.AverageRating</span>
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-500">Avg Rating</span>
             </div>
-            <a asp-route="matches-index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">Open all matches</a>
+
+        </div>
+    </div>
+
+    @* ── Recent Matches panel ── *@
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+
+        <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+            <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Recent Matches</span>
+            <a asp-route="matches-index" class="text-xs font-semibold text-lime-400 transition hover:text-lime-300">View all</a>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        @* Column headers *@
+        <div class="grid grid-cols-[5rem_1fr_auto_1fr] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+            <span>Date</span>
+            <span class="text-right">Home</span>
+            <span class="px-3 text-center">Score</span>
+            <span>Away</span>
+        </div>
+
+        @if (!Model.RecentMatches.Any())
+        {
+            <div class="px-4 py-8 text-center text-sm text-slate-500">No recent matches.</div>
+        }
+        else
+        {
             @foreach (var match in Model.RecentMatches)
             {
-                var badgeClass = match.StatusTone switch
+                @* Status tone color *@
+                var statusColor = match.StatusTone switch
                 {
-                    "live" => "border-red-400/20 bg-red-500/10 text-red-200",
-                    "recent" => "border-sky-400/20 bg-sky-500/10 text-sky-200",
-                    _ => "border-white/10 bg-white/5 text-slate-200"
+                    "live"     => "text-lime-400",
+                    "finished" => "text-slate-500",
+                    _          => "text-slate-400"
                 };
 
-                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.2)]">
-                    <header class="flex items-start justify-between gap-4">
-                        <div class="space-y-1">
-                            <div class="font-['Oswald'] text-xs uppercase tracking-[0.22em] text-slate-500">@match.LeagueName</div>
-                            <div class="text-sm text-slate-400">@match.KickoffLabel</div>
-                        </div>
-                        <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @badgeClass">@match.StatusLabel</span>
-                    </header>
+                <div class="group grid grid-cols-[5rem_1fr_auto_1fr] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
 
-                    <div class="mt-6 space-y-3">
-                        <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-950/40 px-4 py-3 text-white">
-                            <span class="text-base font-semibold">@match.HomeTeamName</span>
-                            <span class="font-['Oswald'] text-3xl leading-none">@match.HomeGoals</span>
-                        </div>
-                        <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-950/20 px-4 py-3 text-white">
-                            <span class="text-base font-semibold text-slate-300">@match.AwayTeamName</span>
-                            <span class="font-['Oswald'] text-3xl leading-none text-slate-100">@match.AwayGoals</span>
-                        </div>
+                    @* Date + status *@
+                    <div class="flex flex-col">
+                        <span class="text-xs text-slate-500">@match.KickoffLabel</span>
+                        <span class="text-xs font-medium @statusColor">@match.StatusLabel</span>
                     </div>
 
-                    <footer class="mt-5 flex items-center justify-between gap-4">
-                        <span class="font-['Oswald'] text-2xl text-white">@match.HomeGoals - @match.AwayGoals</span>
-                        <a asp-route="match-details" asp-route-id="@match.MatchId" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">View match</a>
-                    </footer>
-                </article>
+                    @* Home team (right-aligned) *@
+                    <div class="flex items-center justify-end">
+                        <a asp-route="club-details" asp-route-id="@match.HomeTeamId"
+                           class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@match.HomeTeamName</a>
+                    </div>
+
+                    @* Score badge *@
+                    <div class="px-3">
+                        <a asp-route="match-details" asp-route-id="@match.MatchId"
+                           class="inline-flex min-w-[3.5rem] items-center justify-center rounded bg-slate-800 px-2 py-1 text-sm font-bold tabular-nums text-slate-100 transition hover:bg-slate-700">
+                            @match.HomeGoals – @match.AwayGoals
+                        </a>
+                    </div>
+
+                    @* Away team (left-aligned) *@
+                    <div class="flex items-center">
+                        <a asp-route="club-details" asp-route-id="@match.AwayTeamId"
+                           class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@match.AwayTeamName</a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @* ── Two side-by-side panels: Top Players + Club Form ── *@
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+
+        @* Top Players panel *@
+        <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+
+            <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Top Players</span>
+                <a asp-route="players-index" class="text-xs font-semibold text-lime-400 transition hover:text-lime-300">View all</a>
+            </div>
+
+            @if (!Model.FeaturedPlayers.Any())
+            {
+                <div class="px-4 py-8 text-center text-sm text-slate-500">No player data.</div>
+            }
+            else
+            {
+                @foreach (var fp in Model.FeaturedPlayers)
+                {
+                    @* Position badge color *@
+                    var posBadge = fp.Position switch
+                    {
+                        Position.Goalkeeper => "text-indigo-400 bg-indigo-500/10",
+                        Position.Defender   => "text-emerald-400 bg-emerald-500/10",
+                        Position.Midfielder => "text-amber-400 bg-amber-500/10",
+                        Position.Forward    => "text-rose-400 bg-rose-500/10",
+                        _                   => "text-slate-400 bg-slate-500/10"
+                    };
+
+                    <div class="flex items-center justify-between border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
+                        <div class="flex min-w-0 flex-col gap-0.5">
+                            <a asp-route="player-details" asp-route-id="@fp.PlayerId"
+                               class="truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
+                                @fp.FullName
+                            </a>
+                            <div class="flex items-center gap-1.5">
+                                <span class="rounded px-1.5 py-0.5 text-xs font-medium @posBadge">@fp.Position.ToString()</span>
+                                <span class="truncate text-xs text-slate-500">@(fp.ClubName ?? "—")</span>
+                            </div>
+                        </div>
+                        @* Average rating chip *@
+                        <span class="ml-3 shrink-0 rounded bg-lime-500/10 px-2 py-1 text-xs font-bold text-lime-400">
+                            @fp.AverageRating
+                        </span>
+                    </div>
+                }
             }
         </div>
-    </section>
 
-    <section class="grid gap-8 xl:grid-cols-2">
-        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Top Rated Players</span>
-                    <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Players with momentum</h2>
-                </div>
-                <a asp-route="players-index" class="text-sm font-medium text-lime-300 transition hover:text-lime-200">See all players</a>
+        @* Club Form panel *@
+        <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+
+            <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+                <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Club Form</span>
+                <a asp-route="clubs-index" class="text-xs font-semibold text-lime-400 transition hover:text-lime-300">View all</a>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2">
-                @foreach (var player in Model.FeaturedPlayers)
+            @if (!Model.ClubForms.Any())
+            {
+                <div class="px-4 py-8 text-center text-sm text-slate-500">No form data.</div>
+            }
+            else
+            {
+                @foreach (var cf in Model.ClubForms)
                 {
-                    <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <h3 class="text-xl font-semibold text-white">@player.FullName</h3>
-                                <p class="mt-1 text-sm text-slate-400">@player.ClubName</p>
-                            </div>
-                            <span class="inline-flex h-11 min-w-[2.75rem] items-center justify-center rounded-full bg-amber-400/15 px-3 font-['Oswald'] text-xl text-amber-200">@player.AverageRating</span>
-                        </div>
-                        <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-300">
-                            <span class="rounded-full border border-white/10 px-3 py-1">@player.Position</span>
-                            <span class="rounded-full border border-white/10 px-3 py-1">@player.Nationality</span>
-                        </div>
-                        <a asp-route="player-details" asp-route-id="@player.PlayerId" class="mt-5 text-sm font-medium text-lime-300 transition hover:text-lime-200">Open player</a>
-                    </article>
-                }
-            </div>
-        </section>
+                    <div class="flex items-center justify-between border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
+                        <a asp-route="club-details" asp-route-id="@cf.ClubId"
+                           class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@cf.ClubName</a>
 
-        <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-            <div class="mb-5">
-                <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Club Form</span>
-                <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Momentum by club</h2>
-            </div>
-
-            <div class="space-y-3">
-                @foreach (var entry in Model.ClubForms)
-                {
-                    var wins = entry.Results.Count(result => result == "W");
-                    var draws = entry.Results.Count(result => result == "D");
-                    var losses = entry.Results.Count(result => result == "L");
-
-                    <div class="flex flex-col gap-4 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <strong class="text-base text-white">@entry.ClubName</strong>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                @foreach (var result in entry.Results)
+                        @* W/D/L result chips *@
+                        <div class="flex shrink-0 items-center gap-1 ml-3">
+                            @foreach (var result in cf.Results)
+                            {
+                                var chipClass = result switch
                                 {
-                                    var formClass = result switch
-                                    {
-                                        "W" => "bg-lime-400/15 text-lime-300 border-lime-400/20",
-                                        "D" => "bg-amber-400/15 text-amber-200 border-amber-400/20",
-                                        _ => "bg-red-500/15 text-red-200 border-red-400/20"
-                                    };
-
-                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold @formClass">@result</span>
-                                }
-                            </div>
+                                    "W" => "bg-emerald-500/15 text-emerald-300",
+                                    "D" => "bg-amber-500/15 text-amber-300",
+                                    "L" => "bg-rose-500/15 text-rose-300",
+                                    _   => "bg-slate-500/15 text-slate-400"
+                                };
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded text-xs font-bold @chipClass">
+                                    @result
+                                </span>
+                            }
                         </div>
-                        <div class="font-['Oswald'] text-3xl text-white">@wins/@draws/@losses</div>
                     </div>
                 }
-            </div>
-        </section>
-    </section>
-</section>
+            }
+        </div>
+
+    </div>
+
+</div>

@@ -1,49 +1,64 @@
 @model List<LeagueDetailsViewModel>
 
-<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-        <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Leagues</span>
-        <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Competition hubs for club and match browsing</h2>
+@* ── Header: label + count on left, Add button on right ── *@
+<div class="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div class="flex items-center gap-3">
+        <span class="text-xs font-semibold uppercase tracking-widest text-slate-500">Leagues</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-300">@Model.Count</span>
     </div>
-    <div class="flex flex-col items-start gap-3 sm:items-end">
-        <span class="text-sm text-slate-400">@Model.Count league@(Model.Count != 1 ? "s" : string.Empty) available</span>
-        <a asp-route="league-create" class="inline-flex items-center rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Add league</a>
-    </div>
+    <a asp-route="league-create"
+       class="inline-flex items-center gap-1.5 rounded-full bg-lime-400 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-lime-300">
+        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+        </svg>
+        Add league
+    </a>
 </div>
 
-@if (Model.Count == 0)
+@if (!Model.Any())
 {
-    <div class="mt-6 rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 px-5 py-8 text-center text-slate-300">
-        No leagues match the current search.
-    </div>
+    <div class="py-14 text-center text-sm text-slate-500">No leagues match the current search.</div>
 }
 else
 {
-    <div class="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        @foreach (var league in Model)
-        {
-            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h3 class="text-xl font-semibold text-white">@league.Name</h3>
-                        <p class="mt-1 text-sm text-slate-400">Competition overview</p>
-                    </div>
-                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">League</span>
-                </div>
-
-                <div class="mt-4 grid gap-2 text-sm text-slate-300">
-                    <span>Competition ID: #@league.Id</span>
-                    <span>Clubs: @league.ClubCount</span>
-                    <span>Matches: @league.MatchCount</span>
-                </div>
-
-                <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-                    <a asp-route="matches-index" class="text-lime-300 transition hover:text-lime-200">Open matches</a>
-                    <a asp-route="league-details" asp-route-id="@league.Id" class="text-lime-300 transition hover:text-lime-200">Open league</a>
-                    <a asp-route="league-edit" asp-route-id="@league.Id" class="text-lime-300 transition hover:text-lime-200">Edit</a>
-                    <a asp-route="league-delete" asp-route-id="@league.Id" class="text-rose-300 transition hover:text-rose-200">Delete</a>
-                </div>
-            </article>
-        }
+    @* ── Column labels ── *@
+    <div class="grid grid-cols-[1fr_5rem_6rem_5rem] items-center border-b border-slate-800/60 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+        <span>League</span>
+        <span class="text-right">Clubs</span>
+        <span class="text-right">Matches</span>
+        <span></span>
     </div>
+
+    @* ── One compact row per league ── *@
+    @foreach (var league in Model)
+    {
+        <div class="group grid grid-cols-[1fr_5rem_6rem_5rem] items-center border-b border-slate-800/40 px-3 py-3 transition hover:bg-white/[0.03]">
+
+            @* League name — left lime accent, links to detail page *@
+            <a href="/leagues/@league.Id" class="flex items-center gap-2.5 font-medium text-slate-100 transition hover:text-white">
+                <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+                @league.Name
+            </a>
+
+            @* Stats *@
+            <span class="text-right text-sm tabular-nums text-slate-400">@league.ClubCount</span>
+            <span class="text-right text-sm tabular-nums text-slate-400">@league.MatchCount</span>
+
+            @* Edit / Delete icons — fade in on row hover *@
+            <div class="flex items-center justify-end gap-3 opacity-0 transition group-hover:opacity-100">
+                <a asp-route="league-edit" asp-route-id="@league.Id"
+                   class="text-slate-500 transition hover:text-white" title="Edit league">
+                    <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                    </svg>
+                </a>
+                <a asp-route="league-delete" asp-route-id="@league.Id"
+                   class="text-slate-600 transition hover:text-rose-400" title="Delete league">
+                    <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    }
 }

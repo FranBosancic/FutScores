@@ -6,6 +6,8 @@ namespace ProbaMala.Models.ViewModels
     {
         public int MatchId { get; set; }
         public string LeagueName { get; set; } = null!;
+        public int HomeTeamId { get; set; }
+        public int AwayTeamId { get; set; }
         public string HomeTeamName { get; set; } = null!;
         public string AwayTeamName { get; set; } = null!;
         public int HomeGoals { get; set; }
@@ -36,6 +38,7 @@ namespace ProbaMala.Models.ViewModels
 
     public class ClubFormEntry
     {
+        public int ClubId { get; set; }
         public string ClubName { get; set; } = null!;
         public List<string> Results { get; set; } = new();
     }

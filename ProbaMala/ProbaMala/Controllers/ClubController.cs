@@ -18,18 +18,22 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/clubs", Name = "clubs-index")]
         [HttpGet("~/clubs/list")]
-        public IActionResult Index(string? q)
+        public IActionResult Index(string? q, int? leagueId)
         {
+            // leagueId is set when navigating from the league navbar dropdown
             ViewData["FilterQuery"] = q;
-            return View(_clubRepository.GetAll(q));
+            ViewData["LeagueId"] = leagueId;
+            return View(_clubRepository.GetAll(q, leagueId));
         }
 
         [HttpGet("filter")]
         [HttpGet("~/clubs/filter", Name = "clubs-filter")]
-        public IActionResult Filter(string? q)
+        public IActionResult Filter(string? q, int? leagueId)
         {
+            // leagueId must be forwarded so live search stays scoped to the league
             ViewData["FilterQuery"] = q;
-            return PartialView("_ClubList", _clubRepository.GetAll(q));
+            ViewData["LeagueId"] = leagueId;
+            return PartialView("_ClubList", _clubRepository.GetAll(q, leagueId));
         }
 
         [HttpGet("{id:int}")]

@@ -52,17 +52,71 @@ namespace ProbaMala.Repositories
 
         public LeagueDetailsViewModel? GetById(int id)
         {
-            return _dbContext.Leagues
+            // Load the league with its clubs and matches in a single query via Include.
+            // We use AsEnumerable() to do the final shaping in-memory since EF can't
+            // translate the MatchDetailsViewModel's status logic to SQL.
+            var league = _dbContext.Leagues
                 .AsNoTracking()
-                .Where(league => league.Id == id)
-                .Select(league => new LeagueDetailsViewModel
-                {
-                    Id = league.Id,
-                    Name = league.Name,
-                    ClubCount = league.Clubs.Count,
-                    MatchCount = league.Matches.Count
-                })
-                .FirstOrDefault();
+                .Include(l => l.Clubs)
+                    .ThenInclude(c => c.Players)
+                .Include(l => l.Clubs)
+                    .ThenInclude(c => c.HomeMatches)
+                .Include(l => l.Clubs)
+                    .ThenInclude(c => c.AwayMatches)
+                .Include(l => l.Matches)
+                    .ThenInclude(m => m.HomeTeam)
+                .Include(l => l.Matches)
+                    .ThenInclude(m => m.AwayTeam)
+                .Include(l => l.Matches)
+                    .ThenInclude(m => m.Ratings)
+                .FirstOrDefault(l => l.Id == id);
+
+            if (league == null) return null;
+
+            return new LeagueDetailsViewModel
+            {
+                Id = league.Id,
+                Name = league.Name,
+                ClubCount = league.Clubs.Count,
+                MatchCount = league.Matches.Count,
+
+                // Clubs alphabetically with key stats
+                Clubs = league.Clubs
+                    .OrderBy(c => c.Name)
+                    .Select(c => new ClubDetailsViewModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        LeagueId = league.Id,
+                        LeagueName = league.Name,
+                        FoundedDate = c.FoundedDate,
+                        PlayerCount = c.Players.Count,
+                        MatchCount = c.HomeMatches.Count + c.AwayMatches.Count
+                    })
+                    .ToList(),
+
+                // Matches newest-first; past = Finished, future = Scheduled
+                Matches = league.Matches
+                    .OrderByDescending(m => m.Date)
+                    .Select(m => new MatchDetailsViewModel
+                    {
+                        Id = m.Id,
+                        LeagueId = league.Id,
+                        HomeTeamId = m.HomeTeamId,
+                        AwayTeamId = m.AwayTeamId,
+                        Date = m.Date,
+                        KickoffLabel = m.Date.ToString("dd MMM yyyy"),
+                        StatusLabel = m.Date <= DateTime.UtcNow ? "Finished" : "Scheduled",
+                        StatusTone  = m.Date <= DateTime.UtcNow ? "final" : "upcoming",
+                        LeagueName = league.Name,
+                        HomeTeamName = m.HomeTeam.Name,
+                        AwayTeamName = m.AwayTeam.Name,
+                        HomeGoals = m.HomeGoals,
+                        AwayGoals = m.AwayGoals,
+                        RatingCount = m.Ratings.Count
+                    })
+                    .ToList()
+            };
         }
 
         public LeagueFormViewModel BuildFormModel()

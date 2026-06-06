@@ -8,7 +8,8 @@ namespace ProbaMala.Repositories
 {
     public interface IClubRepository
     {
-        List<ClubDetailsViewModel> GetAll(string? query = null);
+        /// <summary>Returns clubs optionally filtered by name search and/or league.</summary>
+        List<ClubDetailsViewModel> GetAll(string? query = null, int? leagueId = null);
         ClubDetailsViewModel? GetById(int id);
         ClubFormViewModel BuildFormModel();
         ClubFormViewModel? GetFormById(int id);
@@ -30,13 +31,20 @@ namespace ProbaMala.Repositories
             _dbContext = dbContext;
         }
 
-        public List<ClubDetailsViewModel> GetAll(string? query = null)
+        public List<ClubDetailsViewModel> GetAll(string? query = null, int? leagueId = null)
         {
             var clubsQuery = _dbContext.Clubs
                 .AsNoTracking()
                 .Include(club => club.League)
                 .AsQueryable();
 
+            // Filter by league when coming from a league nav dropdown
+            if (leagueId.HasValue)
+            {
+                clubsQuery = clubsQuery.Where(club => club.LeagueId == leagueId.Value);
+            }
+
+            // Full-text search across name, league, and founded year
             if (!string.IsNullOrWhiteSpace(query))
             {
                 var normalizedQuery = query.Trim().ToLower();
@@ -79,7 +87,23 @@ namespace ProbaMala.Repositories
                     LeagueName = club.League.Name,
                     PlayerCount = club.Players.Count,
                     MatchCount = club.HomeMatches.Count + club.AwayMatches.Count,
-                    CanDelete = club.Players.Count == 0 && club.HomeMatches.Count == 0 && club.AwayMatches.Count == 0
+                    CanDelete = club.Players.Count == 0 && club.HomeMatches.Count == 0 && club.AwayMatches.Count == 0,
+                    Players = club.Players
+                        .OrderBy(player => player.LastName)
+                        .ThenBy(player => player.FirstName)
+                        .Select(player => new PlayerDetailsViewModel
+                        {
+                            Id = player.Id,
+                            ClubId = player.ClubId,
+                            FirstName = player.FirstName,
+                            LastName = player.LastName,
+                            DateOfBirth = player.DateOfBirth,
+                            Position = player.Position,
+                            Nationality = player.Nationality,
+                            ClubName = club.Name,
+                            RatingCount = player.Ratings.Count
+                        })
+                        .ToList()
                 })
                 .FirstOrDefault();
         }

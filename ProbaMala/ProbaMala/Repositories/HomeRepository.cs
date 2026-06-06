@@ -47,6 +47,8 @@ namespace ProbaMala.Repositories
                     {
                         MatchId = match.Id,
                         LeagueName = league?.Name ?? "Unknown League",
+                        HomeTeamId = match.HomeTeamId,
+                        AwayTeamId = match.AwayTeamId,
                         HomeTeamName = homeClub?.Name ?? "Unknown Home Team",
                         AwayTeamName = awayClub?.Name ?? "Unknown Away Team",
                         HomeGoals = match.HomeGoals,
@@ -111,6 +113,7 @@ namespace ProbaMala.Repositories
 
                 return new ClubFormEntry
                 {
+                    ClubId = club.Id,
                     ClubName = club.Name,
                     Results = results
                 };

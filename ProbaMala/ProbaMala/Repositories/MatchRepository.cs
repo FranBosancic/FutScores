@@ -8,7 +8,8 @@ namespace ProbaMala.Repositories
 {
     public interface IMatchRepository
     {
-        List<MatchDetailsViewModel> GetAll(string? query = null);
+        /// <summary>Returns matches optionally filtered by text search and/or league.</summary>
+        List<MatchDetailsViewModel> GetAll(string? query = null, int? leagueId = null);
         MatchDetailsViewModel? GetById(int id);
         MatchFormViewModel BuildFormModel();
         MatchFormViewModel? GetFormById(int id);
@@ -30,7 +31,7 @@ namespace ProbaMala.Repositories
             _dbContext = dbContext;
         }
 
-        public List<MatchDetailsViewModel> GetAll(string? query = null)
+        public List<MatchDetailsViewModel> GetAll(string? query = null, int? leagueId = null)
         {
             var matchesQuery = _dbContext.Matches
                 .AsNoTracking()
@@ -39,6 +40,13 @@ namespace ProbaMala.Repositories
                 .Include(match => match.AwayTeam)
                 .AsQueryable();
 
+            // Filter to a specific league when coming from a league nav dropdown
+            if (leagueId.HasValue)
+            {
+                matchesQuery = matchesQuery.Where(match => match.LeagueId == leagueId.Value);
+            }
+
+            // Full-text search across league name, team names, and goal counts
             if (!string.IsNullOrWhiteSpace(query))
             {
                 var normalizedQuery = query.Trim().ToLower();

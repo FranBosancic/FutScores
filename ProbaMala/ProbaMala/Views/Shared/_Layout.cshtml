@@ -1,6 +1,17 @@
-﻿@{
+@using ProbaMala.Repositories
+@inject ILeagueRepository LeagueRepo
+
+@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
-    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentAction     = ViewContext.RouteData.Values["action"]?.ToString();
+
+    // Fetch all leagues once and reuse for both desktop and mobile nav.
+    // Ordered alphabetically; the list is typically short so no paging needed.
+    var navLeagues = LeagueRepo.GetAll();
+
+    // Helper: returns the Tailwind active-link classes when the condition is true.
+    string ActiveClass(bool active) =>
+        active ? "text-white border-b-2 border-lime-500 pb-1" : "";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -11,93 +22,169 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/tailwind.generated.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProbaMala.styles.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen bg-[radial-gradient(circle_at_top_right,rgba(34,197,94,0.18),transparent_26%),linear-gradient(180deg,#08121e_0%,#07111f_100%)] font-['Barlow'] text-slate-50">
-    <header class="sticky top-0 z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-        <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-6 lg:px-8">
-            <a asp-route="home-index" class="flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-white transition hover:bg-white/10 sm:px-4">
-                <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lime-400 font-['Oswald'] text-lg font-bold text-slate-950 shadow-[0_10px_30px_rgba(34,197,94,0.25)]">FS</span>
-                <span class="grid min-w-0">
-                    <span class="truncate font-['Oswald'] text-3xl leading-none tracking-wide">FutScores</span>
-                    <span class="truncate text-sm text-slate-400">Scores, clubs, players, leagues</span>
-                </span>
+<body class="min-h-screen bg-[#02040d] font-['Inter'] text-slate-100">
+
+    <header class="sticky top-0 z-30 border-b border-slate-800 bg-[#070b13]/95 backdrop-blur-sm">
+        <div class="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6">
+
+            @* ── Brand logo ── *@
+            <a asp-route="home-index" class="flex shrink-0 items-center gap-3 text-white">
+                <span class="flex h-10 w-10 items-center justify-center rounded bg-lime-500 text-base font-semibold text-slate-950">FS</span>
+                <div class="leading-tight">
+                    <div class="text-base font-semibold">FutScores</div>
+                    <div class="text-xs text-slate-400">Football dashboard</div>
+                </div>
             </a>
 
-            <form class="hidden min-w-0 flex-1 grid-cols-[110px_minmax(0,1fr)_auto] gap-2 lg:grid" data-search-form>
-                <label class="sr-only" for="shell-search-scope">Search scope</label>
-                <select id="shell-search-scope" class="h-12 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-slate-100 outline-none transition focus:border-lime-400/60 focus:bg-white/10" data-search-scope>
-                    <option value="Match">Matches</option>
-                    <option value="Player">Players</option>
-                    <option value="Club">Clubs</option>
-                    <option value="League">Leagues</option>
-                </select>
-                <label class="sr-only" for="shell-search-query">Search query</label>
-                <input id="shell-search-query" class="h-12 min-w-0 rounded-full border border-white/10 bg-white/5 px-5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-400/60 focus:bg-white/10" type="search" placeholder="Search players, clubs, matches..." data-search-query />
-                <button class="h-12 rounded-full bg-lime-400 px-5 text-sm font-semibold text-slate-950 transition hover:bg-lime-300" type="submit">Search</button>
-            </form>
+            @* ── Desktop navigation ── *@
+            <nav class="hidden flex-1 items-center gap-5 text-sm md:flex">
 
-            <button id="mobile-menu-btn" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 lg:hidden" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle navigation menu">
-                <span class="flex flex-col gap-1.5">
-                    <span class="block h-0.5 w-5 bg-current"></span>
-                    <span class="block h-0.5 w-5 bg-current"></span>
-                    <span class="block h-0.5 w-5 bg-current"></span>
-                </span>
+                @* Dashboard — always the first static link *@
+                <a asp-route="home-index"
+                   class="transition hover:text-white @ActiveClass(currentController == "Home" && currentAction == "Index")">
+                    Dashboard
+                </a>
+
+                @*
+                    One item per league. Hovering reveals a dropdown with Clubs and Matches
+                    links that are pre-filtered to that league (via ?leagueId=).
+                    The dropdown uses Tailwind's group-hover utilities — no JS required.
+                *@
+                @foreach (var league in navLeagues)
+                {
+                    @*
+                        after:content-[''] + after:absolute + after:top-full + after:h-3:
+                        Creates an invisible 12 px pseudo-element bridge between the trigger
+                        and the dropdown panel so group-hover stays active while the mouse
+                        travels down. This avoids adding real padding (which shifts alignment).
+                    *@
+                    <div class="group relative after:absolute after:inset-x-0 after:top-full after:h-3 after:content-['']">
+
+                        @* League label — also a direct link to the league detail page *@
+                        <a href="/leagues/@league.Id"
+                           class="flex items-center gap-1 text-slate-300 transition hover:text-white">
+                            @league.Name
+                            @* Chevron rotates on hover to indicate dropdown state *@
+                            <svg class="h-3 w-3 opacity-50 transition-transform duration-150 group-hover:rotate-180"
+                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.085l3.71-3.755a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                      clip-rule="evenodd" />
+                            </svg>
+                        </a>
+
+                        @*
+                            Dropdown panel.
+                            - invisible + opacity-0 : hidden but takes up no space and can fade in.
+                            - group-hover:visible + group-hover:opacity-100 : revealed on hover.
+                            - pointer-events-none / group-hover:pointer-events-auto : prevents
+                              accidental hover triggers on the transparent area when hidden.
+                        *@
+                        <div class="pointer-events-none invisible absolute left-0 top-full z-50 mt-0 w-36
+                                    rounded-xl border border-white/10 bg-[#070b13] py-1 opacity-0 shadow-2xl
+                                    transition-all duration-150
+                                    group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
+
+                            @* → Clubs filtered to this league *@
+                            <a href="/clubs?leagueId=@league.Id"
+                               class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                <svg class="h-4 w-4 shrink-0 text-lime-400" xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
+                                </svg>
+                                Clubs
+                            </a>
+
+                            @* → Matches filtered to this league *@
+                            <a href="/matches?leagueId=@league.Id"
+                               class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                <svg class="h-4 w-4 shrink-0 text-lime-400" xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                          clip-rule="evenodd" />
+                                </svg>
+                                Matches
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                @if (!navLeagues.Any())
+                {
+                    <span class="text-sm italic text-slate-500">No leagues yet</span>
+                }
+            </nav>
+
+            @* ── Mobile hamburger button ── *@
+            <button id="mobile-menu-btn"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="mobile-menu"
+                    aria-label="Toggle navigation menu"
+                    class="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded bg-slate-900 text-slate-200 transition hover:bg-slate-800 md:hidden">
+                <span class="flex h-0.5 w-5 rounded bg-current"></span>
+                <span class="mt-1 flex h-0.5 w-5 rounded bg-current"></span>
+                <span class="mt-1 flex h-0.5 w-5 rounded bg-current"></span>
             </button>
         </div>
 
-        <div class="mx-auto w-full max-w-7xl px-4 pb-4 sm:px-6 lg:px-8">
-            <nav class="hidden flex-wrap gap-2 lg:flex" aria-label="Primary">
-                <a asp-route="home-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Home" && currentAction == "Index" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Dashboard</a>
-                <a asp-route="matches-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Match" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Matches</a>
-                <a asp-route="players-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Player" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Players</a>
-                <a asp-route="clubs-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Club" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Clubs</a>
-                <a asp-route="leagues-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "League" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Leagues</a>
-                <a asp-route="ratings-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "Rating" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white")">Ratings</a>
-                <a asp-route="users-index" class="rounded-full px-4 py-2 text-sm font-medium transition @(currentController == "User" ? "bg-lime-400 text-slate-950 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white")">Users</a>
-            </nav>
-        </div>
+        @*
+            ── Mobile menu ──
+            Since hover doesn't exist on touch devices, each league section
+            shows its Clubs and Matches sub-links inline and indented.
+        *@
+        <div id="mobile-menu" class="hidden border-t border-slate-800 bg-[#070b13]">
+            <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
 
-        <div id="mobile-menu" class="border-t border-white/10 bg-slate-950/95 lg:hidden" hidden>
-            <div class="mx-auto grid w-full max-w-7xl gap-2 px-4 py-4 sm:px-6 lg:px-8">
-                <a asp-route="home-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Dashboard</a>
-                <a asp-route="matches-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Matches</a>
-                <a asp-route="players-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Players</a>
-                <a asp-route="clubs-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Clubs</a>
-                <a asp-route="leagues-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Leagues</a>
-                <a asp-route="ratings-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Ratings</a>
-                <a asp-route="users-index" class="rounded-2xl bg-white/5 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-white/10">Users</a>
+                <a asp-route="home-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">
+                    Dashboard
+                </a>
+
+                @foreach (var league in navLeagues)
+                {
+                    @* League heading *@
+                    <div class="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        @league.Name
+                    </div>
+                    @* Sub-links indented beneath the league name *@
+                    <a href="/clubs?leagueId=@league.Id"
+                       class="rounded py-1.5 pl-7 pr-3 text-sm text-slate-300 hover:bg-slate-900 hover:text-white">
+                        Clubs
+                    </a>
+                    <a href="/matches?leagueId=@league.Id"
+                       class="rounded py-1.5 pl-7 pr-3 text-sm text-slate-300 hover:bg-slate-900 hover:text-white">
+                        Matches
+                    </a>
+                }
             </div>
         </div>
     </header>
 
-    <main class="py-8" role="main">
+    <main class="py-8">
         @RenderBody()
     </main>
 
-    <footer class="border-t border-white/10 bg-slate-950/60">
-        <div class="mx-auto flex w-full max-w-7xl flex-col justify-between gap-3 px-4 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:px-6 lg:px-8">
-            <div class="flex flex-col gap-1">
-                <strong>FutScores</strong>
-                <span>Football data browser ready for real APIs next.</span>
+    <footer class="border-t border-slate-800 bg-[#070b13] text-slate-400">
+        <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div>
+                <strong class="text-slate-100">FutScores</strong>
+                <p class="text-sm text-slate-500">A cleaner football overview experience.</p>
             </div>
-            <div>&copy; 2026 FutScores</div>
+            <div class="text-sm">© 2026 FutScores</div>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hr.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

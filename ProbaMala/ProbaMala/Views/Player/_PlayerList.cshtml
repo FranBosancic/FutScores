@@ -1,58 +1,87 @@
-@model List<PlayerDetailsViewModel>
+@using ProbaMala.Models.Entities
+@model List<ProbaMala.Models.ViewModels.PlayerDetailsViewModel>
 
-<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-        <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Players</span>
-        <h2 class="mt-2 font-['Oswald'] text-3xl leading-none text-white">Player browsing with club context built in</h2>
-    </div>
-    <div class="flex flex-col items-start gap-3 sm:items-end">
-        <span class="text-sm text-slate-400">@Model.Count player@(Model.Count != 1 ? "s" : string.Empty) in the board</span>
-        <a asp-route="player-create" class="inline-flex items-center rounded-full bg-lime-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Add player</a>
-    </div>
+@* Section header with Add Player button *@
+<div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+    <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Players</span>
+    <a asp-route="player-create" class="flex items-center gap-1 text-xs font-semibold text-lime-400 transition hover:text-lime-300">
+        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+        </svg>
+        Add player
+    </a>
 </div>
 
-@if (Model.Count == 0)
+@* Column headers *@
+<div class="grid grid-cols-[1fr_7rem_8rem_8rem_5rem_4rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+    <span>Player</span>
+    <span>Position</span>
+    <span>Club</span>
+    <span>Nationality</span>
+    <span class="text-center">Rating</span>
+    <span></span>
+</div>
+
+@if (!Model.Any())
 {
-    <div class="mt-6 rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 px-5 py-8 text-center text-slate-300">
-        No players match the current search.
-    </div>
+    <div class="px-4 py-8 text-center text-sm text-slate-500">No players found.</div>
 }
 else
 {
-    <div class="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        @foreach (var player in Model)
+    @foreach (var player in Model)
+    {
+        @* Position badge color based on enum *@
+        var positionBadgeClass = player.Position switch
         {
-            var toneClass = player.Position switch
-            {
-                Position.Goalkeeper => "border-indigo-400/20 bg-indigo-500/10 text-indigo-200",
-                Position.Defender => "border-emerald-400/20 bg-emerald-500/10 text-emerald-200",
-                Position.Midfielder => "border-amber-400/20 bg-amber-500/10 text-amber-200",
-                Position.Forward => "border-rose-400/20 bg-rose-500/10 text-rose-200",
-                _ => "border-white/10 bg-white/5 text-slate-200"
-            };
+            Position.Goalkeeper => "text-indigo-400 bg-indigo-500/10",
+            Position.Defender   => "text-emerald-400 bg-emerald-500/10",
+            Position.Midfielder => "text-amber-400 bg-amber-500/10",
+            Position.Forward    => "text-rose-400 bg-rose-500/10",
+            _                   => "text-slate-400 bg-slate-500/10"
+        };
 
-            <article class="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h3 class="text-xl font-semibold text-white">@player.FirstName @player.LastName</h3>
-                        <p class="mt-1 text-sm text-slate-400">@player.ClubName</p>
-                    </div>
-                    <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @toneClass">@player.Position</span>
-                </div>
+        <div class="group grid grid-cols-[1fr_7rem_8rem_8rem_5rem_4rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
 
-                <div class="mt-4 grid gap-2 text-sm text-slate-300">
-                    <span>Nationality: @player.Nationality</span>
-                    <span>Born: @player.DateOfBirth.ToString("MMM dd, yyyy")</span>
-                    <span>Ratings: @player.RatingCount</span>
-                </div>
+            @* Player name with lime pill *@
+            <div class="flex min-w-0 items-center gap-2">
+                <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+                <a asp-route="player-details" asp-route-id="@player.Id"
+                   class="truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
+                    @($"{player.FirstName} {player.LastName}")
+                </a>
+            </div>
 
-                <div class="mt-5 flex flex-wrap gap-4 text-sm font-medium">
-                    <a asp-route="club-details" asp-route-id="@player.ClubId" class="text-lime-300 transition hover:text-lime-200">Open club</a>
-                    <a asp-route="player-details" asp-route-id="@player.Id" class="text-lime-300 transition hover:text-lime-200">Open player</a>
-                    <a asp-route="player-edit" asp-route-id="@player.Id" class="text-lime-300 transition hover:text-lime-200">Edit</a>
-                    <a asp-route="player-delete" asp-route-id="@player.Id" class="text-rose-300 transition hover:text-rose-200">Delete</a>
-                </div>
-            </article>
-        }
-    </div>
+            @* Position badge *@
+            <span class="rounded px-2 py-0.5 text-xs font-medium @positionBadgeClass w-fit">
+                @player.Position.ToString()
+            </span>
+
+            @* Club *@
+            <span class="truncate text-sm text-slate-400">@(player.ClubName ?? "—")</span>
+
+            @* Nationality *@
+            <span class="truncate text-sm text-slate-400">@(player.Nationality ?? "—")</span>
+
+            @* Ratings count *@
+            <span class="text-center text-sm text-slate-400">@player.RatingCount</span>
+
+            @* Edit / Delete — fade in on hover *@
+            <div class="flex items-center justify-end gap-1 opacity-0 transition group-hover:opacity-100">
+                <a asp-route="player-edit" asp-route-id="@player.Id"
+                   title="Edit"
+                   class="rounded p-1 text-slate-400 transition hover:bg-slate-700 hover:text-slate-100">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                    </svg>
+                </a>
+                <a asp-route="player-delete" asp-route-id="@player.Id"
+                   title="Delete"
+                   class="rounded p-1 text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-400">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    }
 }
