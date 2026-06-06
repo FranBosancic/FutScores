@@ -1,34 +1,42 @@
 @model ClubFormViewModel
 
 @{
-    ViewData["Title"] = "Create Club - Match Center";
+    ViewData["Title"] = "Create Club";
 }
 
-<section class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
-    <nav class="text-sm text-slate-400">
-        <a asp-route="clubs-index" class="font-medium text-lime-300 transition hover:text-lime-200">Clubs</a>
-        <span class="px-2 text-slate-600">/</span>
-        <span>Create</span>
-    </nav>
+<div class="mx-auto w-full max-w-3xl space-y-4 px-4 sm:px-6">
 
-    <section class="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-7">
-        <div class="mb-6">
-            <span class="font-['Oswald'] text-sm uppercase tracking-[0.24em] text-lime-400">Clubs</span>
-            <h1 class="mt-2 font-['Oswald'] text-4xl leading-none text-white">Create a new club</h1>
-            <p class="mt-3 text-sm text-slate-400">Add a new club hub and link it to its competition.</p>
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+
+        @* Title bar *@
+        <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+            <div class="flex items-center gap-2">
+                <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+                <span class="text-sm font-semibold text-slate-100">Create a new club</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+                <a asp-route="clubs-index" class="transition hover:text-slate-300">All clubs</a>
+                <span>/</span>
+                <span class="text-slate-400">Create</span>
+            </div>
         </div>
 
-        <form asp-action="Create" method="post" class="space-y-6">
-            @Html.AntiForgeryToken()
-            <partial name="_ClubForm" model="Model" />
+        @* Body *@
+        <div class="px-4 py-5">
+            <p class="mb-5 text-sm text-slate-400">Add a new club hub and link it to its competition.</p>
 
-            <div class="flex flex-wrap gap-4">
-                <button type="submit" class="inline-flex items-center rounded-full bg-lime-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-lime-300">Save club</button>
-                <a asp-route="clubs-index" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10">Cancel</a>
-            </div>
-        </form>
-    </section>
-</section>
+            <form asp-action="Create" method="post" class="space-y-6">
+                @Html.AntiForgeryToken()
+                <partial name="_ClubForm" model="Model" />
+
+                <div class="flex flex-wrap items-center gap-3 border-t border-slate-800/60 pt-5">
+                    <button type="submit" class="inline-flex items-center rounded-lg bg-lime-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-400">Save club</button>
+                    <a asp-route="clubs-index" class="inline-flex items-center rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-slate-100">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
