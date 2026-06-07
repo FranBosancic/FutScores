@@ -63,8 +63,9 @@
                 <span class="text-xs text-slate-500">Match</span>
                 <a asp-route="match-details" asp-route-id="@Model.MatchId"
                    class="text-sm font-semibold text-lime-400 transition hover:text-lime-300">
-                    @Model.MatchDescription
+                    @Model.HomeTeamName vs @Model.AwayTeamName
                 </a>
+                <span class="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-bold tabular-nums text-slate-100">@Model.MatchScore</span>
             </div>
 
             @* Rated by link *@

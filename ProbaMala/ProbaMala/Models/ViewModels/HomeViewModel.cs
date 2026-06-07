@@ -16,6 +16,7 @@ namespace ProbaMala.Models.ViewModels
         public string KickoffLabel { get; set; } = null!;
         public string StatusLabel { get; set; } = null!;
         public string StatusTone { get; set; } = null!;
+        public int RatingCount { get; set; }
     }
 
     public class DashboardFeaturedPlayer

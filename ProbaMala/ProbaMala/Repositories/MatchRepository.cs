@@ -62,9 +62,13 @@ namespace ProbaMala.Repositories
 
             return matchesQuery
                 .OrderByDescending(match => match.Date)
+                // Count ratings in SQL (the Ratings nav isn't included, so counting it
+                // post-materialization would always yield 0 without lazy loading).
+                .Select(match => new { Match = match, RatingCount = match.Ratings.Count })
                 .AsEnumerable()
-                .Select((match, index) =>
+                .Select((row, index) =>
                 {
+                    var match = row.Match;
                     var statusLabel = index == 0 ? "Featured" : index < 4 ? "Final" : "Recent";
                     var statusTone = index == 0 ? "live" : index < 4 ? "final" : "recent";
 
@@ -83,7 +87,7 @@ namespace ProbaMala.Repositories
                         AwayTeamName = match.AwayTeam.Name,
                         HomeGoals = match.HomeGoals,
                         AwayGoals = match.AwayGoals,
-                        RatingCount = match.Ratings.Count
+                        RatingCount = row.RatingCount
                     };
                 })
                 .ToList();
@@ -91,48 +95,108 @@ namespace ProbaMala.Repositories
 
         public MatchDetailsViewModel? GetById(int id)
         {
-            return _dbContext.Matches
+            var match = _dbContext.Matches
                 .AsNoTracking()
-                .Include(match => match.League)
-                .Include(match => match.HomeTeam)
-                .Include(match => match.AwayTeam)
-                .Include(match => match.Ratings).ThenInclude(rating => rating.Player)
-                .Include(match => match.Ratings).ThenInclude(rating => rating.User)
-                .Where(match => match.Id == id)
-                .AsEnumerable()
-                .Select(match => new MatchDetailsViewModel
+                .Include(m => m.League)
+                .Include(m => m.HomeTeam).ThenInclude(club => club.Players)
+                .Include(m => m.AwayTeam).ThenInclude(club => club.Players)
+                .Include(m => m.Ratings).ThenInclude(rating => rating.Player)
+                .Include(m => m.Ratings).ThenInclude(rating => rating.User)
+                .FirstOrDefault(m => m.Id == id);
+
+            if (match == null)
+            {
+                return null;
+            }
+
+            // Per-player rating aggregates within this match.
+            var statsByPlayer = match.Ratings
+                .GroupBy(rating => rating.PlayerId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => new { Count = group.Count(), Average = group.Average(rating => rating.Score) });
+
+            // Player of the match: best average among rated players (count breaks ties).
+            var topPlayerId = statsByPlayer.Count > 0
+                ? statsByPlayer
+                    .OrderByDescending(entry => entry.Value.Average)
+                    .ThenByDescending(entry => entry.Value.Count)
+                    .First().Key
+                : (int?)null;
+
+            var topPlayer = topPlayerId.HasValue
+                ? match.Ratings.First(rating => rating.PlayerId == topPlayerId.Value).Player
+                : null;
+
+            MatchSquadPlayerViewModel ToSquadPlayer(Player player)
+            {
+                statsByPlayer.TryGetValue(player.Id, out var stat);
+                return new MatchSquadPlayerViewModel
                 {
-                    Id = match.Id,
-                    LeagueId = match.LeagueId,
-                    HomeTeamId = match.HomeTeamId,
-                    AwayTeamId = match.AwayTeamId,
-                    Date = match.Date,
-                    KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
-                    StatusLabel = "Final",
-                    StatusTone = "final",
-                    LeagueName = match.League.Name,
-                    HomeTeamName = match.HomeTeam.Name,
-                    AwayTeamName = match.AwayTeam.Name,
-                    HomeGoals = match.HomeGoals,
-                    AwayGoals = match.AwayGoals,
-                    RatingCount = match.Ratings.Count,
-                    Ratings = match.Ratings
-                        .OrderByDescending(rating => rating.Score)
-                        .Select(rating => new RatingDetailsViewModel
-                        {
-                            Id = rating.Id,
-                            PlayerId = rating.PlayerId,
-                            MatchId = rating.MatchId,
-                            UserId = rating.UserId,
-                            PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
-                            MatchDescription = $"{match.HomeTeam.Name} vs {match.AwayTeam.Name} on {match.Date:yyyy-MM-dd}",
-                            UserName = $"{rating.User.FirstName} {rating.User.LastName}",
-                            Score = rating.Score,
-                            Comment = rating.Comment
-                        })
-                        .ToList()
-                })
-                .FirstOrDefault();
+                    Id = player.Id,
+                    FullName = $"{player.FirstName} {player.LastName}",
+                    Position = player.Position,
+                    RatingCount = stat?.Count ?? 0,
+                    AverageScore = stat?.Average,
+                    IsTopRated = topPlayerId == player.Id
+                };
+            }
+
+            List<MatchSquadPlayerViewModel> BuildSquad(IEnumerable<Player> players) => players
+                .Select(ToSquadPlayer)
+                .OrderBy(player => player.Position)
+                .ThenBy(player => player.FullName)
+                .ToList();
+
+            double? AverageOf(IEnumerable<Rating> ratings)
+            {
+                var list = ratings.ToList();
+                return list.Count > 0 ? list.Average(rating => rating.Score) : (double?)null;
+            }
+
+            return new MatchDetailsViewModel
+            {
+                Id = match.Id,
+                LeagueId = match.LeagueId,
+                HomeTeamId = match.HomeTeamId,
+                AwayTeamId = match.AwayTeamId,
+                Date = match.Date,
+                KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
+                StatusLabel = "Final",
+                StatusTone = "final",
+                LeagueName = match.League.Name,
+                HomeTeamName = match.HomeTeam.Name,
+                AwayTeamName = match.AwayTeam.Name,
+                HomeGoals = match.HomeGoals,
+                AwayGoals = match.AwayGoals,
+                RatingCount = match.Ratings.Count,
+                AverageRating = AverageOf(match.Ratings),
+                HomeAverageRating = AverageOf(match.Ratings.Where(rating => rating.Player.ClubId == match.HomeTeamId)),
+                AwayAverageRating = AverageOf(match.Ratings.Where(rating => rating.Player.ClubId == match.AwayTeamId)),
+                TopRatedPlayerName = topPlayer != null ? $"{topPlayer.FirstName} {topPlayer.LastName}" : null,
+                TopRatedPlayerScore = topPlayerId.HasValue ? statsByPlayer[topPlayerId.Value].Average : null,
+                HomeSquad = BuildSquad(match.HomeTeam.Players),
+                AwaySquad = BuildSquad(match.AwayTeam.Players),
+                Ratings = match.Ratings
+                    .OrderByDescending(rating => rating.Score)
+                    .Select(rating => new RatingDetailsViewModel
+                    {
+                        Id = rating.Id,
+                        PlayerId = rating.PlayerId,
+                        MatchId = rating.MatchId,
+                        UserId = rating.UserId,
+                        PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
+                        MatchDescription = $"{match.HomeTeam.Name} vs {match.AwayTeam.Name} on {match.Date:yyyy-MM-dd}",
+                        UserName = $"{rating.User.FirstName} {rating.User.LastName}",
+                        Score = rating.Score,
+                        Comment = rating.Comment,
+                        HomeTeamName = match.HomeTeam.Name,
+                        AwayTeamName = match.AwayTeam.Name,
+                        HomeGoals = match.HomeGoals,
+                        AwayGoals = match.AwayGoals
+                    })
+                    .ToList()
+            };
         }
 
         public MatchFormViewModel BuildFormModel()

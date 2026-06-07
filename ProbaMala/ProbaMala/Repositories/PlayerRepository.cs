@@ -97,7 +97,11 @@ namespace ProbaMala.Repositories
                             MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
                             UserName = $"{rating.User.FirstName} {rating.User.LastName}",
                             Score = rating.Score,
-                            Comment = rating.Comment
+                            Comment = rating.Comment,
+                            HomeTeamName = rating.Match.HomeTeam.Name,
+                            AwayTeamName = rating.Match.AwayTeam.Name,
+                            HomeGoals = rating.Match.HomeGoals,
+                            AwayGoals = rating.Match.AwayGoals
                         })
                         .ToList()
                 })

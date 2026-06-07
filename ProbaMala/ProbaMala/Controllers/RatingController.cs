@@ -50,9 +50,11 @@ namespace ProbaMala.Controllers
 
         [HttpGet("novo")]
         [HttpGet("~/ratings/create", Name = "rating-create")]
-        public IActionResult Create()
+        public IActionResult Create(int? matchId, int? playerId)
         {
-            return View(_ratingRepository.BuildFormModel());
+            // matchId / playerId arrive from the "Rate" shortcut on a match squad
+            // and pre-fill the whole match context for the rater.
+            return View(_ratingRepository.BuildFormModel(matchId, playerId));
         }
 
         // ── Cascade JSON endpoints (League → Home → Away → Match → Player) ──

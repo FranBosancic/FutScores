@@ -10,7 +10,13 @@ namespace ProbaMala.Repositories
     {
         List<RatingDetailsViewModel> GetAll(string? query = null);
         RatingDetailsViewModel? GetById(int id);
-        RatingFormViewModel BuildFormModel();
+
+        /// <summary>
+        /// Builds a blank rating form, or — when a match (and optionally a player)
+        /// is supplied — one pre-filled with the whole match context so the rater
+        /// only has to pick themselves, set a score, and write a comment.
+        /// </summary>
+        RatingFormViewModel BuildFormModel(int? matchId = null, int? playerId = null);
         RatingFormViewModel? GetFormById(int id);
         void PopulateFormOptions(RatingFormViewModel model);
 
@@ -82,7 +88,11 @@ namespace ProbaMala.Repositories
                     MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
                     UserName = $"{rating.User.FirstName} {rating.User.LastName}",
                     Score = rating.Score,
-                    Comment = rating.Comment
+                    Comment = rating.Comment,
+                    HomeTeamName = rating.Match.HomeTeam.Name,
+                    AwayTeamName = rating.Match.AwayTeam.Name,
+                    HomeGoals = rating.Match.HomeGoals,
+                    AwayGoals = rating.Match.AwayGoals
                 })
                 .ToList();
         }
@@ -109,14 +119,44 @@ namespace ProbaMala.Repositories
                     MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
                     UserName = $"{rating.User.FirstName} {rating.User.LastName}",
                     Score = rating.Score,
-                    Comment = rating.Comment
+                    Comment = rating.Comment,
+                    HomeTeamName = rating.Match.HomeTeam.Name,
+                    AwayTeamName = rating.Match.AwayTeam.Name,
+                    HomeGoals = rating.Match.HomeGoals,
+                    AwayGoals = rating.Match.AwayGoals
                 })
                 .FirstOrDefault();
         }
 
-        public RatingFormViewModel BuildFormModel()
+        public RatingFormViewModel BuildFormModel(int? matchId = null, int? playerId = null)
         {
             var model = new RatingFormViewModel();
+
+            // Pre-fill the cascade from a known match (e.g. the "Rate" button on a
+            // match squad). League / home / away are derived from the match itself,
+            // and the player is only honoured when they actually featured in it.
+            if (matchId.HasValue)
+            {
+                var match = _dbContext.Matches
+                    .AsNoTracking()
+                    .Where(m => m.Id == matchId.Value)
+                    .Select(m => new { m.Id, m.LeagueId, m.HomeTeamId, m.AwayTeamId })
+                    .FirstOrDefault();
+
+                if (match != null)
+                {
+                    model.LeagueId = match.LeagueId;
+                    model.HomeTeamId = match.HomeTeamId;
+                    model.AwayTeamId = match.AwayTeamId;
+                    model.MatchId = match.Id;
+
+                    if (playerId.HasValue && IsPlayerInMatch(playerId.Value, match.Id))
+                    {
+                        model.PlayerId = playerId.Value;
+                    }
+                }
+            }
+
             PopulateFormOptions(model);
             return model;
         }

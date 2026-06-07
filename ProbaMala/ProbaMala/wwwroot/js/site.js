@@ -50,6 +50,25 @@
 		});
 	}
 
+	// ── Clickable rows ──
+	// A row carrying data-row-href navigates there when clicked, except when the
+	// click lands on a real control (link, button, form field) so those keep their
+	// own behaviour. Delegated on document so AJAX-refreshed rows work too.
+	document.addEventListener("click", (event) => {
+		const target = event.target;
+
+		if (!(target instanceof Element) || target.closest("a, button, input, select, textarea, label")) {
+			return;
+		}
+
+		const row = target.closest("[data-row-href]");
+		const href = row?.getAttribute("data-row-href");
+
+		if (href) {
+			window.location.assign(href);
+		}
+	});
+
 	document.querySelectorAll("[data-search-form]").forEach((form) => {
 		form.addEventListener("submit", (event) => {
 			event.preventDefault();

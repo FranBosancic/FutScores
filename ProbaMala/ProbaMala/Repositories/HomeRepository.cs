@@ -30,6 +30,9 @@ namespace ProbaMala.Repositories
             var leagueLookup = leagues.ToDictionary(league => league.Id);
             var clubLookup = clubs.ToDictionary(club => club.Id);
             var playerLookup = players.ToDictionary(player => player.Id);
+            var ratingCountByMatch = ratings
+                .GroupBy(rating => rating.MatchId)
+                .ToDictionary(group => group.Key, group => group.Count());
 
             var recentMatches = matches
                 .OrderByDescending(match => match.Date)
@@ -56,7 +59,8 @@ namespace ProbaMala.Repositories
                         Kickoff = match.Date,
                         KickoffLabel = match.Date.ToString("MMM dd, yyyy"),
                         StatusLabel = statusLabel,
-                        StatusTone = statusTone
+                        StatusTone = statusTone,
+                        RatingCount = ratingCountByMatch.TryGetValue(match.Id, out var ratingCount) ? ratingCount : 0
                     };
                 })
                 .ToList();

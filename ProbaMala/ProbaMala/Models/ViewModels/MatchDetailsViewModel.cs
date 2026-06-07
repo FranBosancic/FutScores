@@ -19,6 +19,17 @@ namespace ProbaMala.Models.ViewModels
 
         public string Score => $"{HomeGoals} - {AwayGoals}";
 
+        // ── Match stats (only populated on the Details page) ──
+        public double? AverageRating { get; set; }
+        public double? HomeAverageRating { get; set; }
+        public double? AwayAverageRating { get; set; }
+        public string? TopRatedPlayerName { get; set; }
+        public double? TopRatedPlayerScore { get; set; }
+
+        // Side-by-side squads, with per-player ratings for this match.
+        public List<MatchSquadPlayerViewModel>? HomeSquad { get; set; }
+        public List<MatchSquadPlayerViewModel>? AwaySquad { get; set; }
+
         // Only populated on the Details page (null on the Index list).
         public List<RatingDetailsViewModel>? Ratings { get; set; }
     }
