@@ -7,14 +7,10 @@ namespace ProbaMala.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IHomeRepository _homeRepository;
 
-        public HomeController(
-            ILogger<HomeController> logger,
-            IHomeRepository homeRepository)
+        public HomeController(IHomeRepository homeRepository)
         {
-            _logger = logger;
             _homeRepository = homeRepository;
         }
 
