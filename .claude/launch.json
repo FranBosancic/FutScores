@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "futscores",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "ProbaMala/ProbaMala/ProbaMala.csproj",
+        "--launch-profile",
+        "http"
+      ],
+      "port": 5009
+    }
+  ]
+}

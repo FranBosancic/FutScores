@@ -1,0 +1,68 @@
+@model List<ProbaMala.Models.ViewModels.RatingDetailsViewModel>
+@{
+    @* Which entity's own page is this rendered on — that column is redundant and hidden.
+       player  → show Match + Reviewer
+       match   → show Player + Reviewer
+       user    → show Player + Match *@
+    var hide = ViewData["RatingHide"] as string ?? "player";
+
+    var primaryHeader = hide == "player" ? "Match" : "Player";
+    var secondaryHeader = hide == "user" ? "Match" : "Reviewer";
+}
+
+@if (Model == null || !Model.Any())
+{
+    <div class="px-4 py-8 text-center text-sm text-slate-500">No ratings yet.</div>
+}
+else
+{
+    @* Column headers *@
+    <div class="grid grid-cols-[1.3fr_1fr_3rem] items-center gap-3 border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+        <span>@primaryHeader</span>
+        <span>@secondaryHeader</span>
+        <span class="text-right">Rtg</span>
+    </div>
+
+    @foreach (var rating in Model)
+    {
+        @* Score badge color *@
+        var scoreBadgeClass = rating.Score switch
+        {
+            >= 9 => "bg-emerald-500/15 text-emerald-300",
+            >= 7 => "bg-lime-500/15 text-lime-300",
+            >= 5 => "bg-amber-500/15 text-amber-300",
+            _    => "bg-rose-500/15 text-rose-300"
+        };
+
+        @* Resolve the two visible columns based on context *@
+        var primaryRoute = hide == "player" ? "match-details" : "player-details";
+        var primaryId = hide == "player" ? rating.MatchId : rating.PlayerId;
+        var primaryText = hide == "player" ? rating.MatchDescription : rating.PlayerName;
+
+        var secondaryRoute = hide == "user" ? "match-details" : "user-details";
+        var secondaryId = hide == "user" ? rating.MatchId : rating.UserId;
+        var secondaryText = hide == "user" ? rating.MatchDescription : rating.UserName;
+
+        <div class="grid grid-cols-[1.3fr_1fr_3rem] items-center gap-3 border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
+
+            @* Primary entity + comment excerpt *@
+            <div class="min-w-0">
+                <a asp-route="@primaryRoute" asp-route-id="@primaryId"
+                   class="block truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@primaryText</a>
+                @if (!string.IsNullOrWhiteSpace(rating.Comment))
+                {
+                    <span class="mt-0.5 block truncate text-xs text-slate-500">@rating.Comment</span>
+                }
+            </div>
+
+            @* Secondary entity *@
+            <a asp-route="@secondaryRoute" asp-route-id="@secondaryId"
+               class="truncate text-sm text-slate-400 transition hover:text-slate-200">@secondaryText</a>
+
+            @* Score badge → full rating *@
+            <a asp-route="rating-details" asp-route-id="@rating.Id" class="flex justify-end" title="View rating">
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold @scoreBadgeClass">@rating.Score</span>
+            </a>
+        </div>
+    }
+}

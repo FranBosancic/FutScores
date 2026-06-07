@@ -2,12 +2,28 @@ html {
   min-height: 100%;
 }
 
+/* Sticky footer: lay the page out as a vertical column and let <main> grow so
+   the footer always sits at the bottom — even on short pages like the
+   create/edit forms. Defined in plain CSS so it never depends on Tailwind
+   utility classes being present in the generated stylesheet. */
 body {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
 }
 
 select {
   color-scheme: dark;
+}
+
+/* Cascade steps render disabled until their parent step is chosen. */
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 select,

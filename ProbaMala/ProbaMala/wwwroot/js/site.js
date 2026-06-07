@@ -400,4 +400,144 @@
 			}
 		});
 	});
+
+	// ── Dependent <select> cascade (e.g. League → Home → Away → Match → Player) ──
+	// Each dependent select declares the keys it depends on, the endpoint to fetch
+	// its options from, and how to map parent values onto query params. Changing a
+	// step rebuilds every step below it, so a stale downstream choice can't survive.
+	document.querySelectorAll("[data-cascade-chain]").forEach((chain) => {
+		const selects = {};
+		// Document order == chain order (league, home, away, match, player).
+		const keys = [];
+		chain.querySelectorAll("select[data-cascade-key]").forEach((select) => {
+			const key = select.getAttribute("data-cascade-key");
+			selects[key] = select;
+			keys.push(key);
+		});
+
+		if (keys.length === 0) {
+			return;
+		}
+
+		const configOf = (select) => {
+			const dependsRaw = select.getAttribute("data-cascade-depends") || "";
+			const paramsRaw = select.getAttribute("data-cascade-params") || "";
+
+			return {
+				key: select.getAttribute("data-cascade-key"),
+				url: select.getAttribute("data-cascade-url"),
+				placeholder: select.getAttribute("data-cascade-placeholder") || "Select an option",
+				depends: dependsRaw.split(",").map((value) => value.trim()).filter(Boolean),
+				params: paramsRaw
+					.split(",")
+					.map((pair) => pair.split(":"))
+					.filter((parts) => parts.length === 2)
+					.map(([param, sourceKey]) => ({ param: param.trim(), sourceKey: sourceKey.trim() }))
+			};
+		};
+
+		// Steps that fetch their own options, kept in chain order.
+		const dependents = keys
+			.map((key) => selects[key])
+			.filter((select) => select.getAttribute("data-cascade-url"))
+			.map(configOf);
+
+		const valueOf = (key) => (selects[key] ? selects[key].value : "");
+
+		const addPlaceholder = (select, text) => {
+			const placeholder = document.createElement("option");
+			placeholder.value = "";
+			placeholder.textContent = text;
+			select.appendChild(placeholder);
+		};
+
+		const resetSelect = (config) => {
+			const select = selects[config.key];
+			select.innerHTML = "";
+			addPlaceholder(select, config.placeholder);
+			select.value = "";
+			select.disabled = true;
+		};
+
+		const populateSelect = (config, options) => {
+			const select = selects[config.key];
+			select.innerHTML = "";
+			addPlaceholder(select, config.placeholder);
+
+			let currentGroupName = null;
+			let currentGroupEl = null;
+
+			(Array.isArray(options) ? options : []).forEach((option) => {
+				const optionEl = document.createElement("option");
+				optionEl.value = String(option.id);
+				optionEl.textContent = option.label;
+
+				if (option.group) {
+					if (option.group !== currentGroupName) {
+						currentGroupName = option.group;
+						currentGroupEl = document.createElement("optgroup");
+						currentGroupEl.label = option.group;
+						select.appendChild(currentGroupEl);
+					}
+
+					currentGroupEl.appendChild(optionEl);
+				} else {
+					currentGroupName = null;
+					currentGroupEl = null;
+					select.appendChild(optionEl);
+				}
+			});
+
+			select.value = "";
+			select.disabled = false;
+		};
+
+		const loadDependent = async (config) => {
+			const ready = config.depends.every((key) => valueOf(key));
+
+			if (!ready || !config.url) {
+				resetSelect(config);
+				return;
+			}
+
+			const query = config.params
+				.map(({ param, sourceKey }) => `${encodeURIComponent(param)}=${encodeURIComponent(valueOf(sourceKey))}`)
+				.join("&");
+
+			try {
+				const response = await fetch(query ? `${config.url}?${query}` : config.url, {
+					headers: { "X-Requested-With": "XMLHttpRequest" }
+				});
+
+				if (!response.ok) {
+					resetSelect(config);
+					return;
+				}
+
+				populateSelect(config, await response.json());
+			} catch {
+				resetSelect(config);
+			}
+		};
+
+		const refreshBelow = async (changedKey) => {
+			const changedIndex = keys.indexOf(changedKey);
+			const below = dependents.filter((config) => keys.indexOf(config.key) > changedIndex);
+
+			// Sequential so each step sees its parent already reset/loaded.
+			for (const config of below) {
+				await loadDependent(config);
+			}
+		};
+
+		keys.forEach((key) => {
+			selects[key].addEventListener("change", () => {
+				if (window.jQuery) {
+					window.jQuery(selects[key]).valid();
+				}
+
+				refreshBelow(key);
+			});
+		});
+	});
 });

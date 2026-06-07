@@ -1,13 +1,26 @@
 @model MatchFormViewModel
 
-<div asp-validation-summary="ModelOnly" class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></div>
+@{
+    // Server-side "ready" flags decide which cascade steps render enabled on first
+    // paint (so Edit / invalid-postback works even before the script runs). The
+    // cascade script then keeps them in sync as the user changes selections.
+    var homeReady = Model.LeagueId.HasValue;
+    var awayReady = Model.LeagueId.HasValue && Model.HomeTeamId.HasValue;
+
+    string? Disabled(bool ready) => ready ? null : "disabled";
+
+    const string fieldClass = "w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800";
+}
+
+<div asp-validation-summary="ModelOnly" class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200 empty:hidden"></div>
 
 <input asp-for="Id" type="hidden" />
 
-<div class="grid gap-6 lg:grid-cols-2">
+<div class="grid gap-6 lg:grid-cols-2" data-cascade-chain>
     <div>
         <label asp-for="LeagueId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <select asp-for="LeagueId" asp-items="Model.LeagueOptions" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800">
+        <select asp-for="LeagueId" asp-items="Model.LeagueOptions" class="@fieldClass"
+                data-cascade-key="league">
             <option value="">Select a league</option>
         </select>
         <span asp-validation-for="LeagueId" class="mt-2 block text-sm text-rose-300"></span>
@@ -29,7 +42,13 @@
 
     <div>
         <label asp-for="HomeTeamId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <select asp-for="HomeTeamId" asp-items="Model.ClubOptions" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800">
+        <select asp-for="HomeTeamId" asp-items="Model.HomeTeamOptions" class="@fieldClass"
+                disabled="@Disabled(homeReady)"
+                data-cascade-key="home"
+                data-cascade-depends="league"
+                data-cascade-url="@Url.RouteUrl("match-clubs")"
+                data-cascade-params="leagueId:league"
+                data-cascade-placeholder="Select a home team">
             <option value="">Select a home team</option>
         </select>
         <span asp-validation-for="HomeTeamId" class="mt-2 block text-sm text-rose-300"></span>
@@ -37,7 +56,13 @@
 
     <div>
         <label asp-for="AwayTeamId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <select asp-for="AwayTeamId" asp-items="Model.ClubOptions" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800">
+        <select asp-for="AwayTeamId" asp-items="Model.AwayTeamOptions" class="@fieldClass"
+                disabled="@Disabled(awayReady)"
+                data-cascade-key="away"
+                data-cascade-depends="league,home"
+                data-cascade-url="@Url.RouteUrl("match-clubs")"
+                data-cascade-params="leagueId:league,excludeId:home"
+                data-cascade-placeholder="Select an away team">
             <option value="">Select an away team</option>
         </select>
         <span asp-validation-for="AwayTeamId" class="mt-2 block text-sm text-rose-300"></span>
@@ -45,13 +70,13 @@
 
     <div>
         <label asp-for="HomeGoals" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <input asp-for="HomeGoals" type="number" min="0" max="99" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800" />
+        <input asp-for="HomeGoals" type="number" min="0" max="99" class="@fieldClass" />
         <span asp-validation-for="HomeGoals" class="mt-2 block text-sm text-rose-300"></span>
     </div>
 
     <div>
         <label asp-for="AwayGoals" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <input asp-for="AwayGoals" type="number" min="0" max="99" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800" />
+        <input asp-for="AwayGoals" type="number" min="0" max="99" class="@fieldClass" />
         <span asp-validation-for="AwayGoals" class="mt-2 block text-sm text-rose-300"></span>
     </div>
 </div>

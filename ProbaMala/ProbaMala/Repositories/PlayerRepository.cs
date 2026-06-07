@@ -69,7 +69,11 @@ namespace ProbaMala.Repositories
             return _dbContext.Players
                 .AsNoTracking()
                 .Include(player => player.Club)
+                .Include(player => player.Ratings).ThenInclude(rating => rating.User)
+                .Include(player => player.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.HomeTeam)
+                .Include(player => player.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.AwayTeam)
                 .Where(player => player.Id == id)
+                .AsEnumerable()
                 .Select(player => new PlayerDetailsViewModel
                 {
                     Id = player.Id,
@@ -80,7 +84,22 @@ namespace ProbaMala.Repositories
                     Position = player.Position,
                     Nationality = player.Nationality,
                     ClubName = player.Club.Name,
-                    RatingCount = player.Ratings.Count
+                    RatingCount = player.Ratings.Count,
+                    Ratings = player.Ratings
+                        .OrderByDescending(rating => rating.Match.Date)
+                        .Select(rating => new RatingDetailsViewModel
+                        {
+                            Id = rating.Id,
+                            PlayerId = rating.PlayerId,
+                            MatchId = rating.MatchId,
+                            UserId = rating.UserId,
+                            PlayerName = $"{player.FirstName} {player.LastName}",
+                            MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
+                            UserName = $"{rating.User.FirstName} {rating.User.LastName}",
+                            Score = rating.Score,
+                            Comment = rating.Comment
+                        })
+                        .ToList()
                 })
                 .FirstOrDefault();
         }

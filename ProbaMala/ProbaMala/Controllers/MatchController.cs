@@ -59,6 +59,14 @@ namespace ProbaMala.Controllers
             return View(_matchRepository.BuildFormModel());
         }
 
+        // Cascade JSON endpoint: clubs in a league (home/away team pickers).
+        [HttpGet("klubovi")]
+        [HttpGet("~/matches/clubs", Name = "match-clubs")]
+        public IActionResult ClubsInLeague(int leagueId, int? excludeId)
+        {
+            return Json(_matchRepository.GetClubsInLeague(leagueId, excludeId));
+        }
+
         [HttpPost("novo")]
         [HttpPost("~/matches/create")]
         [ValidateAntiForgeryToken]

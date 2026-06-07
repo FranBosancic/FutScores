@@ -24,6 +24,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/tailwind.generated.css" asp-append-version="true" />
+    @* flatpickr base stylesheet — required for the date pickers to position/hide correctly.
+       Must load BEFORE site.css so our custom flatpickr theme overrides win. Without this,
+       the calendar renders full-size in normal flow and inflates the page (footer stranded). *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProbaMala.styles.css" asp-append-version="true" />
 </head>
@@ -49,6 +53,18 @@
                    class="transition hover:text-white @ActiveClass(currentController == "Home" && currentAction == "Index")">
                     Dashboard
                 </a>
+
+                @* Global section tabs — the cross-league lists *@
+                <a asp-route="matches-index" class="transition hover:text-white @ActiveClass(currentController == "Match")">Matches</a>
+                <a asp-route="players-index" class="transition hover:text-white @ActiveClass(currentController == "Player")">Players</a>
+                <a asp-route="ratings-index" class="transition hover:text-white @ActiveClass(currentController == "Rating")">Ratings</a>
+                <a asp-route="users-index" class="transition hover:text-white @ActiveClass(currentController == "User")">Users</a>
+
+                @* Divider between the global tabs and the per-league dropdowns *@
+                @if (navLeagues.Any())
+                {
+                    <span class="h-4 w-px self-center bg-slate-700"></span>
+                }
 
                 @*
                     One item per league. Hovering reveals a dropdown with Clubs and Matches
@@ -145,6 +161,10 @@
                 <a asp-route="home-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">
                     Dashboard
                 </a>
+                <a asp-route="matches-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Matches</a>
+                <a asp-route="players-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Players</a>
+                <a asp-route="ratings-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Ratings</a>
+                <a asp-route="users-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Users</a>
 
                 @foreach (var league in navLeagues)
                 {

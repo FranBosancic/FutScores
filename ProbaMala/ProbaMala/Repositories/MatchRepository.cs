@@ -14,6 +14,7 @@ namespace ProbaMala.Repositories
         MatchFormViewModel BuildFormModel();
         MatchFormViewModel? GetFormById(int id);
         void PopulateFormOptions(MatchFormViewModel model);
+        List<CascadeOptionViewModel> GetClubsInLeague(int leagueId, int? excludeClubId = null);
         bool LeagueExists(int leagueId);
         bool ClubExists(int clubId);
         bool ClubBelongsToLeague(int clubId, int leagueId);
@@ -95,6 +96,8 @@ namespace ProbaMala.Repositories
                 .Include(match => match.League)
                 .Include(match => match.HomeTeam)
                 .Include(match => match.AwayTeam)
+                .Include(match => match.Ratings).ThenInclude(rating => rating.Player)
+                .Include(match => match.Ratings).ThenInclude(rating => rating.User)
                 .Where(match => match.Id == id)
                 .AsEnumerable()
                 .Select(match => new MatchDetailsViewModel
@@ -112,7 +115,22 @@ namespace ProbaMala.Repositories
                     AwayTeamName = match.AwayTeam.Name,
                     HomeGoals = match.HomeGoals,
                     AwayGoals = match.AwayGoals,
-                    RatingCount = match.Ratings.Count
+                    RatingCount = match.Ratings.Count,
+                    Ratings = match.Ratings
+                        .OrderByDescending(rating => rating.Score)
+                        .Select(rating => new RatingDetailsViewModel
+                        {
+                            Id = rating.Id,
+                            PlayerId = rating.PlayerId,
+                            MatchId = rating.MatchId,
+                            UserId = rating.UserId,
+                            PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
+                            MatchDescription = $"{match.HomeTeam.Name} vs {match.AwayTeam.Name} on {match.Date:yyyy-MM-dd}",
+                            UserName = $"{rating.User.FirstName} {rating.User.LastName}",
+                            Score = rating.Score,
+                            Comment = rating.Comment
+                        })
+                        .ToList()
                 })
                 .FirstOrDefault();
         }
@@ -163,15 +181,43 @@ namespace ProbaMala.Repositories
                 })
                 .ToList();
 
-            model.ClubOptions = _dbContext.Clubs
+            // Only build the club lists once a league is known, so a fresh Create
+            // form renders the team selects empty + disabled, while Edit / invalid
+            // postback re-renders them fully and pre-selected.
+            if (model.LeagueId.HasValue)
+            {
+                var clubs = GetClubsInLeague(model.LeagueId.Value);
+                model.HomeTeamOptions = ToSelectList(clubs, model.HomeTeamId);
+
+                var awayClubs = model.HomeTeamId.HasValue
+                    ? clubs.Where(club => club.Id != model.HomeTeamId.Value).ToList()
+                    : clubs;
+                model.AwayTeamOptions = ToSelectList(awayClubs, model.AwayTeamId);
+            }
+        }
+
+        public List<CascadeOptionViewModel> GetClubsInLeague(int leagueId, int? excludeClubId = null)
+        {
+            return _dbContext.Clubs
                 .AsNoTracking()
-                .Include(club => club.League)
+                .Where(club => club.LeagueId == leagueId && (excludeClubId == null || club.Id != excludeClubId))
                 .OrderBy(club => club.Name)
-                .Select(club => new SelectListItem
+                .Select(club => new CascadeOptionViewModel
                 {
-                    Value = club.Id.ToString(),
-                    Text = $"{club.Name} ({club.League.Name})",
-                    Selected = model.HomeTeamId == club.Id || model.AwayTeamId == club.Id
+                    Id = club.Id,
+                    Label = club.Name
+                })
+                .ToList();
+        }
+
+        private static List<SelectListItem> ToSelectList(IEnumerable<CascadeOptionViewModel> options, int? selectedId)
+        {
+            return options
+                .Select(option => new SelectListItem
+                {
+                    Value = option.Id.ToString(),
+                    Text = option.Label,
+                    Selected = selectedId == option.Id
                 })
                 .ToList();
         }

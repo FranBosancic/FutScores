@@ -95,4 +95,19 @@
         </div>
     </div>
 
+    @* Ratings & matches panel *@
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+        <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+            <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Ratings &amp; matches</span>
+            <a asp-route="rating-create" class="flex items-center gap-1 text-xs font-semibold text-lime-400 transition hover:text-lime-300">
+                <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                </svg>
+                Add rating
+            </a>
+        </div>
+        @{ ViewData["RatingHide"] = "player"; }
+        <partial name="_RatingMiniList" model="Model.Ratings" />
+    </div>
+
 </div>

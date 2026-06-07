@@ -31,6 +31,12 @@ namespace ProbaMala.Models.ViewModels
         public int AwayGoals { get; set; }
 
         public IEnumerable<SelectListItem> LeagueOptions { get; set; } = [];
-        public IEnumerable<SelectListItem> ClubOptions { get; set; } = [];
+
+        // Home/Away clubs cascade off the chosen league. Each list is only
+        // populated once its parent value is known (on Edit / invalid postback);
+        // otherwise the matching <select> starts empty + disabled and is filled in
+        // by the cascade script. AwayTeamOptions additionally excludes the home club.
+        public IEnumerable<SelectListItem> HomeTeamOptions { get; set; } = [];
+        public IEnumerable<SelectListItem> AwayTeamOptions { get; set; } = [];
     }
 }

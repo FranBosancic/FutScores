@@ -17,6 +17,18 @@
         >= 5 => "Mixed return",
         _ => "Underwhelming night"
     };
+
+    // Server-side "ready" flags decide which cascade steps render enabled on first
+    // paint (so Edit / invalid-postback works even before the script runs). The
+    // cascade script then keeps them in sync as the user changes selections.
+    var homeReady = Model.LeagueId.HasValue;
+    var awayReady = Model.LeagueId.HasValue && Model.HomeTeamId.HasValue;
+    var matchReady = Model.HomeTeamId.HasValue && Model.AwayTeamId.HasValue;
+    var playerReady = Model.MatchId.HasValue;
+
+    string? Disabled(bool ready) => ready ? null : "disabled";
+
+    const string selectClass = "w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800";
 }
 
 <div asp-validation-summary="ModelOnly" class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200 empty:hidden"></div>
@@ -25,37 +37,92 @@
 
 <div class="space-y-6">
 
-    @* Player / Match / User / live snapshot *@
+    @* ── Match context cascade: League → Home → Away → Match → Player ── *@
+    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4" data-cascade-chain>
+        <div class="mb-4 flex items-center justify-between gap-4">
+            <div class="text-xs font-semibold uppercase tracking-widest text-slate-400">Match context</div>
+            <span class="rounded border border-slate-700 px-2 py-0.5 text-xs font-semibold uppercase tracking-widest text-slate-500">Narrow it down</span>
+        </div>
+
+        <div class="grid gap-5 lg:grid-cols-2">
+
+            @* 1. League *@
+            <div class="lg:col-span-2">
+                <label asp-for="LeagueId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                <select asp-for="LeagueId" asp-items="Model.LeagueOptions" class="@selectClass"
+                        data-cascade-key="league">
+                    <option value="">Select a league</option>
+                </select>
+                <span asp-validation-for="LeagueId" class="mt-2 block text-sm text-rose-300"></span>
+            </div>
+
+            @* 2. Home team *@
+            <div>
+                <label asp-for="HomeTeamId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                <select asp-for="HomeTeamId" asp-items="Model.HomeTeamOptions" class="@selectClass"
+                        disabled="@Disabled(homeReady)"
+                        data-cascade-key="home"
+                        data-cascade-depends="league"
+                        data-cascade-url="@Url.RouteUrl("rating-clubs")"
+                        data-cascade-params="leagueId:league"
+                        data-cascade-placeholder="Select a home team">
+                    <option value="">Select a home team</option>
+                </select>
+                <span asp-validation-for="HomeTeamId" class="mt-2 block text-sm text-rose-300"></span>
+            </div>
+
+            @* 3. Away team *@
+            <div>
+                <label asp-for="AwayTeamId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                <select asp-for="AwayTeamId" asp-items="Model.AwayTeamOptions" class="@selectClass"
+                        disabled="@Disabled(awayReady)"
+                        data-cascade-key="away"
+                        data-cascade-depends="league,home"
+                        data-cascade-url="@Url.RouteUrl("rating-clubs")"
+                        data-cascade-params="leagueId:league,excludeId:home"
+                        data-cascade-placeholder="Select an away team">
+                    <option value="">Select an away team</option>
+                </select>
+                <span asp-validation-for="AwayTeamId" class="mt-2 block text-sm text-rose-300"></span>
+            </div>
+
+            @* 4. Match *@
+            <div class="lg:col-span-2">
+                <label asp-for="MatchId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                <select asp-for="MatchId" asp-items="Model.MatchOptions" class="@selectClass"
+                        disabled="@Disabled(matchReady)"
+                        data-cascade-key="match"
+                        data-cascade-depends="home,away"
+                        data-cascade-url="@Url.RouteUrl("rating-matches")"
+                        data-cascade-params="homeTeamId:home,awayTeamId:away"
+                        data-cascade-placeholder="Select a match">
+                    <option value="">Select a match</option>
+                </select>
+                <span asp-validation-for="MatchId" class="mt-2 block text-sm text-rose-300"></span>
+            </div>
+
+            @* 5. Player *@
+            <div class="lg:col-span-2">
+                <label asp-for="PlayerId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                <select asp-for="PlayerId" asp-items="Model.PlayerOptions" class="@selectClass"
+                        disabled="@Disabled(playerReady)"
+                        data-cascade-key="player"
+                        data-cascade-depends="match"
+                        data-cascade-url="@Url.RouteUrl("rating-players")"
+                        data-cascade-params="matchId:match"
+                        data-cascade-placeholder="Select a player">
+                    <option value="">Select a player</option>
+                </select>
+                <span asp-validation-for="PlayerId" class="mt-2 block text-sm text-rose-300"></span>
+            </div>
+        </div>
+    </div>
+
+    @* Rater + live score snapshot *@
     <div class="grid gap-6 lg:grid-cols-2">
         <div>
-            <label asp-for="PlayerId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-            <partial name="_AutocompleteField" model='new AutocompleteFieldViewModel
-            {
-                Label = "Player",
-                HiddenInputName = nameof(Model.PlayerId),
-                HiddenInputId = Html.IdFor(model => model.PlayerId).ToString(),
-                HiddenValue = Model.PlayerId,
-                VisibleInputName = nameof(Model.PlayerLabel),
-                VisibleInputId = Html.IdFor(model => model.PlayerLabel).ToString(),
-                VisibleValue = Model.PlayerLabel,
-                SearchUrl = Url.RouteUrl("rating-player-search") ?? string.Empty,
-                Placeholder = "Search players by first or last name",
-                EmptyStateText = "No players found."
-            }' />
-            <span asp-validation-for="PlayerId" class="mt-2 block text-sm text-rose-300"></span>
-        </div>
-
-        <div>
-            <label asp-for="MatchId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-            <select asp-for="MatchId" asp-items="Model.MatchOptions" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800">
-                <option value="">Select a match</option>
-            </select>
-            <span asp-validation-for="MatchId" class="mt-2 block text-sm text-rose-300"></span>
-        </div>
-
-        <div>
             <label asp-for="UserId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-            <select asp-for="UserId" asp-items="Model.UserOptions" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800">
+            <select asp-for="UserId" asp-items="Model.UserOptions" class="@selectClass">
                 <option value="">Select a user</option>
             </select>
             <span asp-validation-for="UserId" class="mt-2 block text-sm text-rose-300"></span>

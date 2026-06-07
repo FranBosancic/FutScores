@@ -18,5 +18,8 @@ namespace ProbaMala.Models.ViewModels
         public int RatingCount { get; set; }
 
         public string Score => $"{HomeGoals} - {AwayGoals}";
+
+        // Only populated on the Details page (null on the Index list).
+        public List<RatingDetailsViewModel>? Ratings { get; set; }
     }
 }

@@ -13,5 +13,8 @@ namespace ProbaMala.Models.ViewModels
         public string Nationality { get; set; } = null!;
         public string ClubName { get; set; } = null!;
         public int RatingCount { get; set; }
+
+        // Only populated on the Details page (null on the Index list).
+        public List<RatingDetailsViewModel>? Ratings { get; set; }
     }
 }

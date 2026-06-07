@@ -59,14 +59,33 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Users
                 .AsNoTracking()
+                .Include(user => user.Ratings).ThenInclude(rating => rating.Player)
+                .Include(user => user.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.HomeTeam)
+                .Include(user => user.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.AwayTeam)
                 .Where(user => user.Id == id)
+                .AsEnumerable()
                 .Select(user => new UserDetailsViewModel
                 {
                     Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Email = user.Email,
-                    RatingCount = user.Ratings.Count
+                    RatingCount = user.Ratings.Count,
+                    Ratings = user.Ratings
+                        .OrderByDescending(rating => rating.Match.Date)
+                        .Select(rating => new RatingDetailsViewModel
+                        {
+                            Id = rating.Id,
+                            PlayerId = rating.PlayerId,
+                            MatchId = rating.MatchId,
+                            UserId = rating.UserId,
+                            PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
+                            MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
+                            UserName = $"{user.FirstName} {user.LastName}",
+                            Score = rating.Score,
+                            Comment = rating.Comment
+                        })
+                        .ToList()
                 })
                 .FirstOrDefault();
         }
