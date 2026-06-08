@@ -28,66 +28,70 @@ namespace ProbaMala.Repositories
 
         public List<UserDetailsViewModel> GetAll(string? query = null)
         {
-            var usersQuery = _dbContext.Users
-                .AsNoTracking()
-                .AsQueryable();
+            var usersQuery = _dbContext.Users.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                var normalizedQuery = query.Trim().ToLower();
-                usersQuery = usersQuery.Where(user =>
-                    user.FirstName.ToLower().Contains(normalizedQuery) ||
-                    user.LastName.ToLower().Contains(normalizedQuery) ||
-                    user.Email.ToLower().Contains(normalizedQuery));
+                var q = query.Trim().ToLower();
+                usersQuery = usersQuery.Where(u =>
+                    u.FirstName.ToLower().Contains(q) ||
+                    u.LastName.ToLower().Contains(q) ||
+                    u.Email.ToLower().Contains(q));
             }
 
             return usersQuery
-                .OrderBy(user => user.LastName)
-                .ThenBy(user => user.FirstName)
-                .Select(user => new UserDetailsViewModel
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .Select(u => new UserDetailsViewModel
                 {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    RatingCount = user.Ratings.Count
+                    Id          = u.Id,
+                    FirstName   = u.FirstName,
+                    LastName    = u.LastName,
+                    Email       = u.Email,
+                    // Count inside EF query so it translates to SQL COUNT(*)
+                    RatingCount = u.Ratings.Count
                 })
                 .ToList();
         }
 
+        // Loads the user with their full rating history.
+        // We use .AsEnumerable() + FirstOrDefault pattern (load first, then project)
+        // because the nested RatingDetailsViewModel projection can't be translated to SQL.
         public UserDetailsViewModel? GetById(int id)
         {
-            return _dbContext.Users
+            var user = _dbContext.Users
                 .AsNoTracking()
-                .Include(user => user.Ratings).ThenInclude(rating => rating.Player)
-                .Include(user => user.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.HomeTeam)
-                .Include(user => user.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.AwayTeam)
-                .Where(user => user.Id == id)
-                .AsEnumerable()
-                .Select(user => new UserDetailsViewModel
-                {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    RatingCount = user.Ratings.Count,
-                    Ratings = user.Ratings
-                        .OrderByDescending(rating => rating.Match.Date)
-                        .Select(rating => new RatingDetailsViewModel
-                        {
-                            Id = rating.Id,
-                            PlayerId = rating.PlayerId,
-                            MatchId = rating.MatchId,
-                            UserId = rating.UserId,
-                            PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
-                            MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
-                            UserName = $"{user.FirstName} {user.LastName}",
-                            Score = rating.Score,
-                            Comment = rating.Comment
-                        })
-                        .ToList()
-                })
-                .FirstOrDefault();
+                .Include(u => u.Ratings).ThenInclude(r => r.Player)
+                .Include(u => u.Ratings).ThenInclude(r => r.Match).ThenInclude(m => m.HomeTeam)
+                .Include(u => u.Ratings).ThenInclude(r => r.Match).ThenInclude(m => m.AwayTeam)
+                .FirstOrDefault(u => u.Id == id);
+
+            if (user == null)
+                return null;
+
+            return new UserDetailsViewModel
+            {
+                Id          = user.Id,
+                FirstName   = user.FirstName,
+                LastName    = user.LastName,
+                Email       = user.Email,
+                RatingCount = user.Ratings.Count,
+                Ratings     = user.Ratings
+                    .OrderByDescending(r => r.Match.Date)
+                    .Select(r => new RatingDetailsViewModel
+                    {
+                        Id               = r.Id,
+                        PlayerId         = r.PlayerId,
+                        MatchId          = r.MatchId,
+                        UserId           = r.UserId,
+                        PlayerName       = $"{r.Player.FirstName} {r.Player.LastName}",
+                        MatchDescription = $"{r.Match.HomeTeam.Name} vs {r.Match.AwayTeam.Name} on {r.Match.Date:yyyy-MM-dd}",
+                        UserName         = $"{user.FirstName} {user.LastName}",
+                        Score            = r.Score,
+                        Comment          = r.Comment
+                    })
+                    .ToList()
+            };
         }
 
         public UserFormViewModel BuildFormModel()
@@ -99,24 +103,26 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Users
                 .AsNoTracking()
-                .Where(user => user.Id == id)
-                .Select(user => new UserFormViewModel
+                .Where(u => u.Id == id)
+                .Select(u => new UserFormViewModel
                 {
-                    Id = user.Id,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email
+                    Id        = u.Id,
+                    FirstName = u.FirstName,
+                    LastName  = u.LastName,
+                    Email     = u.Email
                 })
                 .FirstOrDefault();
         }
 
+        // Case-insensitive uniqueness check; excludeUserId prevents flagging the
+        // record's own email during an edit.
         public bool EmailExists(string email, int? excludeUserId = null)
         {
-            var normalizedEmail = email.Trim().ToLower();
+            var normalized = email.Trim().ToLower();
 
-            return _dbContext.Users.Any(user =>
-                user.Email.ToLower() == normalizedEmail &&
-                (!excludeUserId.HasValue || user.Id != excludeUserId.Value));
+            return _dbContext.Users.Any(u =>
+                u.Email.ToLower() == normalized &&
+                (!excludeUserId.HasValue || u.Id != excludeUserId.Value));
         }
 
         public int Add(UserFormViewModel model)
@@ -124,8 +130,8 @@ namespace ProbaMala.Repositories
             var entity = new User
             {
                 FirstName = model.FirstName.Trim(),
-                LastName = model.LastName.Trim(),
-                Email = model.Email.Trim()
+                LastName  = model.LastName.Trim(),
+                Email     = model.Email.Trim()
             };
 
             _dbContext.Users.Add(entity);
@@ -135,16 +141,14 @@ namespace ProbaMala.Repositories
 
         public bool Update(int id, UserFormViewModel model)
         {
-            var entity = _dbContext.Users.FirstOrDefault(user => user.Id == id);
+            var entity = _dbContext.Users.FirstOrDefault(u => u.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
             entity.FirstName = model.FirstName.Trim();
-            entity.LastName = model.LastName.Trim();
-            entity.Email = model.Email.Trim();
+            entity.LastName  = model.LastName.Trim();
+            entity.Email     = model.Email.Trim();
 
             _dbContext.SaveChanges();
             return true;
@@ -152,12 +156,10 @@ namespace ProbaMala.Repositories
 
         public bool Delete(int id)
         {
-            var entity = _dbContext.Users.FirstOrDefault(user => user.Id == id);
+            var entity = _dbContext.Users.FirstOrDefault(u => u.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
             _dbContext.Users.Remove(entity);
             _dbContext.SaveChanges();

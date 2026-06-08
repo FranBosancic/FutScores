@@ -8,7 +8,6 @@ namespace ProbaMala.Repositories
 {
     public interface IClubRepository
     {
-        /// <summary>Returns clubs optionally filtered by name search and/or league.</summary>
         List<ClubDetailsViewModel> GetAll(string? query = null, int? leagueId = null);
         ClubDetailsViewModel? GetById(int id);
         ClubFormViewModel BuildFormModel();
@@ -35,39 +34,38 @@ namespace ProbaMala.Repositories
         {
             var clubsQuery = _dbContext.Clubs
                 .AsNoTracking()
-                .Include(club => club.League)
+                .Include(c => c.League)
                 .AsQueryable();
 
-            // Filter by league when coming from a league nav dropdown
+            // Filter by league when coming from the league nav dropdown
             if (leagueId.HasValue)
-            {
-                clubsQuery = clubsQuery.Where(club => club.LeagueId == leagueId.Value);
-            }
+                clubsQuery = clubsQuery.Where(c => c.LeagueId == leagueId.Value);
 
             // Full-text search across name, league, and founded year
             if (!string.IsNullOrWhiteSpace(query))
             {
-                var normalizedQuery = query.Trim().ToLower();
-                var parsedYear = int.TryParse(normalizedQuery, out var foundedYear);
+                var q = query.Trim().ToLower();
+                var parsedYear = int.TryParse(q, out var foundedYear);
 
-                clubsQuery = clubsQuery.Where(club =>
-                    club.Name.ToLower().Contains(normalizedQuery) ||
-                    club.League.Name.ToLower().Contains(normalizedQuery) ||
-                    (parsedYear && club.FoundedDate.Year == foundedYear));
+                clubsQuery = clubsQuery.Where(c =>
+                    c.Name.ToLower().Contains(q) ||
+                    c.League.Name.ToLower().Contains(q) ||
+                    (parsedYear && c.FoundedDate.Year == foundedYear));
             }
 
             return clubsQuery
-                .OrderBy(club => club.Name)
-                .Select(club => new ClubDetailsViewModel
+                .OrderBy(c => c.Name)
+                .Select(c => new ClubDetailsViewModel
                 {
-                    Id = club.Id,
-                    LeagueId = club.LeagueId,
-                    Name = club.Name,
-                    FoundedDate = club.FoundedDate,
-                    LeagueName = club.League.Name,
-                    PlayerCount = club.Players.Count,
-                    MatchCount = club.HomeMatches.Count + club.AwayMatches.Count,
-                    CanDelete = club.Players.Count == 0 && club.HomeMatches.Count == 0 && club.AwayMatches.Count == 0
+                    Id          = c.Id,
+                    LeagueId    = c.LeagueId,
+                    Name        = c.Name,
+                    FoundedDate = c.FoundedDate,
+                    LeagueName  = c.League.Name,
+                    // Counts inside the EF query so they translate to SQL COUNT(*)
+                    PlayerCount = c.Players.Count,
+                    MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count,
+                    CanDelete   = c.Players.Count == 0 && c.HomeMatches.Count == 0 && c.AwayMatches.Count == 0
                 })
                 .ToList();
         }
@@ -76,32 +74,32 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Clubs
                 .AsNoTracking()
-                .Include(club => club.League)
-                .Where(club => club.Id == id)
-                .Select(club => new ClubDetailsViewModel
+                .Include(c => c.League)
+                .Where(c => c.Id == id)
+                .Select(c => new ClubDetailsViewModel
                 {
-                    Id = club.Id,
-                    LeagueId = club.LeagueId,
-                    Name = club.Name,
-                    FoundedDate = club.FoundedDate,
-                    LeagueName = club.League.Name,
-                    PlayerCount = club.Players.Count,
-                    MatchCount = club.HomeMatches.Count + club.AwayMatches.Count,
-                    CanDelete = club.Players.Count == 0 && club.HomeMatches.Count == 0 && club.AwayMatches.Count == 0,
-                    Players = club.Players
-                        .OrderBy(player => player.LastName)
-                        .ThenBy(player => player.FirstName)
-                        .Select(player => new PlayerDetailsViewModel
+                    Id          = c.Id,
+                    LeagueId    = c.LeagueId,
+                    Name        = c.Name,
+                    FoundedDate = c.FoundedDate,
+                    LeagueName  = c.League.Name,
+                    PlayerCount = c.Players.Count,
+                    MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count,
+                    CanDelete   = c.Players.Count == 0 && c.HomeMatches.Count == 0 && c.AwayMatches.Count == 0,
+                    Players = c.Players
+                        .OrderBy(p => p.LastName)
+                        .ThenBy(p => p.FirstName)
+                        .Select(p => new PlayerDetailsViewModel
                         {
-                            Id = player.Id,
-                            ClubId = player.ClubId,
-                            FirstName = player.FirstName,
-                            LastName = player.LastName,
-                            DateOfBirth = player.DateOfBirth,
-                            Position = player.Position,
-                            Nationality = player.Nationality,
-                            ClubName = club.Name,
-                            RatingCount = player.Ratings.Count
+                            Id          = p.Id,
+                            ClubId      = p.ClubId,
+                            FirstName   = p.FirstName,
+                            LastName    = p.LastName,
+                            DateOfBirth = p.DateOfBirth,
+                            Position    = p.Position,
+                            Nationality = p.Nationality,
+                            ClubName    = c.Name,
+                            RatingCount = p.Ratings.Count
                         })
                         .ToList()
                 })
@@ -119,20 +117,18 @@ namespace ProbaMala.Repositories
         {
             var model = _dbContext.Clubs
                 .AsNoTracking()
-                .Where(club => club.Id == id)
-                .Select(club => new ClubFormViewModel
+                .Where(c => c.Id == id)
+                .Select(c => new ClubFormViewModel
                 {
-                    Id = club.Id,
-                    Name = club.Name,
-                    FoundedDate = club.FoundedDate,
-                    LeagueId = club.LeagueId
+                    Id          = c.Id,
+                    Name        = c.Name,
+                    FoundedDate = c.FoundedDate,
+                    LeagueId    = c.LeagueId
                 })
                 .FirstOrDefault();
 
             if (model == null)
-            {
                 return null;
-            }
 
             PopulateFormOptions(model);
             return model;
@@ -142,45 +138,44 @@ namespace ProbaMala.Repositories
         {
             model.LeagueOptions = _dbContext.Leagues
                 .AsNoTracking()
-                .OrderBy(league => league.Name)
-                .Select(league => new SelectListItem
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem
                 {
-                    Value = league.Id.ToString(),
-                    Text = league.Name,
-                    Selected = model.LeagueId == league.Id
+                    Value    = l.Id.ToString(),
+                    Text     = l.Name,
+                    Selected = model.LeagueId == l.Id
                 })
                 .ToList();
         }
 
+        // Case-insensitive uniqueness check; excludeClubId prevents flagging the
+        // record's own name during an edit.
         public bool NameExists(string name, int? excludeClubId = null)
         {
-            var normalizedName = name.Trim().ToLower();
+            var normalized = name.Trim().ToLower();
 
-            return _dbContext.Clubs.Any(club =>
-                club.Name.ToLower() == normalizedName &&
-                (!excludeClubId.HasValue || club.Id != excludeClubId.Value));
+            return _dbContext.Clubs.Any(c =>
+                c.Name.ToLower() == normalized &&
+                (!excludeClubId.HasValue || c.Id != excludeClubId.Value));
         }
 
-        public bool LeagueExists(int leagueId)
-        {
-            return _dbContext.Leagues.Any(league => league.Id == leagueId);
-        }
+        public bool LeagueExists(int leagueId) =>
+            _dbContext.Leagues.Any(l => l.Id == leagueId);
 
-        public bool CanDelete(int id)
-        {
-            return _dbContext.Clubs
+        // A club is only deletable when it has no players and no matches.
+        public bool CanDelete(int id) =>
+            _dbContext.Clubs
                 .AsNoTracking()
-                .Where(club => club.Id == id)
-                .All(club => club.Players.Count == 0 && club.HomeMatches.Count == 0 && club.AwayMatches.Count == 0);
-        }
+                .Where(c => c.Id == id)
+                .All(c => c.Players.Count == 0 && c.HomeMatches.Count == 0 && c.AwayMatches.Count == 0);
 
         public int Add(ClubFormViewModel model)
         {
             var entity = new Club
             {
-                Name = model.Name.Trim(),
+                Name        = model.Name.Trim(),
                 FoundedDate = model.FoundedDate,
-                LeagueId = model.LeagueId!.Value
+                LeagueId    = model.LeagueId!.Value
             };
 
             _dbContext.Clubs.Add(entity);
@@ -190,16 +185,14 @@ namespace ProbaMala.Repositories
 
         public bool Update(int id, ClubFormViewModel model)
         {
-            var entity = _dbContext.Clubs.FirstOrDefault(club => club.Id == id);
+            var entity = _dbContext.Clubs.FirstOrDefault(c => c.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
-            entity.Name = model.Name.Trim();
+            entity.Name        = model.Name.Trim();
             entity.FoundedDate = model.FoundedDate;
-            entity.LeagueId = model.LeagueId!.Value;
+            entity.LeagueId    = model.LeagueId!.Value;
 
             _dbContext.SaveChanges();
             return true;
@@ -207,12 +200,10 @@ namespace ProbaMala.Repositories
 
         public bool Delete(int id)
         {
-            var entity = _dbContext.Clubs.FirstOrDefault(club => club.Id == id);
+            var entity = _dbContext.Clubs.FirstOrDefault(c => c.Id == id);
 
             if (entity == null || !CanDelete(id))
-            {
                 return false;
-            }
 
             _dbContext.Clubs.Remove(entity);
             _dbContext.SaveChanges();

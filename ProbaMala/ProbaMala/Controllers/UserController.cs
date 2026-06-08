@@ -4,6 +4,7 @@ using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
+    // Primary route: /korisnici (Croatian), English aliases: /users
     [Route("korisnici")]
     public class UserController : Controller
     {
@@ -14,6 +15,7 @@ namespace ProbaMala.Controllers
             _userRepository = userRepository;
         }
 
+        // GET /users
         [HttpGet("")]
         [HttpGet("popis")]
         [HttpGet("~/users", Name = "users-index")]
@@ -24,6 +26,7 @@ namespace ProbaMala.Controllers
             return View(_userRepository.GetAll(q));
         }
 
+        // GET /users/filter  (AJAX — returns the _UserList partial)
         [HttpGet("filter")]
         [HttpGet("~/users/filter", Name = "users-filter")]
         public IActionResult Filter(string? q)
@@ -32,6 +35,7 @@ namespace ProbaMala.Controllers
             return PartialView("_UserList", _userRepository.GetAll(q));
         }
 
+        // GET /users/{id}
         [HttpGet("{id:int}")]
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/users/{id:int}", Name = "user-details")]
@@ -39,14 +43,14 @@ namespace ProbaMala.Controllers
         public IActionResult Details(int id)
         {
             var user = _userRepository.GetById(id);
+
             if (user == null)
-            {
                 return NotFound();
-            }
 
             return View(user);
         }
 
+        // GET /users/create
         [HttpGet("novo")]
         [HttpGet("~/users/create", Name = "user-create")]
         public IActionResult Create()
@@ -54,6 +58,7 @@ namespace ProbaMala.Controllers
             return View(_userRepository.BuildFormModel());
         }
 
+        // POST /users/create
         [HttpPost("novo")]
         [HttpPost("~/users/create")]
         [ValidateAntiForgeryToken]
@@ -62,14 +67,13 @@ namespace ProbaMala.Controllers
             ValidateUserForm(model);
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var userId = _userRepository.Add(model);
             return RedirectToAction(nameof(Details), new { id = userId });
         }
 
+        // GET /users/edit/{id}
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/users/edit/{id:int}", Name = "user-edit")]
         public IActionResult Edit(int id)
@@ -77,40 +81,34 @@ namespace ProbaMala.Controllers
             var model = _userRepository.GetFormById(id);
 
             if (model == null)
-            {
                 return NotFound();
-            }
 
             return View(model);
         }
 
+        // POST /users/edit/{id}
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/users/edit/{id:int}")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, UserFormViewModel model)
         {
             if (id != model.Id)
-            {
                 return BadRequest();
-            }
 
             ValidateUserForm(model);
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var updated = _userRepository.Update(id, model);
 
             if (!updated)
-            {
                 return NotFound();
-            }
 
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        // GET /users/delete/{id}
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/users/delete/{id:int}", Name = "user-delete")]
         public IActionResult Delete(int id)
@@ -118,13 +116,12 @@ namespace ProbaMala.Controllers
             var model = _userRepository.GetById(id);
 
             if (model == null)
-            {
                 return NotFound();
-            }
 
             return View(model);
         }
 
+        // POST /users/delete/{id}
         [HttpPost("obrisi/{id:int}")]
         [HttpPost("~/users/delete/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -134,19 +131,16 @@ namespace ProbaMala.Controllers
             var deleted = _userRepository.Delete(id);
 
             if (!deleted)
-            {
                 return NotFound();
-            }
 
             return RedirectToAction(nameof(Index));
         }
 
+        // Checks that the email address is unique (case-insensitive).
         private void ValidateUserForm(UserFormViewModel model)
         {
             if (!string.IsNullOrWhiteSpace(model.Email) && _userRepository.EmailExists(model.Email, model.Id == 0 ? null : model.Id))
-            {
                 ModelState.AddModelError(nameof(model.Email), "A user with this email already exists.");
-            }
         }
     }
 }

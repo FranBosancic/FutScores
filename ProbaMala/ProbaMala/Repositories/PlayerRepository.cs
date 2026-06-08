@@ -32,80 +32,87 @@ namespace ProbaMala.Repositories
         {
             var playersQuery = _dbContext.Players
                 .AsNoTracking()
-                .Include(player => player.Club)
+                .Include(p => p.Club)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                var normalizedQuery = query.Trim().ToLower();
-                playersQuery = playersQuery.Where(player =>
-                    player.FirstName.ToLower().Contains(normalizedQuery) ||
-                    player.LastName.ToLower().Contains(normalizedQuery) ||
-                    player.Nationality.ToLower().Contains(normalizedQuery) ||
-                    player.Club.Name.ToLower().Contains(normalizedQuery) ||
-                    player.Position.ToString().ToLower().Contains(normalizedQuery));
+                var q = query.Trim().ToLower();
+                playersQuery = playersQuery.Where(p =>
+                    p.FirstName.ToLower().Contains(q) ||
+                    p.LastName.ToLower().Contains(q) ||
+                    p.Nationality.ToLower().Contains(q) ||
+                    p.Club.Name.ToLower().Contains(q) ||
+                    p.Position.ToString().ToLower().Contains(q));
             }
 
             return playersQuery
-                .OrderBy(player => player.LastName)
-                .ThenBy(player => player.FirstName)
-                .Select(player => new PlayerDetailsViewModel
+                .OrderBy(p => p.LastName)
+                .ThenBy(p => p.FirstName)
+                .Select(p => new PlayerDetailsViewModel
                 {
-                    Id = player.Id,
-                    ClubId = player.ClubId,
-                    FirstName = player.FirstName,
-                    LastName = player.LastName,
-                    DateOfBirth = player.DateOfBirth,
-                    Position = player.Position,
-                    Nationality = player.Nationality,
-                    ClubName = player.Club.Name,
-                    RatingCount = player.Ratings.Count
+                    Id          = p.Id,
+                    ClubId      = p.ClubId,
+                    FirstName   = p.FirstName,
+                    LastName    = p.LastName,
+                    DateOfBirth = p.DateOfBirth,
+                    Position    = p.Position,
+                    Nationality = p.Nationality,
+                    ClubName    = p.Club.Name,
+                    // Count must happen inside the EF query (before materialisation),
+                    // otherwise it would always return 0 when lazy loading is disabled
+                    RatingCount = p.Ratings.Count
                 })
                 .ToList();
         }
 
+        // Returns the full player profile including their rating history.
+        // We use .AsEnumerable() here because the nested projection (building
+        // RatingDetailsViewModel) can't be fully translated to SQL.
         public PlayerDetailsViewModel? GetById(int id)
         {
-            return _dbContext.Players
+            var player = _dbContext.Players
                 .AsNoTracking()
-                .Include(player => player.Club)
-                .Include(player => player.Ratings).ThenInclude(rating => rating.User)
-                .Include(player => player.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.HomeTeam)
-                .Include(player => player.Ratings).ThenInclude(rating => rating.Match).ThenInclude(match => match.AwayTeam)
-                .Where(player => player.Id == id)
-                .AsEnumerable()
-                .Select(player => new PlayerDetailsViewModel
-                {
-                    Id = player.Id,
-                    ClubId = player.ClubId,
-                    FirstName = player.FirstName,
-                    LastName = player.LastName,
-                    DateOfBirth = player.DateOfBirth,
-                    Position = player.Position,
-                    Nationality = player.Nationality,
-                    ClubName = player.Club.Name,
-                    RatingCount = player.Ratings.Count,
-                    Ratings = player.Ratings
-                        .OrderByDescending(rating => rating.Match.Date)
-                        .Select(rating => new RatingDetailsViewModel
-                        {
-                            Id = rating.Id,
-                            PlayerId = rating.PlayerId,
-                            MatchId = rating.MatchId,
-                            UserId = rating.UserId,
-                            PlayerName = $"{player.FirstName} {player.LastName}",
-                            MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
-                            UserName = $"{rating.User.FirstName} {rating.User.LastName}",
-                            Score = rating.Score,
-                            Comment = rating.Comment,
-                            HomeTeamName = rating.Match.HomeTeam.Name,
-                            AwayTeamName = rating.Match.AwayTeam.Name,
-                            HomeGoals = rating.Match.HomeGoals,
-                            AwayGoals = rating.Match.AwayGoals
-                        })
-                        .ToList()
-                })
-                .FirstOrDefault();
+                .Include(p => p.Club)
+                .Include(p => p.Ratings).ThenInclude(r => r.User)
+                .Include(p => p.Ratings).ThenInclude(r => r.Match).ThenInclude(m => m.HomeTeam)
+                .Include(p => p.Ratings).ThenInclude(r => r.Match).ThenInclude(m => m.AwayTeam)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (player == null)
+                return null;
+
+            return new PlayerDetailsViewModel
+            {
+                Id          = player.Id,
+                ClubId      = player.ClubId,
+                FirstName   = player.FirstName,
+                LastName    = player.LastName,
+                DateOfBirth = player.DateOfBirth,
+                Position    = player.Position,
+                Nationality = player.Nationality,
+                ClubName    = player.Club.Name,
+                RatingCount = player.Ratings.Count,
+                Ratings     = player.Ratings
+                    .OrderByDescending(r => r.Match.Date)
+                    .Select(r => new RatingDetailsViewModel
+                    {
+                        Id               = r.Id,
+                        PlayerId         = r.PlayerId,
+                        MatchId          = r.MatchId,
+                        UserId           = r.UserId,
+                        PlayerName       = $"{player.FirstName} {player.LastName}",
+                        MatchDescription = $"{r.Match.HomeTeam.Name} vs {r.Match.AwayTeam.Name} on {r.Match.Date:yyyy-MM-dd}",
+                        UserName         = $"{r.User.FirstName} {r.User.LastName}",
+                        Score            = r.Score,
+                        Comment          = r.Comment,
+                        HomeTeamName     = r.Match.HomeTeam.Name,
+                        AwayTeamName     = r.Match.AwayTeam.Name,
+                        HomeGoals        = r.Match.HomeGoals,
+                        AwayGoals        = r.Match.AwayGoals
+                    })
+                    .ToList()
+            };
         }
 
         public PlayerFormViewModel BuildFormModel()

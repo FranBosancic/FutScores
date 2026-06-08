@@ -28,70 +28,63 @@ namespace ProbaMala.Repositories
 
         public List<LeagueDetailsViewModel> GetAll(string? query = null)
         {
-            var leaguesQuery = _dbContext.Leagues
-                .AsNoTracking()
-                .AsQueryable();
+            var leaguesQuery = _dbContext.Leagues.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                var normalizedQuery = query.Trim().ToLower();
-                leaguesQuery = leaguesQuery.Where(league => league.Name.ToLower().Contains(normalizedQuery));
+                var q = query.Trim().ToLower();
+                leaguesQuery = leaguesQuery.Where(l => l.Name.ToLower().Contains(q));
             }
 
             return leaguesQuery
-                .OrderBy(league => league.Name)
-                .Select(league => new LeagueDetailsViewModel
+                .OrderBy(l => l.Name)
+                .Select(l => new LeagueDetailsViewModel
                 {
-                    Id = league.Id,
-                    Name = league.Name,
-                    ClubCount = league.Clubs.Count,
-                    MatchCount = league.Matches.Count
+                    Id         = l.Id,
+                    Name       = l.Name,
+                    // Count inside the EF query so it translates to SQL COUNT(*)
+                    ClubCount  = l.Clubs.Count,
+                    MatchCount = l.Matches.Count
                 })
                 .ToList();
         }
 
+        // Loads the league with all its clubs and matches in one round-trip.
+        // We build the view model in-memory after the query because the status logic
+        // (Finished vs Scheduled) can't be expressed in a SQL projection.
         public LeagueDetailsViewModel? GetById(int id)
         {
-            // Load the league with its clubs and matches in a single query via Include.
-            // We use AsEnumerable() to do the final shaping in-memory since EF can't
-            // translate the MatchDetailsViewModel's status logic to SQL.
             var league = _dbContext.Leagues
                 .AsNoTracking()
-                .Include(l => l.Clubs)
-                    .ThenInclude(c => c.Players)
-                .Include(l => l.Clubs)
-                    .ThenInclude(c => c.HomeMatches)
-                .Include(l => l.Clubs)
-                    .ThenInclude(c => c.AwayMatches)
-                .Include(l => l.Matches)
-                    .ThenInclude(m => m.HomeTeam)
-                .Include(l => l.Matches)
-                    .ThenInclude(m => m.AwayTeam)
-                .Include(l => l.Matches)
-                    .ThenInclude(m => m.Ratings)
+                .Include(l => l.Clubs).ThenInclude(c => c.Players)
+                .Include(l => l.Clubs).ThenInclude(c => c.HomeMatches)
+                .Include(l => l.Clubs).ThenInclude(c => c.AwayMatches)
+                .Include(l => l.Matches).ThenInclude(m => m.HomeTeam)
+                .Include(l => l.Matches).ThenInclude(m => m.AwayTeam)
+                .Include(l => l.Matches).ThenInclude(m => m.Ratings)
                 .FirstOrDefault(l => l.Id == id);
 
-            if (league == null) return null;
+            if (league == null)
+                return null;
 
             return new LeagueDetailsViewModel
             {
-                Id = league.Id,
-                Name = league.Name,
-                ClubCount = league.Clubs.Count,
+                Id         = league.Id,
+                Name       = league.Name,
+                ClubCount  = league.Clubs.Count,
                 MatchCount = league.Matches.Count,
 
-                // Clubs alphabetically with key stats
                 Clubs = league.Clubs
                     .OrderBy(c => c.Name)
                     .Select(c => new ClubDetailsViewModel
                     {
-                        Id = c.Id,
-                        Name = c.Name,
-                        LeagueId = league.Id,
-                        LeagueName = league.Name,
+                        Id          = c.Id,
+                        Name        = c.Name,
+                        LeagueId    = league.Id,
+                        LeagueName  = league.Name,
                         FoundedDate = c.FoundedDate,
                         PlayerCount = c.Players.Count,
-                        MatchCount = c.HomeMatches.Count + c.AwayMatches.Count
+                        MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count
                     })
                     .ToList(),
 
@@ -100,20 +93,20 @@ namespace ProbaMala.Repositories
                     .OrderByDescending(m => m.Date)
                     .Select(m => new MatchDetailsViewModel
                     {
-                        Id = m.Id,
-                        LeagueId = league.Id,
-                        HomeTeamId = m.HomeTeamId,
-                        AwayTeamId = m.AwayTeamId,
-                        Date = m.Date,
+                        Id           = m.Id,
+                        LeagueId     = league.Id,
+                        HomeTeamId   = m.HomeTeamId,
+                        AwayTeamId   = m.AwayTeamId,
+                        Date         = m.Date,
                         KickoffLabel = m.Date.ToString("dd MMM yyyy"),
-                        StatusLabel = m.Date <= DateTime.UtcNow ? "Finished" : "Scheduled",
-                        StatusTone  = m.Date <= DateTime.UtcNow ? "final" : "upcoming",
-                        LeagueName = league.Name,
+                        StatusLabel  = m.Date <= DateTime.UtcNow ? "Finished" : "Scheduled",
+                        StatusTone   = m.Date <= DateTime.UtcNow ? "final" : "upcoming",
+                        LeagueName   = league.Name,
                         HomeTeamName = m.HomeTeam.Name,
                         AwayTeamName = m.AwayTeam.Name,
-                        HomeGoals = m.HomeGoals,
-                        AwayGoals = m.AwayGoals,
-                        RatingCount = m.Ratings.Count
+                        HomeGoals    = m.HomeGoals,
+                        AwayGoals    = m.AwayGoals,
+                        RatingCount  = m.Ratings.Count
                     })
                     .ToList()
             };
@@ -128,30 +121,29 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Leagues
                 .AsNoTracking()
-                .Where(league => league.Id == id)
-                .Select(league => new LeagueFormViewModel
+                .Where(l => l.Id == id)
+                .Select(l => new LeagueFormViewModel
                 {
-                    Id = league.Id,
-                    Name = league.Name
+                    Id   = l.Id,
+                    Name = l.Name
                 })
                 .FirstOrDefault();
         }
 
+        // Case-insensitive uniqueness check; excludeLeagueId prevents flagging the
+        // record's own name during an edit.
         public bool NameExists(string name, int? excludeLeagueId = null)
         {
-            var normalizedName = name.Trim().ToLower();
+            var normalized = name.Trim().ToLower();
 
-            return _dbContext.Leagues.Any(league =>
-                league.Name.ToLower() == normalizedName &&
-                (!excludeLeagueId.HasValue || league.Id != excludeLeagueId.Value));
+            return _dbContext.Leagues.Any(l =>
+                l.Name.ToLower() == normalized &&
+                (!excludeLeagueId.HasValue || l.Id != excludeLeagueId.Value));
         }
 
         public int Add(LeagueFormViewModel model)
         {
-            var entity = new League
-            {
-                Name = model.Name.Trim()
-            };
+            var entity = new League { Name = model.Name.Trim() };
 
             _dbContext.Leagues.Add(entity);
             _dbContext.SaveChanges();
@@ -160,12 +152,10 @@ namespace ProbaMala.Repositories
 
         public bool Update(int id, LeagueFormViewModel model)
         {
-            var entity = _dbContext.Leagues.FirstOrDefault(league => league.Id == id);
+            var entity = _dbContext.Leagues.FirstOrDefault(l => l.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
             entity.Name = model.Name.Trim();
             _dbContext.SaveChanges();
@@ -174,12 +164,10 @@ namespace ProbaMala.Repositories
 
         public bool Delete(int id)
         {
-            var entity = _dbContext.Leagues.FirstOrDefault(league => league.Id == id);
+            var entity = _dbContext.Leagues.FirstOrDefault(l => l.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
             _dbContext.Leagues.Remove(entity);
             _dbContext.SaveChanges();

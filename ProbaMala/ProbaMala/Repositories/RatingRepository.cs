@@ -10,22 +10,16 @@ namespace ProbaMala.Repositories
     {
         List<RatingDetailsViewModel> GetAll(string? query = null);
         RatingDetailsViewModel? GetById(int id);
-
-        /// <summary>
-        /// Builds a blank rating form, or — when a match (and optionally a player)
-        /// is supplied — one pre-filled with the whole match context so the rater
-        /// only has to pick themselves, set a score, and write a comment.
-        /// </summary>
         RatingFormViewModel BuildFormModel(int? matchId = null, int? playerId = null);
         RatingFormViewModel? GetFormById(int id);
         void PopulateFormOptions(RatingFormViewModel model);
 
-        // Cascade data sources (also surfaced as JSON endpoints by the controller).
+        // JSON endpoints used by the cascade dropdown (League → Home → Away → Match → Player)
         List<CascadeOptionViewModel> GetClubsInLeague(int leagueId, int? excludeClubId = null);
         List<CascadeOptionViewModel> GetMatchesBetween(int homeTeamId, int awayTeamId);
         List<CascadeOptionViewModel> GetPlayersForMatch(int matchId);
 
-        // Consistency checks for server-side validation.
+        // Validation helpers — used in the controller to check server-side consistency
         bool LeagueExists(int leagueId);
         bool ClubInLeague(int clubId, int leagueId);
         bool MatchHasTeams(int matchId, int leagueId, int homeTeamId, int awayTeamId);
@@ -51,92 +45,61 @@ namespace ProbaMala.Repositories
         {
             var ratingsQuery = _dbContext.Ratings
                 .AsNoTracking()
-                .Include(rating => rating.Player)
-                .Include(rating => rating.User)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.HomeTeam)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.AwayTeam)
+                .Include(r => r.Player)
+                .Include(r => r.User)
+                .Include(r => r.Match).ThenInclude(m => m.HomeTeam)
+                .Include(r => r.Match).ThenInclude(m => m.AwayTeam)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                var normalizedQuery = query.Trim().ToLower();
-                var parsedScore = int.TryParse(normalizedQuery, out var score);
+                var q = query.Trim().ToLower();
+                var parsedScore = int.TryParse(q, out var score);
 
-                ratingsQuery = ratingsQuery.Where(rating =>
-                    rating.Player.FirstName.ToLower().Contains(normalizedQuery) ||
-                    rating.Player.LastName.ToLower().Contains(normalizedQuery) ||
-                    rating.User.FirstName.ToLower().Contains(normalizedQuery) ||
-                    rating.User.LastName.ToLower().Contains(normalizedQuery) ||
-                    rating.Match.HomeTeam.Name.ToLower().Contains(normalizedQuery) ||
-                    rating.Match.AwayTeam.Name.ToLower().Contains(normalizedQuery) ||
-                    (rating.Comment != null && rating.Comment.ToLower().Contains(normalizedQuery)) ||
-                    (parsedScore && rating.Score == score));
+                ratingsQuery = ratingsQuery.Where(r =>
+                    r.Player.FirstName.ToLower().Contains(q) ||
+                    r.Player.LastName.ToLower().Contains(q) ||
+                    r.User.FirstName.ToLower().Contains(q) ||
+                    r.User.LastName.ToLower().Contains(q) ||
+                    r.Match.HomeTeam.Name.ToLower().Contains(q) ||
+                    r.Match.AwayTeam.Name.ToLower().Contains(q) ||
+                    (r.Comment != null && r.Comment.ToLower().Contains(q)) ||
+                    (parsedScore && r.Score == score));
             }
 
             return ratingsQuery
-                .OrderByDescending(rating => rating.Score)
+                .OrderByDescending(r => r.Score)
                 .AsEnumerable()
-                .Select(rating => new RatingDetailsViewModel
-                {
-                    Id = rating.Id,
-                    PlayerId = rating.PlayerId,
-                    MatchId = rating.MatchId,
-                    UserId = rating.UserId,
-                    PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
-                    MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
-                    UserName = $"{rating.User.FirstName} {rating.User.LastName}",
-                    Score = rating.Score,
-                    Comment = rating.Comment,
-                    HomeTeamName = rating.Match.HomeTeam.Name,
-                    AwayTeamName = rating.Match.AwayTeam.Name,
-                    HomeGoals = rating.Match.HomeGoals,
-                    AwayGoals = rating.Match.AwayGoals
-                })
+                .Select(r => MapToDetailsViewModel(r))
                 .ToList();
         }
 
         public RatingDetailsViewModel? GetById(int id)
         {
-            return _dbContext.Ratings
+            var rating = _dbContext.Ratings
                 .AsNoTracking()
-                .Include(rating => rating.Player)
-                .Include(rating => rating.User)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.HomeTeam)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.AwayTeam)
-                .Where(rating => rating.Id == id)
-                .AsEnumerable()
-                .Select(rating => new RatingDetailsViewModel
-                {
-                    Id = rating.Id,
-                    PlayerId = rating.PlayerId,
-                    MatchId = rating.MatchId,
-                    UserId = rating.UserId,
-                    PlayerName = $"{rating.Player.FirstName} {rating.Player.LastName}",
-                    MatchDescription = $"{rating.Match.HomeTeam.Name} vs {rating.Match.AwayTeam.Name} on {rating.Match.Date:yyyy-MM-dd}",
-                    UserName = $"{rating.User.FirstName} {rating.User.LastName}",
-                    Score = rating.Score,
-                    Comment = rating.Comment,
-                    HomeTeamName = rating.Match.HomeTeam.Name,
-                    AwayTeamName = rating.Match.AwayTeam.Name,
-                    HomeGoals = rating.Match.HomeGoals,
-                    AwayGoals = rating.Match.AwayGoals
-                })
-                .FirstOrDefault();
+                .Include(r => r.Player)
+                .Include(r => r.User)
+                .Include(r => r.Match).ThenInclude(m => m.HomeTeam)
+                .Include(r => r.Match).ThenInclude(m => m.AwayTeam)
+                .FirstOrDefault(r => r.Id == id);
+
+            if (rating == null)
+                return null;
+
+            return MapToDetailsViewModel(rating);
         }
 
+        // Builds a form model, optionally pre-filled from a known match and player.
+        // This is used when the user clicks the "Rate" button on a match squad row —
+        // the whole cascade is pre-selected so they only need to set the score.
         public RatingFormViewModel BuildFormModel(int? matchId = null, int? playerId = null)
         {
             var model = new RatingFormViewModel();
 
-            // Pre-fill the cascade from a known match (e.g. the "Rate" button on a
-            // match squad). League / home / away are derived from the match itself,
-            // and the player is only honoured when they actually featured in it.
             if (matchId.HasValue)
             {
+                // Load just the IDs we need; no need to load the full navigation properties here
                 var match = _dbContext.Matches
                     .AsNoTracking()
                     .Where(m => m.Id == matchId.Value)
@@ -145,11 +108,13 @@ namespace ProbaMala.Repositories
 
                 if (match != null)
                 {
-                    model.LeagueId = match.LeagueId;
+                    model.LeagueId   = match.LeagueId;
                     model.HomeTeamId = match.HomeTeamId;
                     model.AwayTeamId = match.AwayTeamId;
-                    model.MatchId = match.Id;
+                    model.MatchId    = match.Id;
 
+                    // Only honour the player pre-selection if that player
+                    // actually plays for one of the two clubs in this match
                     if (playerId.HasValue && IsPlayerInMatch(playerId.Value, match.Id))
                     {
                         model.PlayerId = playerId.Value;
@@ -165,63 +130,62 @@ namespace ProbaMala.Repositories
         {
             var model = _dbContext.Ratings
                 .AsNoTracking()
-                .Include(rating => rating.Player)
-                .Include(rating => rating.User)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.HomeTeam)
-                .Include(rating => rating.Match)
-                    .ThenInclude(match => match.AwayTeam)
-                .Where(rating => rating.Id == id)
-                .Select(rating => new RatingFormViewModel
+                .Include(r => r.Player)
+                .Include(r => r.User)
+                .Include(r => r.Match).ThenInclude(m => m.HomeTeam)
+                .Include(r => r.Match).ThenInclude(m => m.AwayTeam)
+                .Where(r => r.Id == id)
+                .Select(r => new RatingFormViewModel
                 {
-                    Id = rating.Id,
-                    // Derive the cascade selections from the rating's match.
-                    LeagueId = rating.Match.LeagueId,
-                    HomeTeamId = rating.Match.HomeTeamId,
-                    AwayTeamId = rating.Match.AwayTeamId,
-                    MatchId = rating.MatchId,
-                    PlayerId = rating.PlayerId,
-                    UserId = rating.UserId,
-                    Score = rating.Score,
-                    Comment = rating.Comment,
-                    PlayerLabel = rating.Player.FirstName + " " + rating.Player.LastName,
-                    MatchLabel = rating.Match.HomeTeam.Name + " vs " + rating.Match.AwayTeam.Name + " on " + rating.Match.Date.ToString("yyyy-MM-dd"),
-                    UserLabel = rating.User.FirstName + " " + rating.User.LastName
+                    Id         = r.Id,
+                    // The cascade fields (league, home, away) aren't stored on Rating —
+                    // they're derived from the match so the form re-renders correctly on Edit
+                    LeagueId   = r.Match.LeagueId,
+                    HomeTeamId = r.Match.HomeTeamId,
+                    AwayTeamId = r.Match.AwayTeamId,
+                    MatchId    = r.MatchId,
+                    PlayerId   = r.PlayerId,
+                    UserId     = r.UserId,
+                    Score      = r.Score,
+                    Comment    = r.Comment,
+                    PlayerLabel = r.Player.FirstName + " " + r.Player.LastName,
+                    MatchLabel  = r.Match.HomeTeam.Name + " vs " + r.Match.AwayTeam.Name + " on " + r.Match.Date.ToString("yyyy-MM-dd"),
+                    UserLabel   = r.User.FirstName + " " + r.User.LastName
                 })
                 .FirstOrDefault();
 
             if (model == null)
-            {
                 return null;
-            }
 
             PopulateFormOptions(model);
             return model;
         }
 
+        // Fills all dropdown lists on the form.
+        // Dependent lists are only built when their parent value is known —
+        // this way a fresh Create form starts with most dropdowns empty/disabled,
+        // and the cascade JS fills them in as the user makes selections.
         public void PopulateFormOptions(RatingFormViewModel model)
         {
-            // Always available.
             model.LeagueOptions = ToSelectList(GetLeagues(), model.LeagueId);
-            model.UserOptions = ToSelectList(GetUsers(), model.UserId);
+            model.UserOptions   = ToSelectList(GetUsers(), model.UserId);
 
-            // Each dependent list is only built when its parent value is known, so a
-            // fresh Create form renders the downstream selects empty (and disabled),
-            // while Edit / invalid-postback re-renders them fully and pre-selected.
             if (model.LeagueId.HasValue)
             {
                 var clubs = GetClubsInLeague(model.LeagueId.Value);
                 model.HomeTeamOptions = ToSelectList(clubs, model.HomeTeamId);
 
                 var awayClubs = model.HomeTeamId.HasValue
-                    ? clubs.Where(club => club.Id != model.HomeTeamId.Value).ToList()
+                    ? clubs.Where(c => c.Id != model.HomeTeamId.Value).ToList()
                     : clubs;
                 model.AwayTeamOptions = ToSelectList(awayClubs, model.AwayTeamId);
             }
 
             if (model.HomeTeamId.HasValue && model.AwayTeamId.HasValue)
             {
-                model.MatchOptions = ToSelectList(GetMatchesBetween(model.HomeTeamId.Value, model.AwayTeamId.Value), model.MatchId);
+                model.MatchOptions = ToSelectList(
+                    GetMatchesBetween(model.HomeTeamId.Value, model.AwayTeamId.Value),
+                    model.MatchId);
             }
 
             if (model.MatchId.HasValue)
@@ -234,13 +198,9 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Clubs
                 .AsNoTracking()
-                .Where(club => club.LeagueId == leagueId && (excludeClubId == null || club.Id != excludeClubId))
-                .OrderBy(club => club.Name)
-                .Select(club => new CascadeOptionViewModel
-                {
-                    Id = club.Id,
-                    Label = club.Name
-                })
+                .Where(c => c.LeagueId == leagueId && (excludeClubId == null || c.Id != excludeClubId))
+                .OrderBy(c => c.Name)
+                .Select(c => new CascadeOptionViewModel { Id = c.Id, Label = c.Name })
                 .ToList();
         }
 
@@ -248,17 +208,19 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Matches
                 .AsNoTracking()
-                .Where(match => match.HomeTeamId == homeTeamId && match.AwayTeamId == awayTeamId)
-                .OrderByDescending(match => match.Date)
+                .Where(m => m.HomeTeamId == homeTeamId && m.AwayTeamId == awayTeamId)
+                .OrderByDescending(m => m.Date)
                 .AsEnumerable()
-                .Select(match => new CascadeOptionViewModel
+                .Select(m => new CascadeOptionViewModel
                 {
-                    Id = match.Id,
-                    Label = $"{match.Date:yyyy-MM-dd} · {match.HomeGoals}–{match.AwayGoals}"
+                    Id    = m.Id,
+                    Label = $"{m.Date:yyyy-MM-dd} · {m.HomeGoals}–{m.AwayGoals}"
                 })
                 .ToList();
         }
 
+        // Returns all players from both clubs in a match, grouped under
+        // "Home · ClubName" and "Away · ClubName" option group headers.
         public List<CascadeOptionViewModel> GetPlayersForMatch(int matchId)
         {
             var match = _dbContext.Matches
@@ -268,95 +230,78 @@ namespace ProbaMala.Repositories
                 .FirstOrDefault(m => m.Id == matchId);
 
             if (match == null)
-            {
                 return [];
-            }
 
             var clubIds = new[] { match.HomeTeamId, match.AwayTeamId };
 
             var players = _dbContext.Players
                 .AsNoTracking()
-                .Where(player => clubIds.Contains(player.ClubId))
-                .OrderBy(player => player.LastName)
-                .ThenBy(player => player.FirstName)
-                .Select(player => new { player.Id, player.FirstName, player.LastName, player.ClubId })
+                .Where(p => clubIds.Contains(p.ClubId))
+                .OrderBy(p => p.LastName)
+                .ThenBy(p => p.FirstName)
+                .Select(p => new { p.Id, p.FirstName, p.LastName, p.ClubId })
                 .ToList();
 
-            // Home squad first, then away squad, each under its own group header.
+            // Home squad first, then away squad
             return players
-                .Select(player => new
+                .OrderByDescending(p => p.ClubId == match.HomeTeamId)
+                .Select(p => new CascadeOptionViewModel
                 {
-                    IsHome = player.ClubId == match.HomeTeamId,
-                    Option = new CascadeOptionViewModel
-                    {
-                        Id = player.Id,
-                        Label = $"{player.FirstName} {player.LastName}",
-                        Group = player.ClubId == match.HomeTeamId
-                            ? $"Home · {match.HomeTeam.Name}"
-                            : $"Away · {match.AwayTeam.Name}"
-                    }
+                    Id    = p.Id,
+                    Label = $"{p.FirstName} {p.LastName}",
+                    Group = p.ClubId == match.HomeTeamId
+                        ? $"Home · {match.HomeTeam.Name}"
+                        : $"Away · {match.AwayTeam.Name}"
                 })
-                .OrderByDescending(entry => entry.IsHome)
-                .Select(entry => entry.Option)
                 .ToList();
         }
 
-        public bool LeagueExists(int leagueId)
-        {
-            return _dbContext.Leagues.Any(league => league.Id == leagueId);
-        }
+        public bool LeagueExists(int leagueId) =>
+            _dbContext.Leagues.Any(l => l.Id == leagueId);
 
-        public bool ClubInLeague(int clubId, int leagueId)
-        {
-            return _dbContext.Clubs.Any(club => club.Id == clubId && club.LeagueId == leagueId);
-        }
+        public bool ClubInLeague(int clubId, int leagueId) =>
+            _dbContext.Clubs.Any(c => c.Id == clubId && c.LeagueId == leagueId);
 
-        public bool MatchHasTeams(int matchId, int leagueId, int homeTeamId, int awayTeamId)
-        {
-            return _dbContext.Matches.Any(match =>
-                match.Id == matchId &&
-                match.LeagueId == leagueId &&
-                match.HomeTeamId == homeTeamId &&
-                match.AwayTeamId == awayTeamId);
-        }
+        public bool MatchHasTeams(int matchId, int leagueId, int homeTeamId, int awayTeamId) =>
+            _dbContext.Matches.Any(m =>
+                m.Id == matchId &&
+                m.LeagueId == leagueId &&
+                m.HomeTeamId == homeTeamId &&
+                m.AwayTeamId == awayTeamId);
 
-        public bool PlayerExists(int playerId)
-        {
-            return _dbContext.Players.Any(player => player.Id == playerId);
-        }
+        public bool PlayerExists(int playerId) =>
+            _dbContext.Players.Any(p => p.Id == playerId);
 
+        // Checks whether the player belongs to either club that played in this match.
+        // Used to reject "Rate" pre-fills for players who aren't part of the match.
         public bool IsPlayerInMatch(int playerId, int matchId)
         {
-            var playerClubId = _dbContext.Players
+            var clubId = _dbContext.Players
                 .AsNoTracking()
-                .Where(player => player.Id == playerId)
-                .Select(player => (int?)player.ClubId)
+                .Where(p => p.Id == playerId)
+                .Select(p => (int?)p.ClubId)
                 .FirstOrDefault();
 
-            if (!playerClubId.HasValue)
-            {
+            if (!clubId.HasValue)
                 return false;
-            }
 
             return _dbContext.Matches
                 .AsNoTracking()
-                .Any(match => match.Id == matchId && (match.HomeTeamId == playerClubId.Value || match.AwayTeamId == playerClubId.Value));
+                .Any(m => m.Id == matchId && (m.HomeTeamId == clubId.Value || m.AwayTeamId == clubId.Value));
         }
 
-        public bool UserExists(int userId)
-        {
-            return _dbContext.Users.Any(user => user.Id == userId);
-        }
+        public bool UserExists(int userId) =>
+            _dbContext.Users.Any(u => u.Id == userId);
 
         public int Add(RatingFormViewModel model)
         {
             var entity = new Rating
             {
                 PlayerId = model.PlayerId!.Value,
-                MatchId = model.MatchId!.Value,
-                UserId = model.UserId!.Value,
-                Score = model.Score,
-                Comment = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim()
+                MatchId  = model.MatchId!.Value,
+                UserId   = model.UserId!.Value,
+                Score    = model.Score,
+                Comment  = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim()
             };
 
             _dbContext.Ratings.Add(entity);
@@ -366,18 +311,16 @@ namespace ProbaMala.Repositories
 
         public bool Update(int id, RatingFormViewModel model)
         {
-            var entity = _dbContext.Ratings.FirstOrDefault(rating => rating.Id == id);
+            var entity = _dbContext.Ratings.FirstOrDefault(r => r.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
             entity.PlayerId = model.PlayerId!.Value;
-            entity.MatchId = model.MatchId!.Value;
-            entity.UserId = model.UserId!.Value;
-            entity.Score = model.Score;
-            entity.Comment = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim();
+            entity.MatchId  = model.MatchId!.Value;
+            entity.UserId   = model.UserId!.Value;
+            entity.Score    = model.Score;
+            entity.Comment  = string.IsNullOrWhiteSpace(model.Comment) ? null : model.Comment.Trim();
 
             _dbContext.SaveChanges();
             return true;
@@ -385,30 +328,45 @@ namespace ProbaMala.Repositories
 
         public bool Delete(int id)
         {
-            var entity = _dbContext.Ratings.FirstOrDefault(rating => rating.Id == id);
+            var entity = _dbContext.Ratings.FirstOrDefault(r => r.Id == id);
 
             if (entity == null)
-            {
                 return false;
-            }
 
             _dbContext.Ratings.Remove(entity);
             _dbContext.SaveChanges();
             return true;
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
+        // ── Private helpers ──────────────────────────────────────────────────
+
+        // Maps a fully-loaded Rating entity to the view model used by the list and details pages.
+        private static RatingDetailsViewModel MapToDetailsViewModel(Rating r)
+        {
+            return new RatingDetailsViewModel
+            {
+                Id               = r.Id,
+                PlayerId         = r.PlayerId,
+                MatchId          = r.MatchId,
+                UserId           = r.UserId,
+                PlayerName       = $"{r.Player.FirstName} {r.Player.LastName}",
+                MatchDescription = $"{r.Match.HomeTeam.Name} vs {r.Match.AwayTeam.Name} on {r.Match.Date:yyyy-MM-dd}",
+                UserName         = $"{r.User.FirstName} {r.User.LastName}",
+                Score            = r.Score,
+                Comment          = r.Comment,
+                HomeTeamName     = r.Match.HomeTeam.Name,
+                AwayTeamName     = r.Match.AwayTeam.Name,
+                HomeGoals        = r.Match.HomeGoals,
+                AwayGoals        = r.Match.AwayGoals
+            };
+        }
 
         private List<CascadeOptionViewModel> GetLeagues()
         {
             return _dbContext.Leagues
                 .AsNoTracking()
-                .OrderBy(league => league.Name)
-                .Select(league => new CascadeOptionViewModel
-                {
-                    Id = league.Id,
-                    Label = league.Name
-                })
+                .OrderBy(l => l.Name)
+                .Select(l => new CascadeOptionViewModel { Id = l.Id, Label = l.Name })
                 .ToList();
         }
 
@@ -416,20 +374,17 @@ namespace ProbaMala.Repositories
         {
             return _dbContext.Users
                 .AsNoTracking()
-                .OrderBy(user => user.LastName)
-                .ThenBy(user => user.FirstName)
-                .Select(user => new CascadeOptionViewModel
-                {
-                    Id = user.Id,
-                    Label = user.FirstName + " " + user.LastName
-                })
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .Select(u => new CascadeOptionViewModel { Id = u.Id, Label = u.FirstName + " " + u.LastName })
                 .ToList();
         }
 
+        // Converts CascadeOptionViewModels to SelectListItems, supporting optgroup headers.
         private static List<SelectListItem> ToSelectList(IEnumerable<CascadeOptionViewModel> options, int? selectedId)
         {
             var groups = new Dictionary<string, SelectListGroup>();
-            var items = new List<SelectListItem>();
+            var items  = new List<SelectListItem>();
 
             foreach (var option in options)
             {
@@ -446,10 +401,10 @@ namespace ProbaMala.Repositories
 
                 items.Add(new SelectListItem
                 {
-                    Value = option.Id.ToString(),
-                    Text = option.Label,
+                    Value    = option.Id.ToString(),
+                    Text     = option.Label,
                     Selected = selectedId == option.Id,
-                    Group = group
+                    Group    = group
                 });
             }
 

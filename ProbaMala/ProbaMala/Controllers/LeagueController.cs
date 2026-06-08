@@ -4,6 +4,7 @@ using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
+    // Primary route: /lige (Croatian), English aliases: /leagues (named for asp-route use)
     [Route("lige")]
     public class LeagueController : Controller
     {
@@ -14,6 +15,7 @@ namespace ProbaMala.Controllers
             _leagueRepository = leagueRepository;
         }
 
+        // GET /leagues
         [HttpGet("")]
         [HttpGet("popis")]
         [HttpGet("~/leagues", Name = "leagues-index")]
@@ -24,6 +26,7 @@ namespace ProbaMala.Controllers
             return View(_leagueRepository.GetAll(q));
         }
 
+        // GET /leagues/filter  (AJAX — returns the _LeagueList partial, not the full page)
         [HttpGet("filter")]
         [HttpGet("~/leagues/filter", Name = "leagues-filter")]
         public IActionResult Filter(string? q)
@@ -32,6 +35,7 @@ namespace ProbaMala.Controllers
             return PartialView("_LeagueList", _leagueRepository.GetAll(q));
         }
 
+        // GET /leagues/{id}
         [HttpGet("{id:int}")]
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/leagues/{id:int}", Name = "league-details")]
@@ -39,14 +43,14 @@ namespace ProbaMala.Controllers
         public IActionResult Details(int id)
         {
             var league = _leagueRepository.GetById(id);
+
             if (league == null)
-            {
                 return NotFound();
-            }
 
             return View(league);
         }
 
+        // GET /leagues/create
         [HttpGet("novo")]
         [HttpGet("~/leagues/create", Name = "league-create")]
         public IActionResult Create()
@@ -54,6 +58,7 @@ namespace ProbaMala.Controllers
             return View(_leagueRepository.BuildFormModel());
         }
 
+        // POST /leagues/create
         [HttpPost("novo")]
         [HttpPost("~/leagues/create")]
         [ValidateAntiForgeryToken]
@@ -62,14 +67,13 @@ namespace ProbaMala.Controllers
             ValidateLeagueForm(model);
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var leagueId = _leagueRepository.Add(model);
             return RedirectToAction(nameof(Details), new { id = leagueId });
         }
 
+        // GET /leagues/edit/{id}
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/leagues/edit/{id:int}", Name = "league-edit")]
         public IActionResult Edit(int id)
@@ -77,40 +81,34 @@ namespace ProbaMala.Controllers
             var model = _leagueRepository.GetFormById(id);
 
             if (model == null)
-            {
                 return NotFound();
-            }
 
             return View(model);
         }
 
+        // POST /leagues/edit/{id}
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/leagues/edit/{id:int}")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, LeagueFormViewModel model)
         {
             if (id != model.Id)
-            {
                 return BadRequest();
-            }
 
             ValidateLeagueForm(model);
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             var updated = _leagueRepository.Update(id, model);
 
             if (!updated)
-            {
                 return NotFound();
-            }
 
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        // GET /leagues/delete/{id}
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/leagues/delete/{id:int}", Name = "league-delete")]
         public IActionResult Delete(int id)
@@ -118,13 +116,12 @@ namespace ProbaMala.Controllers
             var model = _leagueRepository.GetById(id);
 
             if (model == null)
-            {
                 return NotFound();
-            }
 
             return View(model);
         }
 
+        // POST /leagues/delete/{id}
         [HttpPost("obrisi/{id:int}")]
         [HttpPost("~/leagues/delete/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -134,19 +131,17 @@ namespace ProbaMala.Controllers
             var deleted = _leagueRepository.Delete(id);
 
             if (!deleted)
-            {
                 return NotFound();
-            }
 
             return RedirectToAction(nameof(Index));
         }
 
+        // Checks that the name is unique (case-insensitive).
+        // Passing the current id ensures the check doesn't flag the league's own name during Edit.
         private void ValidateLeagueForm(LeagueFormViewModel model)
         {
             if (!string.IsNullOrWhiteSpace(model.Name) && _leagueRepository.NameExists(model.Name, model.Id == 0 ? null : model.Id))
-            {
                 ModelState.AddModelError(nameof(model.Name), "A league with this name already exists.");
-            }
         }
     }
 }

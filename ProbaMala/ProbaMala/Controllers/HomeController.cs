@@ -14,6 +14,7 @@ namespace ProbaMala.Controllers
             _homeRepository = homeRepository;
         }
 
+        // GET /  — the landing dashboard showing recent matches and top-rated players
         [HttpGet("", Name = "home-index")]
         [HttpGet("nadzorna-ploca")]
         [HttpGet("dashboard")]
@@ -21,6 +22,7 @@ namespace ProbaMala.Controllers
         {
             return View(_homeRepository.GetDashboardViewModel());
         }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         [HttpGet("greska")]
         [HttpGet("error", Name = "home-error")]
