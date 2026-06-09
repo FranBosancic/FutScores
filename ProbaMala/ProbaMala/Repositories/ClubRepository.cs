@@ -119,11 +119,18 @@ namespace ProbaMala.Repositories
             if (!string.IsNullOrWhiteSpace(q))
             {
                 var qTrim = q.Trim().ToLower();
+
+                // Match position by name in memory (only 4 values): EF/Npgsql can't
+                // translate enum.ToString() to SQL, so we turn it into an IN filter.
+                var matchedPositions = Enum.GetValues<Position>()
+                    .Where(position => position.ToString().ToLower().Contains(qTrim))
+                    .ToList();
+
                 playersQuery = playersQuery.Where(p =>
                     p.FirstName.ToLower().Contains(qTrim) ||
                     p.LastName.ToLower().Contains(qTrim) ||
                     p.Nationality.ToLower().Contains(qTrim) ||
-                    p.Position.ToString().ToLower().Contains(qTrim));
+                    matchedPositions.Contains(p.Position));
             }
 
             return playersQuery
