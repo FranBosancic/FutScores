@@ -59,6 +59,7 @@ namespace ProbaMala.Repositories
                 .Include(l => l.Clubs).ThenInclude(c => c.Players)
                 .Include(l => l.Clubs).ThenInclude(c => c.HomeMatches)
                 .Include(l => l.Clubs).ThenInclude(c => c.AwayMatches)
+                .Include(l => l.Clubs).ThenInclude(c => c.Images)
                 .Include(l => l.Matches).ThenInclude(m => m.HomeTeam)
                 .Include(l => l.Matches).ThenInclude(m => m.AwayTeam)
                 .Include(l => l.Matches).ThenInclude(m => m.Ratings)
@@ -84,7 +85,10 @@ namespace ProbaMala.Repositories
                         LeagueName  = league.Name,
                         FoundedDate = c.FoundedDate,
                         PlayerCount = c.Players.Count,
-                        MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count
+                        MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count,
+                        BannerUrl   = c.Images.FirstOrDefault(i => i.IsPrimary) != null
+                            ? c.Images.First(i => i.IsPrimary).FilePath
+                            : null
                     })
                     .ToList(),
 

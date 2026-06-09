@@ -107,8 +107,12 @@
 
 		const loadFilteredResults = debounce(async () => {
 			const query = inputElement.value.trim();
+			// filterUrl may already carry a query string (e.g. ?leagueId=2), so choose
+			// the correct separator instead of blindly appending "?", which would
+			// produce "?leagueId=2?q=…" and silently drop both the scope and the query.
+			const separator = filterUrl.includes("?") ? "&" : "?";
 			const targetUrl = query
-				? `${filterUrl}?q=${encodeURIComponent(query)}`
+				? `${filterUrl}${separator}q=${encodeURIComponent(query)}`
 				: filterUrl;
 
 			try {
@@ -124,8 +128,18 @@
 
 				const html = await response.text();
 				animateFilterRefresh(resultsElement, html);
-				const url = query
-					? `${window.location.pathname}?q=${encodeURIComponent(query)}`
+
+				// Update only the q param in the address bar, preserving the rest
+				// (e.g. leagueId) so a reload keeps the same league scope.
+				const params = new URLSearchParams(window.location.search);
+				if (query) {
+					params.set("q", query);
+				} else {
+					params.delete("q");
+				}
+				const queryString = params.toString();
+				const url = queryString
+					? `${window.location.pathname}?${queryString}`
 					: window.location.pathname;
 				window.history.replaceState({}, "", url);
 			} catch {

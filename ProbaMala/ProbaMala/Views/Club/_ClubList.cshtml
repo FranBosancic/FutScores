@@ -1,4 +1,12 @@
 @model List<ProbaMala.Models.ViewModels.ClubDetailsViewModel>
+@{
+    // When viewing a single league's clubs, the league column is redundant
+    // (it's the same for every row), so we drop it and narrow the grid.
+    var leagueScoped = (ViewData["LeagueId"] as int?).HasValue;
+    var gridCols = leagueScoped
+        ? "grid-cols-[1fr_5rem_5rem_5rem_4rem]"
+        : "grid-cols-[1fr_8rem_5rem_5rem_5rem_4rem]";
+}
 
 @* Section header with Add Club button *@
 <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
@@ -12,9 +20,12 @@
 </div>
 
 @* Column headers *@
-<div class="grid grid-cols-[1fr_8rem_5rem_5rem_5rem_4rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+<div class="grid @gridCols border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
     <span>Club</span>
-    <span>League</span>
+    @if (!leagueScoped)
+    {
+        <span>League</span>
+    }
     <span class="text-center">Founded</span>
     <span class="text-center">Players</span>
     <span class="text-center">Matches</span>
@@ -29,7 +40,7 @@ else
 {
     @foreach (var club in Model)
     {
-        <div class="group grid cursor-pointer grid-cols-[1fr_8rem_5rem_5rem_5rem_4rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+        <div class="group grid cursor-pointer @gridCols items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
              data-row-href="@Url.RouteUrl("club-details", new { id = club.Id })">
             @* Club name with banner thumbnail (falls back to an initial) *@
             <div class="flex min-w-0 items-center gap-2.5">
@@ -47,8 +58,11 @@ else
                 </a>
             </div>
 
-            @* League name *@
-            <span class="truncate text-sm text-slate-400">@(club.LeagueName ?? "—")</span>
+            @* League name — hidden when already scoped to a single league *@
+            @if (!leagueScoped)
+            {
+                <span class="truncate text-sm text-slate-400">@(club.LeagueName ?? "—")</span>
+            }
 
             @* Founded year *@
             <span class="text-center text-sm text-slate-400">@club.FoundedDate.Year</span>

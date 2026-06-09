@@ -67,9 +67,19 @@
             {
                 <div class="grid cursor-pointer grid-cols-[1fr_5rem_5rem_5rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
                      data-row-href="/clubs/@club.Id">
-                    <a href="/clubs/@club.Id" class="font-medium text-slate-100 transition hover:text-white">
-                        @club.Name
-                    </a>
+                    <div class="flex min-w-0 items-center gap-2.5">
+                        @if (!string.IsNullOrEmpty(club.BannerUrl))
+                        {
+                            <img src="@club.BannerUrl" alt="@club.Name" class="h-8 w-8 shrink-0 rounded object-cover" />
+                        }
+                        else
+                        {
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-800 text-xs font-semibold text-slate-400">@club.Name.Substring(0, 1)</span>
+                        }
+                        <a href="/clubs/@club.Id" class="truncate font-medium text-slate-100 transition hover:text-white">
+                            @club.Name
+                        </a>
+                    </div>
                     <span class="text-right text-sm tabular-nums text-slate-500">@club.FoundedDate.Year</span>
                     <span class="text-right text-sm tabular-nums text-slate-400">@club.PlayerCount</span>
                     <span class="text-right text-sm tabular-nums text-slate-400">@club.MatchCount</span>
