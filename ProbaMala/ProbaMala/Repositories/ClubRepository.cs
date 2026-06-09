@@ -10,6 +10,7 @@ namespace ProbaMala.Repositories
     {
         List<ClubDetailsViewModel> GetAll(string? query = null, int? leagueId = null);
         ClubDetailsViewModel? GetById(int id);
+        List<PlayerDetailsViewModel> GetSquad(int clubId, string? q = null);
         ClubFormViewModel BuildFormModel();
         ClubFormViewModel? GetFormById(int id);
         void PopulateFormOptions(ClubFormViewModel model);
@@ -104,6 +105,39 @@ namespace ProbaMala.Repositories
                         .ToList()
                 })
                 .FirstOrDefault();
+        }
+
+        public List<PlayerDetailsViewModel> GetSquad(int clubId, string? q = null)
+        {
+            var playersQuery = _dbContext.Players
+                .AsNoTracking()
+                .Where(p => p.ClubId == clubId);
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var qTrim = q.Trim().ToLower();
+                playersQuery = playersQuery.Where(p =>
+                    p.FirstName.ToLower().Contains(qTrim) ||
+                    p.LastName.ToLower().Contains(qTrim) ||
+                    p.Nationality.ToLower().Contains(qTrim) ||
+                    p.Position.ToString().ToLower().Contains(qTrim));
+            }
+
+            return playersQuery
+                .OrderBy(p => p.LastName)
+                .ThenBy(p => p.FirstName)
+                .Select(p => new PlayerDetailsViewModel
+                {
+                    Id          = p.Id,
+                    ClubId      = p.ClubId,
+                    FirstName   = p.FirstName,
+                    LastName    = p.LastName,
+                    DateOfBirth = p.DateOfBirth,
+                    Position    = p.Position,
+                    Nationality = p.Nationality,
+                    RatingCount = p.Ratings.Count
+                })
+                .ToList();
         }
 
         public ClubFormViewModel BuildFormModel()

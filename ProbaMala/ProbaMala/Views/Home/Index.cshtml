@@ -131,7 +131,8 @@
                         _                   => "text-slate-400 bg-slate-500/10"
                     };
 
-                    <div class="flex items-center justify-between border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
+                    <div class="flex cursor-pointer items-center justify-between border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+                         data-row-href="@Url.RouteUrl("player-details", new { id = fp.PlayerId })">
                         <div class="flex min-w-0 flex-col gap-0.5">
                             <a asp-route="player-details" asp-route-id="@fp.PlayerId"
                                class="truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
@@ -167,7 +168,8 @@
             {
                 @foreach (var cf in Model.ClubForms)
                 {
-                    <div class="flex items-center justify-between border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
+                    <div class="flex cursor-pointer items-center justify-between border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+                         data-row-href="@Url.RouteUrl("club-details", new { id = cf.ClubId })">
                         <a asp-route="club-details" asp-route-id="@cf.ClubId"
                            class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@cf.ClubName</a>
 

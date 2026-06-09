@@ -39,6 +39,16 @@ namespace ProbaMala.Controllers
             return PartialView("_ClubList", _clubRepository.GetAll(q, leagueId));
         }
 
+        // GET /clubs/{id}/squad  (AJAX — returns the _ClubSquad partial filtered by query)
+        [HttpGet("{id:int}/posada")]
+        [HttpGet("~/clubs/{id:int}/squad", Name = "club-squad-filter")]
+        public IActionResult FilterSquad(int id, string? q)
+        {
+            ViewData["FilterQuery"] = q;
+            ViewData["ClubId"]      = id;
+            return PartialView("_ClubSquad", _clubRepository.GetSquad(id, q));
+        }
+
         // GET /clubs/{id}
         [HttpGet("{id:int}")]
         [HttpGet("detalji/{id:int}")]

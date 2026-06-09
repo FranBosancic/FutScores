@@ -95,10 +95,74 @@
         </div>
     </div>
 
-    @* Ratings & matches panel *@
+    @* Recent Matches panel — derived from ratings data *@
+    @{
+        var recentMatches = Model.Ratings?
+            .GroupBy(r => r.MatchId)
+            .Select(g => new {
+                MatchId      = g.Key,
+                HomeTeamName = g.First().HomeTeamName,
+                AwayTeamName = g.First().AwayTeamName,
+                MatchScore   = g.First().MatchScore,
+                MatchDate    = g.First().MatchDate,
+                AvgScore     = g.Average(r => (double)r.Score),
+                RatingCount  = g.Count()
+            })
+            .OrderByDescending(m => m.MatchDate)
+            .ToList();
+    }
+
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+        <div class="border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+            <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Recent Matches</span>
+        </div>
+
+        @if (recentMatches == null || !recentMatches.Any())
+        {
+            <div class="px-4 py-8 text-center text-sm text-slate-500">No rated matches yet.</div>
+        }
+        else
+        {
+            <div class="grid grid-cols-[1fr_4.5rem_3rem] items-center gap-x-3 border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+                <span>Match</span>
+                <span class="text-right">Date</span>
+                <span class="text-right">Rtg</span>
+            </div>
+
+            @foreach (var matchRow in recentMatches)
+            {
+                var avgBadgeClass = matchRow.AvgScore switch
+                {
+                    >= 9 => "bg-emerald-500/15 text-emerald-300",
+                    >= 7 => "bg-lime-500/15 text-lime-300",
+                    >= 5 => "bg-amber-500/15 text-amber-300",
+                    _    => "bg-rose-500/15 text-rose-300"
+                };
+
+                <a asp-route="match-details" asp-route-id="@matchRow.MatchId"
+                   class="grid grid-cols-[1fr_4.5rem_3rem] items-center gap-x-3 border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]">
+                    <div class="flex min-w-0 items-center gap-2">
+                        <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+                        <span class="truncate text-sm font-medium text-slate-100">@matchRow.HomeTeamName</span>
+                        <span class="shrink-0 rounded bg-slate-800 px-1.5 py-0.5 text-xs font-bold tabular-nums text-slate-200">@matchRow.MatchScore</span>
+                        <span class="truncate text-sm font-medium text-slate-100">@matchRow.AwayTeamName</span>
+                    </div>
+                    <span class="text-right text-xs text-slate-500">@matchRow.MatchDate.ToString("MMM d")</span>
+                    <div class="flex justify-end">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold @avgBadgeClass"
+                              title="@matchRow.RatingCount rating(s)">
+                            @matchRow.AvgScore.ToString("0.0")
+                        </span>
+                    </div>
+                </a>
+            }
+        }
+    </div>
+
+    @* Ratings panel *@
     <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
         <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
-            <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Ratings &amp; matches</span>
+            <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Ratings</span>
             <a asp-route="rating-create" class="flex items-center gap-1 text-xs font-semibold text-lime-400 transition hover:text-lime-300">
                 <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />

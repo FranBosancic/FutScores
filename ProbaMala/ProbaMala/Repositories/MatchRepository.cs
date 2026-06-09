@@ -185,7 +185,8 @@ namespace ProbaMala.Repositories
                         HomeTeamName     = match.HomeTeam.Name,
                         AwayTeamName     = match.AwayTeam.Name,
                         HomeGoals        = match.HomeGoals,
-                        AwayGoals        = match.AwayGoals
+                        AwayGoals        = match.AwayGoals,
+                        MatchDate        = match.Date
                     })
                     .ToList()
             };

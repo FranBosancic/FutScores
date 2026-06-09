@@ -1,0 +1,49 @@
+@using ProbaMala.Models.Entities
+@model List<ProbaMala.Models.ViewModels.PlayerDetailsViewModel>
+
+@* Column headers *@
+<div class="grid grid-cols-[1fr_7rem_8rem_4rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+    <span>Player</span>
+    <span>Position</span>
+    <span>Nationality</span>
+    <span class="text-center">Rtg</span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="px-4 py-8 text-center text-sm text-slate-500">No players found.</div>
+}
+else
+{
+    @foreach (var player in Model)
+    {
+        var positionBadgeClass = player.Position switch
+        {
+            Position.Goalkeeper => "text-indigo-400 bg-indigo-500/10",
+            Position.Defender   => "text-emerald-400 bg-emerald-500/10",
+            Position.Midfielder => "text-amber-400 bg-amber-500/10",
+            Position.Forward    => "text-rose-400 bg-rose-500/10",
+            _                   => "text-slate-400 bg-slate-500/10"
+        };
+
+        <div class="group grid cursor-pointer grid-cols-[1fr_7rem_8rem_4rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+             data-row-href="@Url.RouteUrl("player-details", new { id = player.Id })">
+
+            <div class="flex min-w-0 items-center gap-2">
+                <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+                <a asp-route="player-details" asp-route-id="@player.Id"
+                   class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">
+                    @($"{player.FirstName} {player.LastName}")
+                </a>
+            </div>
+
+            <span class="w-fit rounded px-2 py-0.5 text-xs font-medium @positionBadgeClass">
+                @player.Position.ToString()
+            </span>
+
+            <span class="truncate text-sm text-slate-400">@(player.Nationality ?? "—")</span>
+
+            <span class="text-center text-sm text-slate-400">@player.RatingCount</span>
+        </div>
+    }
+}

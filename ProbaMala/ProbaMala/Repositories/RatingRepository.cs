@@ -357,7 +357,8 @@ namespace ProbaMala.Repositories
                 HomeTeamName     = r.Match.HomeTeam.Name,
                 AwayTeamName     = r.Match.AwayTeam.Name,
                 HomeGoals        = r.Match.HomeGoals,
-                AwayGoals        = r.Match.AwayGoals
+                AwayGoals        = r.Match.AwayGoals,
+                MatchDate        = r.Match.Date
             };
         }
 
