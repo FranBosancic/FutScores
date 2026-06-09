@@ -11,6 +11,9 @@ namespace ProbaMala.Models.ViewModels
         public int MatchCount { get; set; }
         public bool CanDelete { get; set; }
 
+        // Web path of the club's primary image (banner), or null when none uploaded.
+        public string? BannerUrl { get; set; }
+
         // Only populated on the Details page (null on the Index list),
         // mirroring how LeagueDetailsViewModel carries its child collections.
         public List<PlayerDetailsViewModel>? Players { get; set; }

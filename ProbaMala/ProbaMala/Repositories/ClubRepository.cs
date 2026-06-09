@@ -66,7 +66,8 @@ namespace ProbaMala.Repositories
                     // Counts inside the EF query so they translate to SQL COUNT(*)
                     PlayerCount = c.Players.Count,
                     MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count,
-                    CanDelete   = c.Players.Count == 0 && c.HomeMatches.Count == 0 && c.AwayMatches.Count == 0
+                    CanDelete   = c.Players.Count == 0 && c.HomeMatches.Count == 0 && c.AwayMatches.Count == 0,
+                    BannerUrl   = c.Images.Where(i => i.IsPrimary).Select(i => i.FilePath).FirstOrDefault()
                 })
                 .ToList();
         }
@@ -87,6 +88,7 @@ namespace ProbaMala.Repositories
                     PlayerCount = c.Players.Count,
                     MatchCount  = c.HomeMatches.Count + c.AwayMatches.Count,
                     CanDelete   = c.Players.Count == 0 && c.HomeMatches.Count == 0 && c.AwayMatches.Count == 0,
+                    BannerUrl   = c.Images.Where(i => i.IsPrimary).Select(i => i.FilePath).FirstOrDefault(),
                     Players = c.Players
                         .OrderBy(p => p.LastName)
                         .ThenBy(p => p.FirstName)
@@ -100,7 +102,8 @@ namespace ProbaMala.Repositories
                             Position    = p.Position,
                             Nationality = p.Nationality,
                             ClubName    = c.Name,
-                            RatingCount = p.Ratings.Count
+                            RatingCount = p.Ratings.Count,
+                            PhotoUrl    = p.Images.Where(i => i.IsPrimary).Select(i => i.FilePath).FirstOrDefault()
                         })
                         .ToList()
                 })
@@ -135,7 +138,8 @@ namespace ProbaMala.Repositories
                     DateOfBirth = p.DateOfBirth,
                     Position    = p.Position,
                     Nationality = p.Nationality,
-                    RatingCount = p.Ratings.Count
+                    RatingCount = p.Ratings.Count,
+                    PhotoUrl    = p.Images.Where(i => i.IsPrimary).Select(i => i.FilePath).FirstOrDefault()
                 })
                 .ToList();
         }

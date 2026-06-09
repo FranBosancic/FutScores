@@ -51,6 +51,13 @@
         @* Stat chips row *@
         <div class="flex flex-wrap items-center gap-3 px-4 py-4">
 
+            @* Headshot (primary photo), shown only when one has been uploaded *@
+            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+            {
+                <img src="@Model.PhotoUrl" alt="@Model.FirstName @Model.LastName"
+                     class="h-16 w-16 shrink-0 rounded-full object-cover ring-2 ring-slate-700/60" />
+            }
+
             @* Position badge *@
             <div class="flex items-center gap-1.5 rounded-lg bg-slate-800/60 px-3 py-1.5">
                 <span class="text-xs text-slate-500">Position</span>

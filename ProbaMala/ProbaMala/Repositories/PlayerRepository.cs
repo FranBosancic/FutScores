@@ -61,7 +61,8 @@ namespace ProbaMala.Repositories
                     ClubName    = p.Club.Name,
                     // Count must happen inside the EF query (before materialisation),
                     // otherwise it would always return 0 when lazy loading is disabled
-                    RatingCount = p.Ratings.Count
+                    RatingCount = p.Ratings.Count,
+                    PhotoUrl    = p.Images.Where(i => i.IsPrimary).Select(i => i.FilePath).FirstOrDefault()
                 })
                 .ToList();
         }
@@ -74,6 +75,7 @@ namespace ProbaMala.Repositories
             var player = _dbContext.Players
                 .AsNoTracking()
                 .Include(p => p.Club)
+                .Include(p => p.Images)
                 .Include(p => p.Ratings).ThenInclude(r => r.User)
                 .Include(p => p.Ratings).ThenInclude(r => r.Match).ThenInclude(m => m.HomeTeam)
                 .Include(p => p.Ratings).ThenInclude(r => r.Match).ThenInclude(m => m.AwayTeam)
@@ -93,6 +95,7 @@ namespace ProbaMala.Repositories
                 Nationality = player.Nationality,
                 ClubName    = player.Club.Name,
                 RatingCount = player.Ratings.Count,
+                PhotoUrl    = player.Images.Where(i => i.IsPrimary).Select(i => i.FilePath).FirstOrDefault(),
                 Ratings     = player.Ratings
                     .OrderByDescending(r => r.Match.Date)
                     .Select(r => new RatingDetailsViewModel

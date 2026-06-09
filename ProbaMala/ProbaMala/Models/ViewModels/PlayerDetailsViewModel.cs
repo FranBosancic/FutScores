@@ -14,6 +14,9 @@ namespace ProbaMala.Models.ViewModels
         public string ClubName { get; set; } = null!;
         public int RatingCount { get; set; }
 
+        // Web path of the player's primary image (photo), or null when none uploaded.
+        public string? PhotoUrl { get; set; }
+
         // Only populated on the Details page (null on the Index list).
         public List<RatingDetailsViewModel>? Ratings { get; set; }
     }
