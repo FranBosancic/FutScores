@@ -29,5 +29,6 @@ namespace ProbaMala.Models.Entities
 
         public virtual Club Club { get; set; } = null!;
         public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+        public virtual ICollection<Image> Images { get; set; } = new List<Image>();
     }
 }

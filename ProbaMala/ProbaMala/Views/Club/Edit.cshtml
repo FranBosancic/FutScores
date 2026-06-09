@@ -38,8 +38,70 @@
             </form>
         </div>
     </div>
+
+    @* ── Images / banner ── *@
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+        <div class="flex items-center gap-2 border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+            <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+            <span class="text-sm font-semibold text-slate-100">Club images</span>
+        </div>
+
+        <div class="space-y-4 px-4 py-5">
+            <p class="text-sm text-slate-400">Upload one or more images. The image marked <span class="font-medium text-lime-400">banner</span> represents the club.</p>
+
+            @* Dropzone target. autoDiscover is off — initialised explicitly in the script below. *@
+            <form id="imageDropzone"
+                  asp-controller="Club" asp-action="UploadImage" asp-route-id="@Model.Id"
+                  enctype="multipart/form-data"
+                  class="dropzone !min-h-[8rem] !rounded-lg !border !border-dashed !border-slate-700 !bg-slate-900/40">
+            </form>
+
+            <div id="imageList"></div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+
+    <script>
+        Dropzone.autoDiscover = false;
+
+        (function () {
+            // Reuse the anti-forgery token rendered by the main edit form above.
+            var token      = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            var listUrl    = '@Url.Action("GetImages", "Club", new { id = Model.Id })';
+            var deleteUrl  = '@Url.Action("DeleteImage", "Club")';
+            var primaryUrl = '@Url.Action("SetPrimaryImage", "Club")';
+
+            function loadImages() { $('#imageList').load(listUrl); }
+
+            // Called from buttons rendered inside the _ImageList partial.
+            window.deleteImage = function (id) {
+                $.ajax({ url: deleteUrl, method: 'POST', data: { imageId: id },
+                         headers: { 'RequestVerificationToken': token } }).done(loadImages);
+            };
+            window.setPrimaryImage = function (id) {
+                $.ajax({ url: primaryUrl, method: 'POST', data: { imageId: id },
+                         headers: { 'RequestVerificationToken': token } }).done(loadImages);
+            };
+
+            new Dropzone('#imageDropzone', {
+                paramName: 'file',
+                maxFilesize: 5,                  // MB
+                acceptedFiles: 'image/*',
+                addRemoveLinks: true,
+                dictDefaultMessage: 'Drop images here or click to upload',
+                headers: { 'RequestVerificationToken': token },
+                init: function () {
+                    this.on('success', function (file) { this.removeFile(file); loadImages(); });
+                }
+            });
+
+            loadImages();
+        })();
+    </script>
 }

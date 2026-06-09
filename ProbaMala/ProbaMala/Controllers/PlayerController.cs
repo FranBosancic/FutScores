@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProbaMala.Models.Entities;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
 
@@ -8,10 +9,12 @@ namespace ProbaMala.Controllers
     public class PlayerController : Controller
     {
         private readonly IPlayerRepository _playerRepository;
+        private readonly IImageRepository _imageRepository;
 
-        public PlayerController(IPlayerRepository playerRepository)
+        public PlayerController(IPlayerRepository playerRepository, IImageRepository imageRepository)
         {
             _playerRepository = playerRepository;
+            _imageRepository = imageRepository;
         }
 
         // GET /players
@@ -139,6 +142,49 @@ namespace ProbaMala.Controllers
                 return NotFound();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // ── Image upload (Dropzone) ──────────────────────────────────────────
+
+        // POST /players/{id}/images — Dropzone posts one file per request as "file".
+        [HttpPost("{id:int}/slike")]
+        [HttpPost("~/players/{id:int}/images")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadImage(int id, IFormFile file)
+        {
+            var (image, error) = await _imageRepository.AddAsync(ImageOwnerType.Player, id, file);
+
+            if (error != null)
+                return BadRequest(error);
+
+            return Json(new { success = true, id = image!.Id });
+        }
+
+        // GET /players/{id}/images — AJAX: renders the gallery partial.
+        [HttpGet("{id:int}/slike")]
+        [HttpGet("~/players/{id:int}/images")]
+        public IActionResult GetImages(int id)
+        {
+            ViewData["PrimaryNoun"] = "photo";
+            return PartialView("_ImageList", _imageRepository.GetForOwner(ImageOwnerType.Player, id));
+        }
+
+        // POST /players/images/delete — imageId comes from the AJAX request body.
+        [HttpPost("slike/obrisi")]
+        [HttpPost("~/players/images/delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteImage(int imageId)
+        {
+            return _imageRepository.Delete(imageId) ? Json(new { success = true }) : NotFound();
+        }
+
+        // POST /players/images/primary — mark as the player headshot.
+        [HttpPost("slike/glavna")]
+        [HttpPost("~/players/images/primary")]
+        [ValidateAntiForgeryToken]
+        public IActionResult SetPrimaryImage(int imageId)
+        {
+            return _imageRepository.SetPrimary(imageId) ? Json(new { success = true }) : NotFound();
         }
 
         // Checks that the selected club actually exists in the database.

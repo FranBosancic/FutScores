@@ -26,5 +26,7 @@ namespace ProbaMala.Models.Entities
 
         [InverseProperty(nameof(Match.AwayTeam))]
         public virtual ICollection<Match> AwayMatches { get; set; } = new List<Match>();
+
+        public virtual ICollection<Image> Images { get; set; } = new List<Image>();
     }
 }

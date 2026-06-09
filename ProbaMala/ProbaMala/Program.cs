@@ -9,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Let AJAX/Dropzone requests send the anti-forgery token in a header rather than
+// a form field, so the image endpoints can keep [ValidateAntiForgeryToken].
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
+
 var supportedCultures = new[]
 {
     new CultureInfo("hr"),
@@ -32,6 +36,7 @@ builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 var app = builder.Build();
 

@@ -16,6 +16,7 @@ namespace ProbaMala.Data
         public DbSet<Match> Matches => Set<Match>();
         public DbSet<User> Users => Set<User>();
         public DbSet<Rating> Ratings => Set<Rating>();
+        public DbSet<Image> Images => Set<Image>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +45,24 @@ namespace ProbaMala.Data
                 .WithMany(club => club.AwayMatches)
                 .HasForeignKey(match => match.AwayTeamId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // An Image belongs to exactly one owner. Both FKs are nullable; the
+            // application sets exactly one. Deleting the owner cascades its images.
+            modelBuilder.Entity<Image>()
+                .Property(image => image.CreatedAt)
+                .HasColumnType("timestamp without time zone");
+
+            modelBuilder.Entity<Image>()
+                .HasOne(image => image.Club)
+                .WithMany(club => club.Images)
+                .HasForeignKey(image => image.ClubId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Image>()
+                .HasOne(image => image.Player)
+                .WithMany(player => player.Images)
+                .HasForeignKey(image => image.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ─────────────────────────────────────────────────────────────────
             // Seed data: real 2025–26 season (Europe's top five leagues).

@@ -1,0 +1,52 @@
+@model List<ProbaMala.Models.ViewModels.ImageListItemViewModel>
+@{
+    // Owner-specific wording: "banner" for clubs, "photo" for players.
+    var noun = ViewData["PrimaryNoun"] as string ?? "primary";
+    var badge = char.ToUpper(noun[0]) + noun.Substring(1);
+
+    string FormatSize(long bytes)
+    {
+        if (bytes >= 1024 * 1024) return $"{bytes / (1024.0 * 1024.0):0.0} MB";
+        if (bytes >= 1024) return $"{bytes / 1024.0:0} KB";
+        return $"{bytes} B";
+    }
+}
+
+@if (Model.Count == 0)
+{
+    <p class="text-sm text-slate-500">No images uploaded yet.</p>
+}
+else
+{
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        @foreach (var img in Model)
+        {
+            <div class="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-900/40">
+                <img src="@img.Url" alt="@img.FileName" class="h-28 w-full object-cover" />
+
+                @if (img.IsPrimary)
+                {
+                    <span class="absolute left-1.5 top-1.5 rounded bg-lime-500 px-1.5 py-0.5 text-[10px] font-semibold text-slate-950">@badge</span>
+                }
+
+                <div class="space-y-1 p-2">
+                    <p class="truncate text-xs text-slate-300" title="@img.FileName">@img.FileName</p>
+                    <p class="text-[10px] text-slate-500">@FormatSize(img.FileSize)</p>
+                    <div class="flex items-center gap-2 pt-1">
+                        @if (!img.IsPrimary)
+                        {
+                            <button type="button" onclick="setPrimaryImage(@img.Id)"
+                                    class="text-[11px] font-medium text-lime-400 transition hover:text-lime-300">
+                                Set as @noun
+                            </button>
+                        }
+                        <button type="button" onclick="deleteImage(@img.Id)"
+                                class="ml-auto text-[11px] font-medium text-red-400 transition hover:text-red-300">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
