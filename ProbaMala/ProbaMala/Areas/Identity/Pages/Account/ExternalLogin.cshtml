@@ -1,0 +1,74 @@
+@page
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Complete registration";
+}
+
+<div class="mx-auto w-full max-w-md px-4 sm:px-6">
+    <div class="overflow-hidden rounded-xl border border-slate-800 bg-[#0b0f1a]">
+
+        @* Title bar *@
+        <div class="flex items-center gap-2 border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
+            <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
+            <span class="text-sm font-semibold text-slate-100">Complete your registration</span>
+        </div>
+
+        @* Body *@
+        <div class="px-4 py-5">
+            <p class="mb-5 text-sm text-slate-400">
+                You've successfully authenticated with
+                <span class="font-semibold text-lime-400">@Model.ProviderDisplayName</span>.
+                Please provide the details below to finish setting up your FutScores account.
+            </p>
+
+            <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-5">
+
+                @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                {
+                    <div asp-validation-summary="ModelOnly" class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200" role="alert"></div>
+                }
+
+                <div>
+                    <label asp-for="Input.Email" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                    <input asp-for="Input.Email" autocomplete="username"
+                           class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800"
+                           placeholder="name@example.com" />
+                    <span asp-validation-for="Input.Email" class="mt-2 block text-sm text-rose-300"></span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                        <label asp-for="Input.OIB" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                        <input asp-for="Input.OIB" maxlength="11" inputmode="numeric"
+                               class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800"
+                               placeholder="11 digits" />
+                        <span asp-validation-for="Input.OIB" class="mt-2 block text-sm text-rose-300"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.JMBG" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                        <input asp-for="Input.JMBG" maxlength="13" inputmode="numeric"
+                               class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800"
+                               placeholder="13 digits" />
+                        <span asp-validation-for="Input.JMBG" class="mt-2 block text-sm text-rose-300"></span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 border-t border-slate-800/60 pt-5">
+                    <button type="submit"
+                            class="inline-flex items-center rounded-lg bg-lime-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-lime-400">
+                        Register
+                    </button>
+                    <a asp-area="Identity" asp-page="/Account/Login"
+                       class="text-sm text-slate-400 transition hover:text-slate-200">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -40,6 +40,23 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
+// 3rd-party login (Google). Wired up only when credentials are present
+// (stored in user-secrets for development, never committed to source), so the
+// app still starts and runs normally when they are not configured.
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    builder.Services
+        .AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+        });
+}
+
 // We never actually send mail; the framework's no-op sender keeps the default
 // Identity pages (password reset / resend confirmation) from throwing.
 builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();

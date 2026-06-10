@@ -23,6 +23,11 @@ namespace ProbaMala.Areas.Identity.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
+        // External providers (e.g. Google) that are currently configured. Empty
+        // when no provider credentials are set up, in which case the Login view
+        // hides the "continue with" section.
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
+
         public string? ReturnUrl { get; set; }
 
         [TempData]
@@ -54,12 +59,16 @@ namespace ProbaMala.Areas.Identity.Pages.Account
             // Clear any leftover external cookie to ensure a clean login.
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             ReturnUrl = returnUrl;
         }
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (!ModelState.IsValid)
             {
