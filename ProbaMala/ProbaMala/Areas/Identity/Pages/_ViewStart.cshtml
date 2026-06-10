@@ -1,6 +1,5 @@
 @{
-    // All Identity pages (including the default-UI Login/Logout) render inside
-    // this self-contained Bootstrap layout, scoping Bootstrap to the auth pages
-    // and leaving the main site's Tailwind theme untouched.
-    Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml";
+    // Identity pages render inside the main site layout so they share the exact
+    // header, footer and dark Tailwind theme as the rest of the application.
+    Layout = "/Views/Shared/_Layout.cshtml";
 }
