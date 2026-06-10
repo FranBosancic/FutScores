@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
@@ -5,6 +6,8 @@ using ProbaMala.Repositories;
 namespace ProbaMala.Controllers
 {
     // Primary route: /lige (Croatian), English aliases: /leagues (named for asp-route use)
+    // Mutations are Admin-only; the read actions opt back in with [AllowAnonymous].
+    [Authorize(Roles = "Admin")]
     [Route("lige")]
     public class LeagueController : Controller
     {
@@ -20,6 +23,7 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/leagues", Name = "leagues-index")]
         [HttpGet("~/leagues/list")]
+        [AllowAnonymous]
         public IActionResult Index(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -29,6 +33,7 @@ namespace ProbaMala.Controllers
         // GET /leagues/filter  (AJAX — returns the _LeagueList partial, not the full page)
         [HttpGet("filter")]
         [HttpGet("~/leagues/filter", Name = "leagues-filter")]
+        [AllowAnonymous]
         public IActionResult Filter(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -40,6 +45,7 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/leagues/{id:int}", Name = "league-details")]
         [HttpGet("~/leagues/details/{id:int}")]
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var league = _leagueRepository.GetById(id);

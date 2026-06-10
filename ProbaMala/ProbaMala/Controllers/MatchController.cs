@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
@@ -8,6 +9,9 @@ namespace ProbaMala.Controllers
     // Each action below also has a Croatian and an English alias route; the English
     // ones are named (Name = "match-details" etc.) so views can reference them with
     // asp-route="match-details" instead of hardcoding the URL.
+    // Mutations are Admin-only; the read actions (incl. the cascade JSON helper)
+    // opt back in with [AllowAnonymous].
+    [Authorize(Roles = "Admin")]
     [Route("utakmice")]
     public class MatchController : Controller
     {
@@ -26,6 +30,7 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/matches", Name = "matches-index")]
         [HttpGet("~/matches/list")]
+        [AllowAnonymous]
         public IActionResult Index(string? q, int? leagueId)
         {
             ViewData["FilterQuery"] = q;
@@ -37,6 +42,7 @@ namespace ProbaMala.Controllers
         // The live-search input calls this endpoint and replaces the list area with the result.
         [HttpGet("filter")]
         [HttpGet("~/matches/filter", Name = "matches-filter")]
+        [AllowAnonymous]
         public IActionResult Filter(string? q, int? leagueId)
         {
             ViewData["FilterQuery"] = q;
@@ -49,6 +55,7 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/matches/{id:int}", Name = "match-details")]
         [HttpGet("~/matches/details/{id:int}")]
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _matchRepository.GetById(id);
@@ -72,6 +79,7 @@ namespace ProbaMala.Controllers
         // returns the clubs in that league so the home/away selects can be populated.
         [HttpGet("klubovi")]
         [HttpGet("~/matches/clubs", Name = "match-clubs")]
+        [AllowAnonymous]
         public IActionResult ClubsInLeague(int leagueId, int? excludeId)
         {
             return Json(_matchRepository.GetClubsInLeague(leagueId, excludeId));

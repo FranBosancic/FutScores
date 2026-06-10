@@ -32,19 +32,22 @@ else
                 <div class="space-y-1 p-2">
                     <p class="truncate text-xs text-slate-300" title="@img.FileName">@img.FileName</p>
                     <p class="text-[10px] text-slate-500">@FormatSize(img.FileSize)</p>
-                    <div class="flex items-center gap-2 pt-1">
-                        @if (!img.IsPrimary)
-                        {
-                            <button type="button" onclick="setPrimaryImage(@img.Id)"
-                                    class="text-[11px] font-medium text-lime-400 transition hover:text-lime-300">
-                                Set as @noun
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="flex items-center gap-2 pt-1">
+                            @if (!img.IsPrimary)
+                            {
+                                <button type="button" onclick="setPrimaryImage(@img.Id)"
+                                        class="text-[11px] font-medium text-lime-400 transition hover:text-lime-300">
+                                    Set as @noun
+                                </button>
+                            }
+                            <button type="button" onclick="deleteImage(@img.Id)"
+                                    class="ml-auto text-[11px] font-medium text-red-400 transition hover:text-red-300">
+                                Delete
                             </button>
-                        }
-                        <button type="button" onclick="deleteImage(@img.Id)"
-                                class="ml-auto text-[11px] font-medium text-red-400 transition hover:text-red-300">
-                            Delete
-                        </button>
-                    </div>
+                        </div>
+                    }
                 </div>
             </div>
         }

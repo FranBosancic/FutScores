@@ -19,10 +19,13 @@
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-500">
                 <a asp-route="leagues-index" class="transition hover:text-slate-300">All leagues</a>
-                <span>/</span>
-                <a asp-route="league-edit" asp-route-id="@Model.Id" class="transition hover:text-slate-300">Edit</a>
-                <span>/</span>
-                <a asp-route="league-delete" asp-route-id="@Model.Id" class="text-rose-600 transition hover:text-rose-400">Delete</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <span>/</span>
+                    <a asp-route="league-edit" asp-route-id="@Model.Id" class="transition hover:text-slate-300">Edit</a>
+                    <span>/</span>
+                    <a asp-route="league-delete" asp-route-id="@Model.Id" class="text-rose-600 transition hover:text-rose-400">Delete</a>
+                }
             </div>
         </div>
 

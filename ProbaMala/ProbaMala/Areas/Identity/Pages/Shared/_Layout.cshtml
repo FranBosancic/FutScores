@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FutScores</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { background-color: #02040d; }
+        .auth-card { background:#0b0f1a; border:1px solid #1e293b; border-radius:1rem; color:#e2e8f0; }
+        .auth-card a { color:#84cc16; }
+        .navbar-brand .badge-fs { background:#84cc16; color:#020617; border-radius:.35rem; padding:.2rem .45rem; font-weight:600; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark border-bottom border-secondary" style="background:#070b13;">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <span class="badge-fs">FS</span>
+                <span>FutScores</span>
+            </a>
+            <a class="btn btn-outline-light btn-sm" href="/">&larr; Back to FutScores</a>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6">
+                <div class="auth-card p-4 p-md-5">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

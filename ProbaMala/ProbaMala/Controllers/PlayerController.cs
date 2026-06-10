@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.Entities;
 using ProbaMala.Models.ViewModels;
@@ -5,6 +6,8 @@ using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
+    // Mutations are Admin-only; the read actions opt back in with [AllowAnonymous].
+    [Authorize(Roles = "Admin")]
     [Route("igraci")]
     public class PlayerController : Controller
     {
@@ -22,6 +25,7 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/players", Name = "players-index")]
         [HttpGet("~/players/list")]
+        [AllowAnonymous]
         public IActionResult Index(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -31,6 +35,7 @@ namespace ProbaMala.Controllers
         // GET /players/filter  (AJAX — returns only the list partial)
         [HttpGet("filter")]
         [HttpGet("~/players/filter", Name = "players-filter")]
+        [AllowAnonymous]
         public IActionResult Filter(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -42,6 +47,7 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/players/{id:int}", Name = "player-details")]
         [HttpGet("~/players/details/{id:int}")]
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _playerRepository.GetById(id);
@@ -163,6 +169,7 @@ namespace ProbaMala.Controllers
         // GET /players/{id}/images — AJAX: renders the gallery partial.
         [HttpGet("{id:int}/slike")]
         [HttpGet("~/players/{id:int}/images")]
+        [AllowAnonymous]
         public IActionResult GetImages(int id)
         {
             ViewData["PrimaryNoun"] = "photo";

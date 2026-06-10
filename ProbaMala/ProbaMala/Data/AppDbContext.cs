@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Models.Entities;
 
 namespace ProbaMala.Data
 {
-    public class AppDbContext : DbContext
+    // Inherits IdentityDbContext to bring in the AspNet* tables (users, roles,
+    // claims, logins, tokens). The auth account type is AppUser; roles use the
+    // default IdentityRole with string keys.
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -14,7 +18,10 @@ namespace ProbaMala.Data
         public DbSet<Club> Clubs => Set<Club>();
         public DbSet<Player> Players => Set<Player>();
         public DbSet<Match> Matches => Set<Match>();
-        public DbSet<User> Users => Set<User>();
+        // Domain users (rating authors) — distinct from Identity's AppUser set.
+        // `new` intentionally hides the inherited AspNetUsers `Users` property;
+        // Identity accesses its own users via Set<AppUser>(), not this property.
+        public new DbSet<User> Users => Set<User>();
         public DbSet<Rating> Ratings => Set<Rating>();
         public DbSet<Image> Images => Set<Image>();
 

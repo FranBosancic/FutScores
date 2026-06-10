@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
@@ -5,6 +6,8 @@ using ProbaMala.Repositories;
 namespace ProbaMala.Controllers
 {
     // Primary route: /korisnici (Croatian), English aliases: /users
+    // Mutations are Admin-only; the read actions opt back in with [AllowAnonymous].
+    [Authorize(Roles = "Admin")]
     [Route("korisnici")]
     public class UserController : Controller
     {
@@ -20,6 +23,7 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/users", Name = "users-index")]
         [HttpGet("~/users/list")]
+        [AllowAnonymous]
         public IActionResult Index(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -29,6 +33,7 @@ namespace ProbaMala.Controllers
         // GET /users/filter  (AJAX — returns the _UserList partial)
         [HttpGet("filter")]
         [HttpGet("~/users/filter", Name = "users-filter")]
+        [AllowAnonymous]
         public IActionResult Filter(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -40,6 +45,7 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/users/{id:int}", Name = "user-details")]
         [HttpGet("~/users/details/{id:int}")]
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var user = _userRepository.GetById(id);

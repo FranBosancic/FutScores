@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.Entities;
 using ProbaMala.Models.ViewModels;
@@ -6,6 +7,9 @@ using ProbaMala.Repositories;
 namespace ProbaMala.Controllers
 {
     // Primary route: /klubovi (Croatian), English aliases: /clubs
+    // Mutations (create/edit/delete/image management) are Admin-only; the read
+    // actions below opt back in with [AllowAnonymous] so anyone can browse.
+    [Authorize(Roles = "Admin")]
     [Route("klubovi")]
     public class ClubController : Controller
     {
@@ -24,6 +28,7 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/clubs", Name = "clubs-index")]
         [HttpGet("~/clubs/list")]
+        [AllowAnonymous]
         public IActionResult Index(string? q, int? leagueId)
         {
             ViewData["FilterQuery"] = q;
@@ -35,6 +40,7 @@ namespace ProbaMala.Controllers
         // leagueId must be forwarded so live search stays scoped to the league
         [HttpGet("filter")]
         [HttpGet("~/clubs/filter", Name = "clubs-filter")]
+        [AllowAnonymous]
         public IActionResult Filter(string? q, int? leagueId)
         {
             ViewData["FilterQuery"] = q;
@@ -45,6 +51,7 @@ namespace ProbaMala.Controllers
         // GET /clubs/{id}/squad  (AJAX — returns the _ClubSquad partial filtered by query)
         [HttpGet("{id:int}/posada")]
         [HttpGet("~/clubs/{id:int}/squad", Name = "club-squad-filter")]
+        [AllowAnonymous]
         public IActionResult FilterSquad(int id, string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -57,6 +64,7 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/clubs/{id:int}", Name = "club-details")]
         [HttpGet("~/clubs/details/{id:int}")]
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _clubRepository.GetById(id);
@@ -191,6 +199,7 @@ namespace ProbaMala.Controllers
         // GET /clubs/{id}/images — AJAX: renders the gallery partial.
         [HttpGet("{id:int}/slike")]
         [HttpGet("~/clubs/{id:int}/images")]
+        [AllowAnonymous]
         public IActionResult GetImages(int id)
         {
             ViewData["PrimaryNoun"] = "banner";

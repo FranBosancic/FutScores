@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
+    // Mutations are Admin-only; the read actions (incl. cascade JSON helpers)
+    // opt back in with [AllowAnonymous].
+    [Authorize(Roles = "Admin")]
     [Route("ocjene")]
     public class RatingController : Controller
     {
@@ -19,6 +23,7 @@ namespace ProbaMala.Controllers
         [HttpGet("popis")]
         [HttpGet("~/ratings", Name = "ratings-index")]
         [HttpGet("~/ratings/list")]
+        [AllowAnonymous]
         public IActionResult Index(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -28,6 +33,7 @@ namespace ProbaMala.Controllers
         // GET /ratings/filter  (AJAX — returns only the list partial)
         [HttpGet("filter")]
         [HttpGet("~/ratings/filter", Name = "ratings-filter")]
+        [AllowAnonymous]
         public IActionResult Filter(string? q)
         {
             ViewData["FilterQuery"] = q;
@@ -39,6 +45,7 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/ratings/{id:int}", Name = "rating-details")]
         [HttpGet("~/ratings/details/{id:int}")]
+        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _ratingRepository.GetById(id);
@@ -68,6 +75,7 @@ namespace ProbaMala.Controllers
         // GET /ratings/clubs?leagueId=5
         [HttpGet("klubovi")]
         [HttpGet("~/ratings/clubs", Name = "rating-clubs")]
+        [AllowAnonymous]
         public IActionResult ClubsInLeague(int leagueId, int? excludeId)
         {
             return Json(_ratingRepository.GetClubsInLeague(leagueId, excludeId));
@@ -76,6 +84,7 @@ namespace ProbaMala.Controllers
         // GET /ratings/matches?homeTeamId=1&awayTeamId=3
         [HttpGet("utakmice")]
         [HttpGet("~/ratings/matches", Name = "rating-matches")]
+        [AllowAnonymous]
         public IActionResult MatchesBetween(int homeTeamId, int awayTeamId)
         {
             return Json(_ratingRepository.GetMatchesBetween(homeTeamId, awayTeamId));
@@ -84,6 +93,7 @@ namespace ProbaMala.Controllers
         // GET /ratings/players?matchId=7
         [HttpGet("igraci")]
         [HttpGet("~/ratings/players", Name = "rating-players")]
+        [AllowAnonymous]
         public IActionResult PlayersForMatch(int matchId)
         {
             return Json(_ratingRepository.GetPlayersForMatch(matchId));

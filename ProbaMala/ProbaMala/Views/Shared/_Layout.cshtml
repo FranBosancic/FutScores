@@ -137,6 +137,11 @@
                 }
             </nav>
 
+            @* ── Auth (desktop only): login/register or user + logout ── *@
+            <div class="hidden shrink-0 items-center md:flex">
+                <partial name="_LoginPartial" />
+            </div>
+
             @* ── Mobile hamburger button ── *@
             <button id="mobile-menu-btn"
                     type="button"
@@ -182,6 +187,11 @@
                         Matches
                     </a>
                 }
+
+                @* Auth links/buttons for the mobile menu *@
+                <div class="mt-3 border-t border-slate-800 px-3 pt-3">
+                    <partial name="_LoginPartial" />
+                </div>
             </div>
         </div>
     </header>

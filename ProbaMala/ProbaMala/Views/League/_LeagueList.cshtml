@@ -6,13 +6,16 @@
         <span class="text-xs font-semibold uppercase tracking-widest text-slate-500">Leagues</span>
         <span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-300">@Model.Count</span>
     </div>
-    <a asp-route="league-create"
-       class="inline-flex items-center gap-1.5 rounded-full bg-lime-400 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-lime-300">
-        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-        </svg>
-        Add league
-    </a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-route="league-create"
+           class="inline-flex items-center gap-1.5 rounded-full bg-lime-400 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-lime-300">
+            <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+            </svg>
+            Add league
+        </a>
+    }
 </div>
 
 @if (!Model.Any())
@@ -45,8 +48,10 @@ else
             <span class="text-right text-sm tabular-nums text-slate-400">@league.ClubCount</span>
             <span class="text-right text-sm tabular-nums text-slate-400">@league.MatchCount</span>
 
-            @* Edit / Delete icons — fade in on row hover *@
+            @* Edit / Delete icons — admin only, fade in on row hover *@
             <div class="flex items-center justify-end gap-3 opacity-0 transition group-hover:opacity-100">
+                @if (User.IsInRole("Admin"))
+                {
                 <a asp-route="league-edit" asp-route-id="@league.Id"
                    class="text-slate-500 transition hover:text-white" title="Edit league">
                     <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -59,6 +64,7 @@ else
                         <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
                     </svg>
                 </a>
+                }
             </div>
         </div>
     }
