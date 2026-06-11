@@ -40,6 +40,15 @@
         @* Stat chips row *@
         <div class="flex flex-wrap items-center gap-3 px-4 py-4">
 
+            @* Email — admins only (it's private contact info, not shown to other users) *@
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="flex min-w-0 items-center gap-1.5 rounded-lg bg-slate-800/60 px-3 py-1.5">
+                    <span class="shrink-0 text-xs text-slate-500">Email</span>
+                    <a href="mailto:@Model.Email" class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@Model.Email</a>
+                </div>
+            }
+
             @* Ratings count *@
             <div class="flex items-center gap-1.5 rounded-lg bg-slate-800/60 px-3 py-1.5">
                 <span class="text-xs text-slate-500">Ratings</span>
