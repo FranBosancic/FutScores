@@ -51,7 +51,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult<LeagueDTO> Post([FromBody] LeagueRequest model)
         {
             if (_db.Leagues.Any(l => l.Name.ToLower() == model.Name.Trim().ToLower()))

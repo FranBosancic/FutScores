@@ -88,15 +88,28 @@ namespace ProbaMala.Controllers.Api
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
-        // Samo admin smije mijenjati ocjenu — editiranje je privilegija administracije.
+        // Admin smije urediti svaku ocjenu; obični korisnik samo vlastitu (vlasništvo
+        // se provjerava po Rating.User.AppUserId). Ne-admin zadržava izvornog autora,
+        // kao i na webu — ne može prebaciti ocjenu na drugog korisnika.
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult<RatingDTO> Put(int id, [FromBody] RatingRequest model)
         {
-            var entity = _db.Ratings.FirstOrDefault(r => r.Id == id);
+            var entity = _db.Ratings.Include(r => r.User).FirstOrDefault(r => r.Id == id);
 
             if (entity == null)
                 return NotFound();
+
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin)
+            {
+                var appUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (entity.User?.AppUserId != appUserId)
+                    return Forbid();
+
+                // Zadrži izvornog autora — ne-admin ne smije mijenjati vlasništvo.
+                model.UserId = entity.UserId;
+            }
 
             var error = ValidateRefs(model);
             if (error != null)

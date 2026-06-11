@@ -283,6 +283,15 @@ namespace ProbaMala.IntegrationTests
         }
 
         [Fact]
+        public async Task Post_Returns403_WhenRegularUser()
+        {
+            // Kreiranje kluba je samo za admina (kao na webu).
+            using var userClient = _factory.CreateUserClient("some-user-id");
+            var response = await userClient.PostAsJsonAsync("/api/clubs", new { name = "X" });
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
         public async Task Put_Returns401_WhenNotAuthenticated()
         {
             var response = await _client.PutAsJsonAsync("/api/clubs/1", new { name = "X" });

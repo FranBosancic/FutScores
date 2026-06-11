@@ -374,11 +374,85 @@ namespace ProbaMala.IntegrationTests
         }
 
         [Fact]
-        public async Task Put_Returns403_WhenRegularUser()
+        public async Task Put_Returns200_WhenOwner()
         {
-            // PUT je samo za admina; obični korisnik dobiva 403 Forbidden.
-            using var userClient = _factory.CreateUserClient("some-user-id");
-            var response = await userClient.PutAsJsonAsync("/api/ratings/1", new { score = 5 });
+            // Vlasnik smije urediti vlastitu ocjenu (kao na webu).
+            const string ownerAppId = "owner-app-id";
+            var (player, match, user) = await SeedRatingDependenciesAsync(ownerAppId);
+            var rating = await SeedRatingAsync(player.Id, match.Id, user.Id, 4, "meh");
+
+            using var ownerClient = _factory.CreateUserClient(ownerAppId);
+            var response = await ownerClient.PutAsJsonAsync($"/api/ratings/{rating.Id}", new
+            {
+                playerId = player.Id,
+                matchId  = match.Id,
+                userId   = user.Id,
+                score    = 9,
+                comment  = "Updated by owner"
+            });
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            await _factory.WithDbContextAsync(async db =>
+            {
+                var updated = await db.Ratings.FindAsync(rating.Id);
+                updated!.Score.Should().Be(9);
+            });
+        }
+
+        [Fact]
+        public async Task Put_KeepsOriginalAuthor_WhenOwnerTriesToReassign()
+        {
+            // Ne-admin ne smije prebaciti autorstvo — izvorni autor se zadržava.
+            const string ownerAppId = "owner-app-id";
+            var (player, match, owner) = await SeedRatingDependenciesAsync(ownerAppId);
+            var rating = await SeedRatingAsync(player.Id, match.Id, owner.Id, 5);
+
+            // Drugi domenski korisnik na kojeg vlasnik pokušava prebaciti ocjenu.
+            var other = new User { FirstName = "Other", LastName = "Person", Email = "other@example.com" };
+            await _factory.WithDbContextAsync(async db =>
+            {
+                db.Users.Add(other);
+                await db.SaveChangesAsync();
+            });
+
+            using var ownerClient = _factory.CreateUserClient(ownerAppId);
+            var response = await ownerClient.PutAsJsonAsync($"/api/ratings/{rating.Id}", new
+            {
+                playerId = player.Id,
+                matchId  = match.Id,
+                userId   = other.Id,   // pokušaj preuzimanja — mora se ignorirati
+                score    = 8
+            });
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            await _factory.WithDbContextAsync(async db =>
+            {
+                var updated = await db.Ratings.FindAsync(rating.Id);
+                updated!.UserId.Should().Be(owner.Id);   // i dalje izvorni autor
+                updated.Score.Should().Be(8);
+            });
+        }
+
+        [Fact]
+        public async Task Put_Returns403_WhenNonOwner()
+        {
+            // Tuđa ocjena → 403 Forbidden (niti vlasnik niti admin).
+            const string ownerAppId = "owner-app-id";
+            const string otherAppId = "other-app-id";
+            var (player, match, user) = await SeedRatingDependenciesAsync(ownerAppId);
+            var rating = await SeedRatingAsync(player.Id, match.Id, user.Id, 5);
+
+            using var otherClient = _factory.CreateUserClient(otherAppId);
+            var response = await otherClient.PutAsJsonAsync($"/api/ratings/{rating.Id}", new
+            {
+                playerId = player.Id,
+                matchId  = match.Id,
+                userId   = user.Id,
+                score    = 9
+            });
+
             response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         }
 

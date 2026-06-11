@@ -212,6 +212,15 @@ namespace ProbaMala.IntegrationTests
         }
 
         [Fact]
+        public async Task Post_Returns403_WhenRegularUser()
+        {
+            // Kreiranje lige je samo za admina (kao na webu).
+            using var userClient = _factory.CreateUserClient("some-user-id");
+            var response = await userClient.PostAsJsonAsync("/api/leagues", new { name = "X" });
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
         public async Task Put_Returns401_WhenNotAuthenticated()
         {
             var response = await _client.PutAsJsonAsync("/api/leagues/1", new { name = "X" });

@@ -57,7 +57,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult<ClubDTO> Post([FromBody] ClubRequest model)
         {
             if (!_db.Leagues.Any(l => l.Id == model.LeagueId))

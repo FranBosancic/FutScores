@@ -60,7 +60,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult<MatchDTO> Post([FromBody] MatchRequest model)
         {
             var error = ValidateTeams(model);

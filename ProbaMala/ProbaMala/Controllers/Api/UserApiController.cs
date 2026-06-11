@@ -52,7 +52,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult<UserDTO> Post([FromBody] UserRequest model)
         {
             if (_db.Users.Any(u => u.Email.ToLower() == model.Email.Trim().ToLower()))

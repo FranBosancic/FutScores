@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
@@ -16,6 +17,43 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title       = "FutScores API",
+        Version     = "v1",
+        Description = "REST API for leagues, clubs, players, matches, ratings and users."
+    });
+
+    // Let the Swagger UI send a Bearer token with every request.
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name        = "Authorization",
+        Type        = SecuritySchemeType.Http,
+        Scheme      = "Bearer",
+        BearerFormat = "JWT",
+        In          = ParameterLocation.Header,
+        Description = "Paste your JWT here (without the 'Bearer ' prefix — the UI adds it).\n\nGet one from POST /api/auth/token."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Let AJAX/Dropzone requests send the anti-forgery token in a header rather than
 // a form field, so the image endpoints can keep [ValidateAntiForgeryToken].
@@ -124,6 +162,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "FutScores API v1");
+    options.RoutePrefix = "swagger";   // UI at /swagger
+});
 
 app.UseRequestLocalization();
 

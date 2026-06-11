@@ -306,6 +306,20 @@ namespace ProbaMala.IntegrationTests
         }
 
         [Fact]
+        public async Task Post_Returns403_WhenRegularUser()
+        {
+            // Za razliku od ostalih entiteta, kreiranje korisnika je samo za admina.
+            using var userClient = _factory.CreateUserClient("some-user-id");
+            var response = await userClient.PostAsJsonAsync("/api/users", new
+            {
+                firstName = "New",
+                lastName  = "User",
+                email     = "new@example.com"
+            });
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
         public async Task Put_Returns401_WhenNotAuthenticated()
         {
             var response = await _client.PutAsJsonAsync("/api/users/1", new { email = "x@x.com" });
