@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Data;
@@ -50,6 +51,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult<LeagueDTO> Post([FromBody] LeagueRequest model)
         {
             if (_db.Leagues.Any(l => l.Name.ToLower() == model.Name.Trim().ToLower()))
@@ -63,6 +65,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<LeagueDTO> Put(int id, [FromBody] LeagueRequest model)
         {
             var entity = _db.Leagues.FirstOrDefault(l => l.Id == id);
@@ -80,6 +83,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var entity = _db.Leagues

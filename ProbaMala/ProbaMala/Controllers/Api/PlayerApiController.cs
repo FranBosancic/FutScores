@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Data;
@@ -53,6 +54,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult<PlayerDTO> Post([FromBody] PlayerRequest model)
         {
             if (!_db.Clubs.Any(c => c.Id == model.ClubId))
@@ -76,6 +78,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<PlayerDTO> Put(int id, [FromBody] PlayerRequest model)
         {
             var entity = _db.Players.FirstOrDefault(p => p.Id == id);
@@ -100,6 +103,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var entity = _db.Players.Include(p => p.Ratings).FirstOrDefault(p => p.Id == id);

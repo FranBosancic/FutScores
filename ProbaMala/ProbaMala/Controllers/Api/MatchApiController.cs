@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Data;
@@ -59,6 +60,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult<MatchDTO> Post([FromBody] MatchRequest model)
         {
             var error = ValidateTeams(model);
@@ -82,6 +84,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<MatchDTO> Put(int id, [FromBody] MatchRequest model)
         {
             var entity = _db.Matches.FirstOrDefault(m => m.Id == id);
@@ -106,6 +109,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var entity = _db.Matches.Include(m => m.Ratings).FirstOrDefault(m => m.Id == id);

@@ -13,23 +13,23 @@ namespace ProbaMala.IntegrationTests
     public class LeagueApiTests : IDisposable
     {
         private readonly FutScoresApiFactory _factory;
-        private readonly HttpClient _client;
+        private readonly HttpClient _client;        // neautentificiran
+        private readonly HttpClient _adminClient;   // admin rola
 
         public LeagueApiTests()
         {
-            // xUnit radi novu instancu razreda za svaki test, pa novi factory ovdje
-            // znači svježu, izoliranu in-memory bazu po svakom testu.
-            _factory = new FutScoresApiFactory();
-            _client = _factory.CreateClient();
+            _factory     = new FutScoresApiFactory();
+            _client      = _factory.CreateClient();
+            _adminClient = _factory.CreateAdminClient();
         }
 
         public void Dispose()
         {
+            _adminClient.Dispose();
             _client.Dispose();
             _factory.Dispose();
         }
 
-        // Pomoćna metoda: seedaj jednu ligu izravno u bazu i vrati je (s dodijeljenim Id-em).
         private async Task<League> SeedLeagueAsync(string name)
         {
             var league = new League { Name = name };
@@ -46,15 +46,12 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task GetAll_ReturnsAllLeagues_OrderedByName()
         {
-            // Arrange — seedaj tri lige nesortirano.
             await SeedLeagueAsync("Zeta League");
             await SeedLeagueAsync("Alpha League");
             await SeedLeagueAsync("Mid League");
 
-            // Act
             var response = await _client.GetAsync("/api/leagues");
 
-            // Assert — 200 + sve tri lige, poredane po imenu (kako controller i radi).
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var leagues = await response.Content.ReadFromJsonAsync<List<LeagueDTO>>();
@@ -66,14 +63,11 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task GetAll_FiltersByQuery_WhenQProvided()
         {
-            // Arrange
             await SeedLeagueAsync("La Liga");
             await SeedLeagueAsync("Premier League");
 
-            // Act — pretraga "liga" odgovara samo "La Liga".
             var response = await _client.GetAsync("/api/leagues?q=liga");
 
-            // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var leagues = await response.Content.ReadFromJsonAsync<List<LeagueDTO>>();
@@ -86,13 +80,10 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task GetById_ReturnsLeague_WhenLeagueExists()
         {
-            // Arrange — seedaj točno jednu ligu izravno u in-memory bazu.
             var seeded = await SeedLeagueAsync("Test League");
 
-            // Act — pozovi stvarni endpoint preko HTTP-a.
             var response = await _client.GetAsync($"/api/leagues/{seeded.Id}");
 
-            // Assert — HTTP status i JSON DTO koji klijent stvarno dobije.
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var dto = await response.Content.ReadFromJsonAsync<LeagueDTO>();
@@ -106,10 +97,7 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task GetById_Returns404_WhenLeagueMissing()
         {
-            // Act — nepostojeći Id u praznoj bazi.
             var response = await _client.GetAsync("/api/leagues/999999");
-
-            // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
@@ -118,10 +106,8 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task Post_CreatesLeague_AndReturns201()
         {
-            // Act
-            var response = await _client.PostAsJsonAsync("/api/leagues", new { name = "New League" });
+            var response = await _adminClient.PostAsJsonAsync("/api/leagues", new { name = "New League" });
 
-            // Assert — 201 Created + Location na novi resurs + DTO u tijelu.
             response.StatusCode.Should().Be(HttpStatusCode.Created);
             response.Headers.Location.Should().NotBeNull();
 
@@ -130,7 +116,6 @@ namespace ProbaMala.IntegrationTests
             dto!.Id.Should().BeGreaterThan(0);
             dto.Name.Should().Be("New League");
 
-            // I doista je spremljena u bazu.
             await _factory.WithDbContextAsync(async db =>
             {
                 var exists = await db.Leagues.FindAsync(dto.Id);
@@ -142,23 +127,17 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task Post_Returns400_WhenNameMissing()
         {
-            // Act — prazno ime pada na [Required] validaciji ([ApiController] → 400).
-            var response = await _client.PostAsJsonAsync("/api/leagues", new { name = "" });
-
-            // Assert
+            var response = await _adminClient.PostAsJsonAsync("/api/leagues", new { name = "" });
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
         [Fact]
         public async Task Post_Returns400_WhenNameAlreadyExists()
         {
-            // Arrange — liga s tim imenom već postoji.
             await SeedLeagueAsync("Existing League");
 
-            // Act — pokušaj kreirati duplikat (business pravilo u controlleru → 400).
-            var response = await _client.PostAsJsonAsync("/api/leagues", new { name = "Existing League" });
+            var response = await _adminClient.PostAsJsonAsync("/api/leagues", new { name = "Existing League" });
 
-            // Assert — 400 i nije nastao drugi zapis.
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             await _factory.WithDbContextAsync(async db =>
@@ -173,13 +152,10 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task Put_UpdatesLeague_AndReturns200()
         {
-            // Arrange
             var seeded = await SeedLeagueAsync("Old Name");
 
-            // Act
-            var response = await _client.PutAsJsonAsync($"/api/leagues/{seeded.Id}", new { name = "New Name" });
+            var response = await _adminClient.PutAsJsonAsync($"/api/leagues/{seeded.Id}", new { name = "New Name" });
 
-            // Assert — 200 + DTO s novim imenom, i promjena je u bazi.
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var dto = await response.Content.ReadFromJsonAsync<LeagueDTO>();
@@ -197,10 +173,7 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task Put_Returns404_WhenLeagueMissing()
         {
-            // Act — valjan model, ali nepostojeći Id → controller vraća NotFound.
-            var response = await _client.PutAsJsonAsync("/api/leagues/999999", new { name = "Whatever" });
-
-            // Assert
+            var response = await _adminClient.PutAsJsonAsync("/api/leagues/999999", new { name = "Whatever" });
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
@@ -209,13 +182,10 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task Delete_RemovesLeague_AndReturns204()
         {
-            // Arrange — liga bez klubova/utakmica (smije se obrisati).
             var seeded = await SeedLeagueAsync("To Delete");
 
-            // Act
-            var response = await _client.DeleteAsync($"/api/leagues/{seeded.Id}");
+            var response = await _adminClient.DeleteAsync($"/api/leagues/{seeded.Id}");
 
-            // Assert — 204 No Content i zapisa više nema u bazi.
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
             await _factory.WithDbContextAsync(async db =>
@@ -228,11 +198,47 @@ namespace ProbaMala.IntegrationTests
         [Fact]
         public async Task Delete_Returns404_WhenLeagueMissing()
         {
-            // Act
-            var response = await _client.DeleteAsync("/api/leagues/999999");
-
-            // Assert
+            var response = await _adminClient.DeleteAsync("/api/leagues/999999");
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        // ─────────────────────────── AUTORIZACIJA ───────────────────────────
+
+        [Fact]
+        public async Task Post_Returns401_WhenNotAuthenticated()
+        {
+            var response = await _client.PostAsJsonAsync("/api/leagues", new { name = "X" });
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task Put_Returns401_WhenNotAuthenticated()
+        {
+            var response = await _client.PutAsJsonAsync("/api/leagues/1", new { name = "X" });
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task Put_Returns403_WhenRegularUser()
+        {
+            using var userClient = _factory.CreateUserClient("some-user-id");
+            var response = await userClient.PutAsJsonAsync("/api/leagues/1", new { name = "X" });
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
+        public async Task Delete_Returns401_WhenNotAuthenticated()
+        {
+            var response = await _client.DeleteAsync("/api/leagues/1");
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task Delete_Returns403_WhenRegularUser()
+        {
+            using var userClient = _factory.CreateUserClient("some-user-id");
+            var response = await userClient.DeleteAsync("/api/leagues/1");
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         }
     }
 }

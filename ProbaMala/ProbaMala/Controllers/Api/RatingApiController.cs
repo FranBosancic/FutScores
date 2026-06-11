@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Data;
 using ProbaMala.Models.DTOs;
 using ProbaMala.Models.Entities;
+using System.Security.Claims;
 
 namespace ProbaMala.Controllers.Api
 {
@@ -64,6 +66,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult<RatingDTO> Post([FromBody] RatingRequest model)
         {
             var error = ValidateRefs(model);
@@ -85,7 +88,9 @@ namespace ProbaMala.Controllers.Api
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
+        // Samo admin smije mijenjati ocjenu — editiranje je privilegija administracije.
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<RatingDTO> Put(int id, [FromBody] RatingRequest model)
         {
             var entity = _db.Ratings.FirstOrDefault(r => r.Id == id);
@@ -108,13 +113,23 @@ namespace ProbaMala.Controllers.Api
             return Ok(Project(id));
         }
 
+        // Admin briše sve; korisnik smije obrisati samo vlastitu ocjenu (provjera
+        // vlasništva: Rating.User.AppUserId mora odgovarati prijavljenom AppUserId).
         [HttpDelete("{id}")]
+        [Authorize]
         public IActionResult Delete(int id)
         {
-            var entity = _db.Ratings.FirstOrDefault(r => r.Id == id);
+            var entity = _db.Ratings.Include(r => r.User).FirstOrDefault(r => r.Id == id);
 
             if (entity == null)
                 return NotFound();
+
+            if (!User.IsInRole("Admin"))
+            {
+                var appUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (entity.User?.AppUserId != appUserId)
+                    return Forbid();
+            }
 
             _db.Ratings.Remove(entity);
             _db.SaveChanges();

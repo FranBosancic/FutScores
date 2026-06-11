@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProbaMala.Data;
@@ -51,6 +52,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize]
         public ActionResult<UserDTO> Post([FromBody] UserRequest model)
         {
             if (_db.Users.Any(u => u.Email.ToLower() == model.Email.Trim().ToLower()))
@@ -70,6 +72,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<UserDTO> Put(int id, [FromBody] UserRequest model)
         {
             var entity = _db.Users.FirstOrDefault(u => u.Id == id);
@@ -90,6 +93,7 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var entity = _db.Users.Include(u => u.Ratings).FirstOrDefault(u => u.Id == id);

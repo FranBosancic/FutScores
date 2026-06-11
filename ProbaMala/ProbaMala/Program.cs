@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ProbaMala.Data;
 using ProbaMala.Models.Entities;
 using ProbaMala.Repositories;
+using ProbaMala.Services;
 using System.Globalization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +43,44 @@ builder.Services
     .AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
+// JWT Bearer + policy scheme that dispatches to JWT when a Bearer header is
+// present, and to Identity cookies otherwise. This lets both the MVC pages
+// (cookie) and API clients (Bearer token) use the same [Authorize] attributes.
+const string SmartScheme = "SmartAuth";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme         = SmartScheme;
+    options.DefaultChallengeScheme = SmartScheme;
+    options.DefaultForbidScheme   = SmartScheme;
+})
+.AddPolicyScheme(SmartScheme, "JWT or Cookie", options =>
+{
+    options.ForwardDefaultSelector = ctx =>
+    {
+        var auth = ctx.Request.Headers["Authorization"].FirstOrDefault();
+        if (auth?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true)
+            return JwtBearerDefaults.AuthenticationScheme;
+        return IdentityConstants.ApplicationScheme;
+    };
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer           = true,
+        ValidateAudience         = true,
+        ValidateLifetime         = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer              = builder.Configuration["Jwt:Issuer"],
+        ValidAudience            = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey         = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+    };
+});
+
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // 3rd-party login (Google). Wired up only when credentials are present
 // (stored in user-secrets for development, never committed to source), so the
