@@ -5,15 +5,17 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <div class="flex items-center gap-3">
-        <span class="hidden text-xs text-slate-400 lg:inline">
-            @User.Identity?.Name
+    <div class="flex min-w-0 items-center gap-3">
+        @* The email can be long — cap its width and truncate so it never stretches
+           the header. The Admin badge stays outside the truncation so it isn't clipped. *@
+        <span class="hidden min-w-0 items-center gap-1.5 lg:flex">
+            <span class="max-w-[12rem] truncate text-xs text-slate-400">@User.Identity?.Name</span>
             @if (User.IsInRole("Admin"))
             {
-                <span class="ml-1 rounded bg-lime-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-lime-400">Admin</span>
+                <span class="shrink-0 rounded bg-lime-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-lime-400">Admin</span>
             }
         </span>
-        <form class="inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.RouteUrl("home-index")" method="post">
+        <form class="inline shrink-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.RouteUrl("home-index")" method="post">
             <button type="submit"
                     class="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:border-slate-600 hover:text-white">
                 Log out

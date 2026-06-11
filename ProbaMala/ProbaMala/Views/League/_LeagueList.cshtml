@@ -24,32 +24,35 @@
 }
 else
 {
-    @* ── Column labels ── *@
-    <div class="grid grid-cols-[1fr_5rem_6rem_5rem] items-center border-b border-slate-800/60 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+    @* ── Column labels — collapse to just League on mobile (stats fold into the subline) ── *@
+    <div class="grid grid-cols-[1fr] items-center border-b border-slate-800/60 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 sm:grid-cols-[1fr_5rem_6rem_5rem]">
         <span>League</span>
-        <span class="text-right">Clubs</span>
-        <span class="text-right">Matches</span>
-        <span></span>
+        <span class="hidden text-right sm:block">Clubs</span>
+        <span class="hidden text-right sm:block">Matches</span>
+        <span class="hidden sm:block"></span>
     </div>
 
     @* ── One compact row per league ── *@
     @foreach (var league in Model)
     {
-        <div class="group grid cursor-pointer grid-cols-[1fr_5rem_6rem_5rem] items-center border-b border-slate-800/40 px-3 py-3 transition hover:bg-white/[0.03]"
+        <div class="group grid cursor-pointer grid-cols-[1fr] items-center border-b border-slate-800/40 px-3 py-3 transition hover:bg-white/[0.03] sm:grid-cols-[1fr_5rem_6rem_5rem]"
              data-row-href="/leagues/@league.Id">
 
-            @* League name — left lime accent, links to detail page *@
-            <a href="/leagues/@league.Id" class="flex items-center gap-2.5 font-medium text-slate-100 transition hover:text-white">
-                <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
-                @league.Name
-            </a>
+            @* League name — left lime accent, links to detail page; counts fold beneath on mobile *@
+            <div class="flex min-w-0 items-center gap-2.5">
+                <span class="h-4 w-1 shrink-0 self-start mt-1 rounded-full bg-lime-500 opacity-70 sm:mt-0 sm:self-auto"></span>
+                <div class="min-w-0">
+                    <a href="/leagues/@league.Id" class="block truncate font-medium text-slate-100 transition hover:text-white">@league.Name</a>
+                    <span class="mt-0.5 block text-xs text-slate-500 sm:hidden">@league.ClubCount clubs · @league.MatchCount matches</span>
+                </div>
+            </div>
 
-            @* Stats *@
-            <span class="text-right text-sm tabular-nums text-slate-400">@league.ClubCount</span>
-            <span class="text-right text-sm tabular-nums text-slate-400">@league.MatchCount</span>
+            @* Stats (sm+) *@
+            <span class="hidden text-right text-sm tabular-nums text-slate-400 sm:block">@league.ClubCount</span>
+            <span class="hidden text-right text-sm tabular-nums text-slate-400 sm:block">@league.MatchCount</span>
 
-            @* Edit / Delete icons — admin only, fade in on row hover *@
-            <div class="flex items-center justify-end gap-3 opacity-0 transition group-hover:opacity-100">
+            @* Edit / Delete icons — admin only, fade in on row hover (sm+) *@
+            <div class="hidden items-center justify-end gap-3 opacity-0 transition group-hover:opacity-100 sm:flex">
                 @if (User.IsInRole("Admin"))
                 {
                 <a asp-route="league-edit" asp-route-id="@league.Id"

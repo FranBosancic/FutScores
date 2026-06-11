@@ -3,9 +3,11 @@
     // When viewing a single league's clubs, the league column is redundant
     // (it's the same for every row), so we drop it and narrow the grid.
     var leagueScoped = (ViewData["LeagueId"] as int?).HasValue;
+    // Mobile collapses to a single Club column (the other facts fold into a subline);
+    // the full table grid returns at sm+.
     var gridCols = leagueScoped
-        ? "grid-cols-[1fr_5rem_5rem_5rem_4rem]"
-        : "grid-cols-[1fr_8rem_5rem_5rem_5rem_4rem]";
+        ? "grid-cols-[1fr] sm:grid-cols-[1fr_5rem_5rem_5rem_4rem]"
+        : "grid-cols-[1fr] sm:grid-cols-[1fr_8rem_5rem_5rem_5rem_4rem]";
 }
 
 @* Section header with Add Club button *@
@@ -22,17 +24,17 @@
     }
 </div>
 
-@* Column headers *@
+@* Column headers — secondary columns hide on mobile (folded into each row's subline) *@
 <div class="grid @gridCols border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
     <span>Club</span>
     @if (!leagueScoped)
     {
-        <span>League</span>
+        <span class="hidden sm:block">League</span>
     }
-    <span class="text-center">Founded</span>
-    <span class="text-center">Players</span>
-    <span class="text-center">Matches</span>
-    <span></span>
+    <span class="hidden text-center sm:block">Founded</span>
+    <span class="hidden text-center sm:block">Players</span>
+    <span class="hidden text-center sm:block">Matches</span>
+    <span class="hidden sm:block"></span>
 </div>
 
 @if (!Model.Any())
@@ -45,7 +47,8 @@ else
     {
         <div class="group grid cursor-pointer @gridCols items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
              data-row-href="@Url.RouteUrl("club-details", new { id = club.Id })">
-            @* Club name with banner thumbnail (falls back to an initial) *@
+            @* Club name with banner thumbnail (falls back to an initial).
+               On mobile, league/founded/counts fold into a subline beneath the name. *@
             <div class="flex min-w-0 items-center gap-2.5">
                 @if (!string.IsNullOrEmpty(club.BannerUrl))
                 {
@@ -55,29 +58,32 @@ else
                 {
                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-800 text-xs font-semibold text-slate-400">@club.Name.Substring(0, 1)</span>
                 }
-                <a asp-route="club-details" asp-route-id="@club.Id"
-                   class="truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
-                    @club.Name
-                </a>
+                <div class="min-w-0">
+                    <a asp-route="club-details" asp-route-id="@club.Id"
+                       class="block truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
+                        @club.Name
+                    </a>
+                    <span class="mt-0.5 block truncate text-xs text-slate-500 sm:hidden">@(leagueScoped ? "" : (club.LeagueName ?? "—") + " · ")est. @club.FoundedDate.Year · @club.PlayerCount players · @club.MatchCount matches</span>
+                </div>
             </div>
 
-            @* League name — hidden when already scoped to a single league *@
+            @* League name (sm+) — hidden when already scoped to a single league *@
             @if (!leagueScoped)
             {
-                <span class="truncate text-sm text-slate-400">@(club.LeagueName ?? "—")</span>
+                <span class="hidden truncate text-sm text-slate-400 sm:block">@(club.LeagueName ?? "—")</span>
             }
 
-            @* Founded year *@
-            <span class="text-center text-sm text-slate-400">@club.FoundedDate.Year</span>
+            @* Founded year (sm+) *@
+            <span class="hidden text-center text-sm text-slate-400 sm:block">@club.FoundedDate.Year</span>
 
-            @* Players count *@
-            <span class="text-center text-sm text-slate-400">@club.PlayerCount</span>
+            @* Players count (sm+) *@
+            <span class="hidden text-center text-sm text-slate-400 sm:block">@club.PlayerCount</span>
 
-            @* Matches count *@
-            <span class="text-center text-sm text-slate-400">@club.MatchCount</span>
+            @* Matches count (sm+) *@
+            <span class="hidden text-center text-sm text-slate-400 sm:block">@club.MatchCount</span>
 
-            @* Edit / Delete actions — admin only, fade in on row hover *@
-            <div class="flex items-center justify-end gap-1 opacity-0 transition group-hover:opacity-100">
+            @* Edit / Delete actions — admin only, fade in on row hover (sm+) *@
+            <div class="hidden items-center justify-end gap-1 opacity-0 transition group-hover:opacity-100 sm:flex">
                 @if (User.IsInRole("Admin"))
                 {
                 <a asp-route="club-edit" asp-route-id="@club.Id"

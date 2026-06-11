@@ -63,35 +63,25 @@ namespace ProbaMala.Repositories
 
             // We project the rating count inside the SQL query (before .AsEnumerable())
             // because counting a not-included navigation property after materialization
-            // always returns 0 when lazy loading is off.
+            // always returns 0 when lazy loading is off. Matches are ordered newest first.
             return matchesQuery
                 .OrderByDescending(m => m.Date)
                 .Select(m => new { Match = m, RatingCount = m.Ratings.Count })
                 .AsEnumerable()
-                .Select((row, index) =>
+                .Select(row => new MatchDetailsViewModel
                 {
-                    // Give the top match a "Featured" badge, the next few "Final",
-                    // and the rest just "Recent" — purely cosmetic.
-                    var statusLabel = index == 0 ? "Featured" : index < 4 ? "Final" : "Recent";
-                    var statusTone  = index == 0 ? "live"     : index < 4 ? "final" : "recent";
-
-                    return new MatchDetailsViewModel
-                    {
-                        Id            = row.Match.Id,
-                        LeagueId      = row.Match.LeagueId,
-                        HomeTeamId    = row.Match.HomeTeamId,
-                        AwayTeamId    = row.Match.AwayTeamId,
-                        Date          = row.Match.Date,
-                        KickoffLabel  = row.Match.Date.ToString("MMM dd, yyyy"),
-                        StatusLabel   = statusLabel,
-                        StatusTone    = statusTone,
-                        LeagueName    = row.Match.League.Name,
-                        HomeTeamName  = row.Match.HomeTeam.Name,
-                        AwayTeamName  = row.Match.AwayTeam.Name,
-                        HomeGoals     = row.Match.HomeGoals,
-                        AwayGoals     = row.Match.AwayGoals,
-                        RatingCount   = row.RatingCount
-                    };
+                    Id            = row.Match.Id,
+                    LeagueId      = row.Match.LeagueId,
+                    HomeTeamId    = row.Match.HomeTeamId,
+                    AwayTeamId    = row.Match.AwayTeamId,
+                    Date          = row.Match.Date,
+                    KickoffLabel  = row.Match.Date.ToString("MMM dd, yyyy"),
+                    LeagueName    = row.Match.League.Name,
+                    HomeTeamName  = row.Match.HomeTeam.Name,
+                    AwayTeamName  = row.Match.AwayTeam.Name,
+                    HomeGoals     = row.Match.HomeGoals,
+                    AwayGoals     = row.Match.AwayGoals,
+                    RatingCount   = row.RatingCount
                 })
                 .ToList();
         }

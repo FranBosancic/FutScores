@@ -14,11 +14,11 @@
     }
 </div>
 
-@* Column headers *@
-<div class="grid grid-cols-[1fr_5rem_4rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+@* Column headers — collapses to just Name on mobile (ratings fold into the row subline) *@
+<div class="grid grid-cols-[1fr] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 sm:grid-cols-[1fr_5rem_4rem]">
     <span>Name</span>
-    <span class="text-center">Ratings</span>
-    <span></span>
+    <span class="hidden text-center sm:block">Ratings</span>
+    <span class="hidden sm:block"></span>
 </div>
 
 @if (!Model.Any())
@@ -29,23 +29,26 @@ else
 {
     @foreach (var user in Model)
     {
-        <div class="group grid cursor-pointer grid-cols-[1fr_5rem_4rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+        <div class="group grid cursor-pointer grid-cols-[1fr] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03] sm:grid-cols-[1fr_5rem_4rem]"
              data-row-href="@Url.RouteUrl("user-details", new { id = user.Id })">
 
-            @* Name with lime pill *@
+            @* Name with lime pill; ratings count folds beneath on mobile *@
             <div class="flex min-w-0 items-center gap-2">
-                <span class="h-4 w-1 shrink-0 rounded-full bg-lime-500 opacity-70"></span>
-                <a asp-route="user-details" asp-route-id="@user.Id"
-                   class="truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
-                    @($"{user.FirstName} {user.LastName}")
-                </a>
+                <span class="h-4 w-1 shrink-0 self-start mt-1 rounded-full bg-lime-500 opacity-70 sm:mt-0 sm:self-auto"></span>
+                <div class="min-w-0">
+                    <a asp-route="user-details" asp-route-id="@user.Id"
+                       class="block truncate text-sm font-medium text-slate-100 hover:text-lime-400 transition">
+                        @($"{user.FirstName} {user.LastName}")
+                    </a>
+                    <span class="mt-0.5 block text-xs text-slate-500 sm:hidden">@user.RatingCount @(user.RatingCount == 1 ? "rating" : "ratings")</span>
+                </div>
             </div>
 
-            @* Ratings count *@
-            <span class="text-center text-sm text-slate-400">@user.RatingCount</span>
+            @* Ratings count (sm+) *@
+            <span class="hidden text-center text-sm text-slate-400 sm:block">@user.RatingCount</span>
 
-            @* Edit / Delete — admin only, fade in on hover *@
-            <div class="flex items-center justify-end gap-1 opacity-0 transition group-hover:opacity-100">
+            @* Edit / Delete — admin only, fade in on hover (sm+) *@
+            <div class="hidden items-center justify-end gap-1 opacity-0 transition group-hover:opacity-100 sm:flex">
                 @if (User.IsInRole("Admin"))
                 {
                 <a asp-route="user-edit" asp-route-id="@user.Id"

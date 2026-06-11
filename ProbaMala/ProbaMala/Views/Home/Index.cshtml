@@ -41,13 +41,13 @@
             <a asp-route="matches-index" class="text-xs font-semibold text-lime-400 transition hover:text-lime-300">View all</a>
         </div>
 
-        @* Column headers *@
-        <div class="grid grid-cols-[5rem_1fr_auto_1fr_5rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+        @* Column headers — Rtg folds away on mobile to give the team names room *@
+        <div class="grid grid-cols-[4.5rem_1fr_auto_1fr] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 sm:grid-cols-[5rem_1fr_auto_1fr_5rem]">
             <span>Date</span>
             <span class="text-right">Home</span>
             <span class="px-3 text-center">Score</span>
             <span>Away</span>
-            <span class="text-center">Rtg</span>
+            <span class="hidden text-center sm:block">Rtg</span>
         </div>
 
         @if (!Model.RecentMatches.Any())
@@ -58,21 +58,12 @@
         {
             @foreach (var match in Model.RecentMatches)
             {
-                @* Status tone color *@
-                var statusColor = match.StatusTone switch
-                {
-                    "live"     => "text-lime-400",
-                    "finished" => "text-slate-500",
-                    _          => "text-slate-400"
-                };
-
-                <div class="group grid cursor-pointer grid-cols-[5rem_1fr_auto_1fr_5rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+                <div class="group grid cursor-pointer grid-cols-[4.5rem_1fr_auto_1fr] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03] sm:grid-cols-[5rem_1fr_auto_1fr_5rem]"
                      data-row-href="@Url.RouteUrl("match-details", new { id = match.MatchId })">
 
-                    @* Date + status *@
+                    @* Date *@
                     <div class="flex flex-col">
                         <span class="text-xs text-slate-500">@match.KickoffLabel</span>
-                        <span class="text-xs font-medium @statusColor">@match.StatusLabel</span>
                     </div>
 
                     @* Home team (right-aligned) *@
@@ -95,8 +86,8 @@
                            class="truncate text-sm font-medium text-slate-100 transition hover:text-lime-400">@match.AwayTeamName</a>
                     </div>
 
-                    @* Ratings count *@
-                    <span class="text-center text-xs text-slate-500">@match.RatingCount</span>
+                    @* Ratings count (sm+) *@
+                    <span class="hidden text-center text-xs text-slate-500 sm:block">@match.RatingCount</span>
                 </div>
             }
         }

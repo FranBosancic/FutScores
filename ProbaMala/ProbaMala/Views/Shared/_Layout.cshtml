@@ -12,6 +12,10 @@
     // Helper: returns the Tailwind active-link classes when the condition is true.
     string ActiveClass(bool active) =>
         active ? "text-white border-b-2 border-lime-500 pb-1" : "";
+
+    // Mobile menu variant: a filled highlight reads better than an underline in a stacked list.
+    string MobileActiveClass(bool active) =>
+        active ? "bg-slate-800 font-medium text-white" : "text-slate-200 hover:bg-slate-900";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -163,13 +167,13 @@
         <div id="mobile-menu" class="hidden border-t border-slate-800 bg-[#070b13]">
             <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
 
-                <a asp-route="home-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">
+                <a asp-route="home-index" class="rounded px-3 py-2 text-sm transition @MobileActiveClass(currentController == "Home" && currentAction == "Index")">
                     Dashboard
                 </a>
-                <a asp-route="matches-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Matches</a>
-                <a asp-route="players-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Players</a>
-                <a asp-route="ratings-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Ratings</a>
-                <a asp-route="users-index" class="rounded px-3 py-2 text-sm text-slate-200 hover:bg-slate-900">Users</a>
+                <a asp-route="matches-index" class="rounded px-3 py-2 text-sm transition @MobileActiveClass(currentController == "Match")">Matches</a>
+                <a asp-route="players-index" class="rounded px-3 py-2 text-sm transition @MobileActiveClass(currentController == "Player")">Players</a>
+                <a asp-route="ratings-index" class="rounded px-3 py-2 text-sm transition @MobileActiveClass(currentController == "Rating")">Ratings</a>
+                <a asp-route="users-index" class="rounded px-3 py-2 text-sm transition @MobileActiveClass(currentController == "User")">Users</a>
 
                 @foreach (var league in navLeagues)
                 {

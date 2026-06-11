@@ -73,8 +73,11 @@ namespace ProbaMala.Repositories
                     (parsedScore && r.Score == score));
             }
 
+            // Newest matches first; ties (ratings on the same match) fall back to
+            // most-recently-added (highest Id) for a stable order.
             return ratingsQuery
-                .OrderByDescending(r => r.Score)
+                .OrderByDescending(r => r.Match.Date)
+                .ThenByDescending(r => r.Id)
                 .AsEnumerable()
                 .Select(r => MapToDetailsViewModel(r))
                 .ToList();

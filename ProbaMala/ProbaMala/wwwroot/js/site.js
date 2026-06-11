@@ -38,15 +38,10 @@
 
 	if (mobileToggle && mobileMenu) {
 		mobileToggle.addEventListener("click", () => {
-			const isHidden = mobileMenu.hasAttribute("hidden");
-
-			if (isHidden) {
-				mobileMenu.removeAttribute("hidden");
-				mobileToggle.setAttribute("aria-expanded", "true");
-			} else {
-				mobileMenu.setAttribute("hidden", "hidden");
-				mobileToggle.setAttribute("aria-expanded", "false");
-			}
+			// The menu is hidden via the Tailwind `hidden` class, so toggle that
+			// (not the `hidden` attribute) to show/hide it.
+			const isNowOpen = mobileMenu.classList.toggle("hidden") === false;
+			mobileToggle.setAttribute("aria-expanded", isNowOpen ? "true" : "false");
 		});
 	}
 
