@@ -93,7 +93,12 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+
+    // Relacijski provideri dobivaju shemu kroz migracije. In-memory provider koji
+    // koriste integracijski testovi nije relacijski i bacio bi iznimku na Migrate(),
+    // pa ga ondje preskačemo.
+    if (dbContext.Database.IsRelational())
+        dbContext.Database.Migrate();
 
     // Roles (Admin/User) + the configured default admin account.
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
@@ -108,3 +113,8 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+// Izloženo kako bi projekt s integracijskim testovima mogao podići stvarnu
+// aplikaciju kroz WebApplicationFactory<Program>. Inače bi top-level statements
+// kompajlirali ovaj entry-point razred kao internal.
+public partial class Program { }
