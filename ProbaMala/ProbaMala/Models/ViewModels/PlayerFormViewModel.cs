@@ -26,6 +26,12 @@ namespace ProbaMala.Models.ViewModels
         [Required(ErrorMessage = "Select the player's position.")]
         public Position? Position { get; set; }
 
+        // League is not stored on the player (it's derived from the club) — it's a
+        // UI helper that scopes the club dropdown via the League → Club cascade.
+        [Display(Name = "League")]
+        [Required(ErrorMessage = "Select a league first.")]
+        public int? LeagueId { get; set; }
+
         [Display(Name = "Club")]
         [Required(ErrorMessage = "Select the player's club.")]
         public int? ClubId { get; set; }
@@ -35,6 +41,7 @@ namespace ProbaMala.Models.ViewModels
         [StringLength(120, ErrorMessage = "Nationality can contain up to 120 characters.")]
         public string Nationality { get; set; } = string.Empty;
 
+        public IEnumerable<SelectListItem> LeagueOptions { get; set; } = [];
         public IEnumerable<SelectListItem> ClubOptions { get; set; } = [];
         public IEnumerable<SelectListItem> PositionOptions { get; set; } = [];
     }

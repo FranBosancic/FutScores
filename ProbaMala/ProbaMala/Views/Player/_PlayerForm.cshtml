@@ -1,10 +1,18 @@
 @model PlayerFormViewModel
 
-<div asp-validation-summary="ModelOnly" class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></div>
+@{
+    // League gates the club dropdown (League → Club cascade). The server-side "ready"
+    // flag keeps the club select enabled on first paint for Edit / invalid-postback.
+    var clubReady = Model.LeagueId.HasValue;
+    string? Disabled(bool ready) => ready ? null : "disabled";
+    const string fieldClass = "w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800";
+}
+
+<div asp-validation-summary="ModelOnly" class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200 empty:hidden"></div>
 
 <input asp-for="Id" type="hidden" />
 
-<div class="grid gap-6 lg:grid-cols-2">
+<div class="grid gap-6 lg:grid-cols-2" data-cascade-chain>
     <div>
         <label asp-for="FirstName" class="mb-2 block text-sm font-medium text-slate-200"></label>
         <input asp-for="FirstName" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800" />
@@ -18,8 +26,23 @@
     </div>
 
     <div>
+        <label asp-for="LeagueId" class="mb-2 block text-sm font-medium text-slate-200"></label>
+        <select asp-for="LeagueId" asp-items="Model.LeagueOptions" class="@fieldClass"
+                data-cascade-key="league">
+            <option value="">Select a league</option>
+        </select>
+        <span asp-validation-for="LeagueId" class="mt-2 block text-sm text-rose-300"></span>
+    </div>
+
+    <div>
         <label asp-for="ClubId" class="mb-2 block text-sm font-medium text-slate-200"></label>
-        <select asp-for="ClubId" asp-items="Model.ClubOptions" class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-lime-500/60 focus:bg-slate-800">
+        <select asp-for="ClubId" asp-items="Model.ClubOptions" class="@fieldClass"
+                disabled="@Disabled(clubReady)"
+                data-cascade-key="club"
+                data-cascade-depends="league"
+                data-cascade-url="@Url.RouteUrl("player-clubs")"
+                data-cascade-params="leagueId:league"
+                data-cascade-placeholder="Select a club">
             <option value="">Select a club</option>
         </select>
         <span asp-validation-for="ClubId" class="mt-2 block text-sm text-rose-300"></span>

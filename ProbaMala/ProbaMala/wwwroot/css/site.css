@@ -79,6 +79,26 @@ select option[value=""] {
   color: #e2e8f0;
 }
 
+/* Month/year header bar + the month <select> share the calendar's dark surface.
+   Without this the month dropdown (and its native option list) renders white. */
+.flatpickr-months,
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  background: #08111d;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover,
+.flatpickr-current-month .flatpickr-monthDropdown-months:focus {
+  background: #0d1828;
+}
+
+/* The individual month options inside the dropdown list. */
+.flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
+  background-color: #08111d;
+  color: #e2e8f0;
+}
+
 .flatpickr-months .flatpickr-prev-month svg,
 .flatpickr-months .flatpickr-next-month svg {
   fill: #a3e635;

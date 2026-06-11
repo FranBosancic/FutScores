@@ -13,6 +13,7 @@ namespace ProbaMala.Repositories
         PlayerFormViewModel BuildFormModel();
         PlayerFormViewModel? GetFormById(int id);
         void PopulateFormOptions(PlayerFormViewModel model);
+        List<CascadeOptionViewModel> GetClubsInLeague(int leagueId);
         bool ClubExists(int clubId);
         int Add(PlayerFormViewModel model);
         bool Update(int id, PlayerFormViewModel model);
@@ -146,6 +147,7 @@ namespace ProbaMala.Repositories
                     DateOfBirth = player.DateOfBirth,
                     Position = player.Position,
                     ClubId = player.ClubId,
+                    LeagueId = player.Club.LeagueId,
                     Nationality = player.Nationality
                 })
                 .FirstOrDefault();
@@ -161,16 +163,33 @@ namespace ProbaMala.Repositories
 
         public void PopulateFormOptions(PlayerFormViewModel model)
         {
-            model.ClubOptions = _dbContext.Clubs
+            model.LeagueOptions = _dbContext.Leagues
                 .AsNoTracking()
-                .OrderBy(club => club.Name)
-                .Select(club => new SelectListItem
+                .OrderBy(league => league.Name)
+                .Select(league => new SelectListItem
                 {
-                    Value = club.Id.ToString(),
-                    Text = club.Name,
-                    Selected = model.ClubId == club.Id
+                    Value = league.Id.ToString(),
+                    Text = league.Name,
+                    Selected = model.LeagueId == league.Id
                 })
                 .ToList();
+
+            // Clubs are scoped to the chosen league. The cascade fills them client-side
+            // as the league changes; this server-side fill covers Edit and invalid-postback
+            // first paint (when a league is already selected).
+            model.ClubOptions = model.LeagueId.HasValue
+                ? _dbContext.Clubs
+                    .AsNoTracking()
+                    .Where(club => club.LeagueId == model.LeagueId.Value)
+                    .OrderBy(club => club.Name)
+                    .Select(club => new SelectListItem
+                    {
+                        Value = club.Id.ToString(),
+                        Text = club.Name,
+                        Selected = model.ClubId == club.Id
+                    })
+                    .ToList()
+                : new List<SelectListItem>();
 
             model.PositionOptions = Enum.GetValues<Position>()
                 .Select(position => new SelectListItem
@@ -179,6 +198,17 @@ namespace ProbaMala.Repositories
                     Text = position.ToString(),
                     Selected = model.Position == position
                 })
+                .ToList();
+        }
+
+        // Clubs in a league, for the League → Club cascade dropdown (JSON endpoint).
+        public List<CascadeOptionViewModel> GetClubsInLeague(int leagueId)
+        {
+            return _dbContext.Clubs
+                .AsNoTracking()
+                .Where(club => club.LeagueId == leagueId)
+                .OrderBy(club => club.Name)
+                .Select(club => new CascadeOptionViewModel { Id = club.Id, Label = club.Name })
                 .ToList();
         }
 

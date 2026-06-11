@@ -68,6 +68,15 @@ namespace ProbaMala.Controllers
             return View(_playerRepository.BuildFormModel());
         }
 
+        // GET /players/clubs?leagueId=5  (AJAX — JSON for the League → Club cascade)
+        [HttpGet("klubovi")]
+        [HttpGet("~/players/clubs", Name = "player-clubs")]
+        [AllowAnonymous]
+        public IActionResult ClubsInLeague(int leagueId)
+        {
+            return Json(_playerRepository.GetClubsInLeague(leagueId));
+        }
+
         // POST /players/create
         [Authorize(Roles = "Admin")]
         [HttpPost("novo")]
