@@ -34,6 +34,24 @@
 
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
+                        <label asp-for="Input.FirstName" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                        <input asp-for="Input.FirstName" autocomplete="given-name"
+                               class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800"
+                               placeholder="Ada" />
+                        <span asp-validation-for="Input.FirstName" class="mt-2 block text-sm text-rose-300"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.LastName" class="mb-2 block text-sm font-medium text-slate-200"></label>
+                        <input asp-for="Input.LastName" autocomplete="family-name"
+                               class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800"
+                               placeholder="Lovelace" />
+                        <span asp-validation-for="Input.LastName" class="mt-2 block text-sm text-rose-300"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
                         <label asp-for="Input.OIB" class="mb-2 block text-sm font-medium text-slate-200"></label>
                         <input asp-for="Input.OIB" maxlength="11" inputmode="numeric"
                                class="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-800"

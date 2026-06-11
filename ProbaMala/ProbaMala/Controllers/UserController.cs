@@ -6,8 +6,10 @@ using ProbaMala.Repositories;
 namespace ProbaMala.Controllers
 {
     // Primary route: /korisnici (Croatian), English aliases: /users
-    // Mutations are Admin-only; the read actions opt back in with [AllowAnonymous].
-    [Authorize(Roles = "Admin")]
+    // Authorization (per Lab5): Index + search are public ([AllowAnonymous]); Details is
+    // visible to any signed-in user (inherits the class [Authorize]); create/edit/delete
+    // are Admin-only.
+    [Authorize]
     [Route("korisnici")]
     public class UserController : Controller
     {
@@ -45,7 +47,6 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/users/{id:int}", Name = "user-details")]
         [HttpGet("~/users/details/{id:int}")]
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var user = _userRepository.GetById(id);
@@ -57,6 +58,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /users/create
+        [Authorize(Roles = "Admin")]
         [HttpGet("novo")]
         [HttpGet("~/users/create", Name = "user-create")]
         public IActionResult Create()
@@ -65,6 +67,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /users/create
+        [Authorize(Roles = "Admin")]
         [HttpPost("novo")]
         [HttpPost("~/users/create")]
         [ValidateAntiForgeryToken]
@@ -80,6 +83,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /users/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/users/edit/{id:int}", Name = "user-edit")]
         public IActionResult Edit(int id)
@@ -93,6 +97,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /users/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/users/edit/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -115,6 +120,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /users/delete/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/users/delete/{id:int}", Name = "user-delete")]
         public IActionResult Delete(int id)
@@ -128,6 +134,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /users/delete/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("obrisi/{id:int}")]
         [HttpPost("~/users/delete/{id:int}")]
         [ValidateAntiForgeryToken]

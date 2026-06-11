@@ -33,8 +33,8 @@ namespace ProbaMala.Models.ViewModels
         [Required(ErrorMessage = "Select a player.")]
         public int? PlayerId { get; set; }
 
-        [Display(Name = "User")]
-        [Required(ErrorMessage = "Select the user who submitted the rating.")]
+        // The author is the signed-in user's own profile, assigned server-side in the
+        // controller — it is no longer chosen on the form, so it carries no validation.
         public int? UserId { get; set; }
 
         [Display(Name = "Score")]

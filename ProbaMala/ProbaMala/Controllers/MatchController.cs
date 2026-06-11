@@ -9,9 +9,10 @@ namespace ProbaMala.Controllers
     // Each action below also has a Croatian and an English alias route; the English
     // ones are named (Name = "match-details" etc.) so views can reference them with
     // asp-route="match-details" instead of hardcoding the URL.
-    // Mutations are Admin-only; the read actions (incl. the cascade JSON helper)
-    // opt back in with [AllowAnonymous].
-    [Authorize(Roles = "Admin")]
+    // Authorization (per Lab5): Index + search (and the cascade JSON helper) are public
+    // ([AllowAnonymous]); Details is visible to any signed-in user (inherits the class
+    // [Authorize]); create/edit/delete are Admin-only.
+    [Authorize]
     [Route("utakmice")]
     public class MatchController : Controller
     {
@@ -55,7 +56,6 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/matches/{id:int}", Name = "match-details")]
         [HttpGet("~/matches/details/{id:int}")]
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _matchRepository.GetById(id);
@@ -67,6 +67,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /matches/create  — shows the blank form
+        [Authorize(Roles = "Admin")]
         [HttpGet("novo")]
         [HttpGet("~/matches/create", Name = "match-create")]
         public IActionResult Create()
@@ -86,6 +87,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /matches/create  — processes the submitted form
+        [Authorize(Roles = "Admin")]
         [HttpPost("novo")]
         [HttpPost("~/matches/create")]
         [ValidateAntiForgeryToken]
@@ -107,6 +109,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /matches/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/matches/edit/{id:int}", Name = "match-edit")]
         public IActionResult Edit(int id)
@@ -120,6 +123,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /matches/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/matches/edit/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -146,6 +150,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /matches/delete/{id}  — shows the confirmation page
+        [Authorize(Roles = "Admin")]
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/matches/delete/{id:int}", Name = "match-delete")]
         public IActionResult Delete(int id)
@@ -162,6 +167,7 @@ namespace ProbaMala.Controllers
         // [ActionName] lets the GET and POST share the same URL while having different
         // method names in C# (avoids the compile error from identical signatures).
         [HttpPost("obrisi/{id:int}")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("~/matches/delete/{id:int}")]
         [ValidateAntiForgeryToken]
         [ActionName(nameof(Delete))]

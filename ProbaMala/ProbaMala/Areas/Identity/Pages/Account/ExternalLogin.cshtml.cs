@@ -18,15 +18,18 @@ namespace ProbaMala.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
+        private readonly AppDbContext _db;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         public ExternalLoginModel(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
+            AppDbContext db,
             ILogger<ExternalLoginModel> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _db = db;
             _logger = logger;
         }
 
@@ -159,6 +162,18 @@ namespace ProbaMala.Areas.Identity.Pages.Account
                     // Same as local registration: a fresh external account is a plain User.
                     await _userManager.AddToRoleAsync(user, IdentitySeeder.UserRole);
 
+                    // Create the rating-author profile tied to this login, with the name
+                    // taken from the provider's claims (Google supplies given/family name).
+                    var (firstName, lastName) = ResolveName(info, Input.Email);
+                    _db.Users.Add(new ProbaMala.Models.Entities.User
+                    {
+                        FirstName = firstName,
+                        LastName = lastName,
+                        Email = Input.Email,
+                        AppUserId = user.Id
+                    });
+                    await _db.SaveChangesAsync();
+
                     await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
                     return LocalRedirect(returnUrl);
                 }
@@ -170,6 +185,33 @@ namespace ProbaMala.Areas.Identity.Pages.Account
             ProviderDisplayName = info.ProviderDisplayName;
             ReturnUrl = returnUrl;
             return Page();
+        }
+
+        // Derives a first/last name for the rating-author profile from the external
+        // provider's claims, with graceful fallbacks: structured given/family name →
+        // a split of the full "name" claim → the email's local part.
+        private static (string firstName, string lastName) ResolveName(ExternalLoginInfo info, string email)
+        {
+            var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+            var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
+
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+            {
+                var fullName = info.Principal.FindFirstValue(ClaimTypes.Name);
+                if (!string.IsNullOrWhiteSpace(fullName))
+                {
+                    var parts = fullName.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (string.IsNullOrWhiteSpace(firstName))
+                        firstName = parts[0];
+                    if (string.IsNullOrWhiteSpace(lastName) && parts.Length > 1)
+                        lastName = parts[1];
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(firstName))
+                firstName = email.Contains('@') ? email[..email.IndexOf('@')] : email;
+
+            return (firstName.Trim(), (lastName ?? string.Empty).Trim());
         }
     }
 }

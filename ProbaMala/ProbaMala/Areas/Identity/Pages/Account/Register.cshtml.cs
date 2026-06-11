@@ -13,15 +13,18 @@ namespace ProbaMala.Areas.Identity.Pages.Account
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly AppDbContext _db;
         private readonly ILogger<RegisterModel> _logger;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
+            AppDbContext db,
             ILogger<RegisterModel> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _db = db;
             _logger = logger;
         }
 
@@ -36,6 +39,16 @@ namespace ProbaMala.Areas.Identity.Pages.Account
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; } = null!;
+
+            [Required]
+            [StringLength(120)]
+            [Display(Name = "First name")]
+            public string FirstName { get; set; } = null!;
+
+            [Required]
+            [StringLength(120)]
+            [Display(Name = "Last name")]
+            public string LastName { get; set; } = null!;
 
             [Required]
             [StringLength(11, MinimumLength = 11, ErrorMessage = "OIB must be exactly 11 digits.")]
@@ -86,6 +99,17 @@ namespace ProbaMala.Areas.Identity.Pages.Account
 
                 // Every self-registration is a plain User. Admins are seeded/assigned separately.
                 await _userManager.AddToRoleAsync(user, IdentitySeeder.UserRole);
+
+                // Create the rating-author profile tied to this login, so the user can
+                // post — and later edit/delete — their own ratings.
+                _db.Users.Add(new ProbaMala.Models.Entities.User
+                {
+                    FirstName = Input.FirstName.Trim(),
+                    LastName = Input.LastName.Trim(),
+                    Email = Input.Email,
+                    AppUserId = user.Id
+                });
+                await _db.SaveChangesAsync();
 
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return LocalRedirect(returnUrl);

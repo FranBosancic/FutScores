@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ProbaMala.Models.Entities;
 
 namespace ProbaMala.Data
@@ -52,6 +53,26 @@ namespace ProbaMala.Data
 
             if (!await userManager.IsInRoleAsync(admin, AdminRole))
                 await userManager.AddToRoleAsync(admin, AdminRole);
+
+            // Give the seeded admin a rating-author profile so they can post ratings
+            // under a proper name (like any registered user). Skipped under the "Testing"
+            // environment so the integration tests' in-memory DB stays free of domain users.
+            var environment = services.GetRequiredService<IHostEnvironment>();
+            if (!environment.IsEnvironment("Testing"))
+            {
+                var dbContext = services.GetRequiredService<AppDbContext>();
+                if (!await dbContext.Users.AnyAsync(u => u.AppUserId == admin.Id))
+                {
+                    dbContext.Users.Add(new User
+                    {
+                        FirstName = "Site",
+                        LastName = "Admin",
+                        Email = admin.Email!,
+                        AppUserId = admin.Id
+                    });
+                    await dbContext.SaveChangesAsync();
+                }
+            }
         }
     }
 }

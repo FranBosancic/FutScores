@@ -27,6 +27,12 @@ namespace ProbaMala.Repositories
         bool IsPlayerInMatch(int playerId, int matchId);
         bool UserExists(int userId);
 
+        // Resolves the rating-author profile (domain User) tied to a login (AppUser).
+        // GetProfileIdForAppUser only reads (used for ownership checks); GetOrCreate
+        // makes a minimal profile when a login doesn't have one yet (used when rating).
+        int? GetProfileIdForAppUser(string appUserId);
+        int GetOrCreateProfileId(string appUserId, string email);
+
         int Add(RatingFormViewModel model);
         bool Update(int id, RatingFormViewModel model);
         bool Delete(int id);
@@ -292,6 +298,33 @@ namespace ProbaMala.Repositories
 
         public bool UserExists(int userId) =>
             _dbContext.Users.Any(u => u.Id == userId);
+
+        public int? GetProfileIdForAppUser(string appUserId) =>
+            _dbContext.Users.AsNoTracking()
+                .Where(u => u.AppUserId == appUserId)
+                .Select(u => (int?)u.Id)
+                .FirstOrDefault();
+
+        public int GetOrCreateProfileId(string appUserId, string email)
+        {
+            var existing = _dbContext.Users.FirstOrDefault(u => u.AppUserId == appUserId);
+            if (existing != null)
+                return existing.Id;
+
+            // A login without a profile yet (the seeded admin or an external-login
+            // account): create a minimal one derived from the email's local part.
+            var localPart = email.Contains('@') ? email[..email.IndexOf('@')] : email;
+            var profile = new User
+            {
+                FirstName = string.IsNullOrWhiteSpace(localPart) ? "User" : localPart,
+                LastName = "(account)",
+                Email = email,
+                AppUserId = appUserId
+            };
+            _dbContext.Users.Add(profile);
+            _dbContext.SaveChanges();
+            return profile.Id;
+        }
 
         public int Add(RatingFormViewModel model)
         {

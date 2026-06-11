@@ -9,6 +9,11 @@
         >= 5 => "bg-amber-500/15 text-amber-300",
         _    => "bg-rose-500/15 text-rose-300"
     };
+
+    // Edit/Delete show for the rating's author or an Admin (ownership set by the controller).
+    var isAdmin = ViewData["IsAdmin"] as bool? ?? false;
+    var currentProfileId = ViewData["CurrentProfileId"] as int?;
+    var canModify = isAdmin || (currentProfileId.HasValue && currentProfileId.Value == Model.UserId);
 }
 
 <div class="mx-auto w-full max-w-3xl space-y-4 px-4 sm:px-6">
@@ -29,7 +34,7 @@
                 <a asp-route="ratings-index" class="text-xs text-slate-400 transition hover:text-slate-200">All ratings</a>
             </div>
             <div class="flex items-center gap-2">
-                @if (User.IsInRole("Admin"))
+                @if (canModify)
                 {
                 <a asp-route="rating-edit" asp-route-id="@Model.Id"
                    class="flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-400 transition hover:bg-slate-700 hover:text-slate-100">

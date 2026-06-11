@@ -15,9 +15,8 @@
 </div>
 
 @* Column headers *@
-<div class="grid grid-cols-[1fr_1fr_5rem_4rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
+<div class="grid grid-cols-[1fr_5rem_4rem] border-b border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
     <span>Name</span>
-    <span>Email</span>
     <span class="text-center">Ratings</span>
     <span></span>
 </div>
@@ -30,7 +29,7 @@ else
 {
     @foreach (var user in Model)
     {
-        <div class="group grid cursor-pointer grid-cols-[1fr_1fr_5rem_4rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
+        <div class="group grid cursor-pointer grid-cols-[1fr_5rem_4rem] items-center border-b border-slate-800/40 px-4 py-3 last:border-b-0 transition hover:bg-white/[0.03]"
              data-row-href="@Url.RouteUrl("user-details", new { id = user.Id })">
 
             @* Name with lime pill *@
@@ -41,9 +40,6 @@ else
                     @($"{user.FirstName} {user.LastName}")
                 </a>
             </div>
-
-            @* Email *@
-            <span class="truncate text-sm text-slate-400">@user.Email</span>
 
             @* Ratings count *@
             <span class="text-center text-sm text-slate-400">@user.RatingCount</span>

@@ -7,9 +7,10 @@ using ProbaMala.Repositories;
 namespace ProbaMala.Controllers
 {
     // Primary route: /klubovi (Croatian), English aliases: /clubs
-    // Mutations (create/edit/delete/image management) are Admin-only; the read
-    // actions below opt back in with [AllowAnonymous] so anyone can browse.
-    [Authorize(Roles = "Admin")]
+    // Authorization (per Lab5): Index + search are public ([AllowAnonymous]); Details is
+    // visible to any signed-in user (inherits the class [Authorize]); create/edit/delete
+    // and image management are Admin-only.
+    [Authorize]
     [Route("klubovi")]
     public class ClubController : Controller
     {
@@ -64,7 +65,6 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/clubs/{id:int}", Name = "club-details")]
         [HttpGet("~/clubs/details/{id:int}")]
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _clubRepository.GetById(id);
@@ -76,6 +76,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /clubs/create
+        [Authorize(Roles = "Admin")]
         [HttpGet("novo")]
         [HttpGet("~/clubs/create", Name = "club-create")]
         public IActionResult Create()
@@ -84,6 +85,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /clubs/create
+        [Authorize(Roles = "Admin")]
         [HttpPost("novo")]
         [HttpPost("~/clubs/create")]
         [ValidateAntiForgeryToken]
@@ -102,6 +104,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /clubs/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/clubs/edit/{id:int}", Name = "club-edit")]
         public IActionResult Edit(int id)
@@ -115,6 +118,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /clubs/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/clubs/edit/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -140,6 +144,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /clubs/delete/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/clubs/delete/{id:int}", Name = "club-delete")]
         public IActionResult Delete(int id)
@@ -156,6 +161,7 @@ namespace ProbaMala.Controllers
         // A club can only be deleted when it has no players and no matches.
         // If those constraints aren't met we re-show the delete page with an error message.
         [HttpPost("obrisi/{id:int}")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("~/clubs/delete/{id:int}")]
         [ValidateAntiForgeryToken]
         [ActionName(nameof(Delete))]
@@ -183,6 +189,7 @@ namespace ProbaMala.Controllers
         // ── Image upload (Dropzone) ──────────────────────────────────────────
 
         // POST /clubs/{id}/images — Dropzone posts one file per request as "file".
+        [Authorize(Roles = "Admin")]
         [HttpPost("{id:int}/slike")]
         [HttpPost("~/clubs/{id:int}/images")]
         [ValidateAntiForgeryToken]
@@ -207,6 +214,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /clubs/images/delete — imageId comes from the AJAX request body.
+        [Authorize(Roles = "Admin")]
         [HttpPost("slike/obrisi")]
         [HttpPost("~/clubs/images/delete")]
         [ValidateAntiForgeryToken]
@@ -216,6 +224,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /clubs/images/primary — mark as the club banner.
+        [Authorize(Roles = "Admin")]
         [HttpPost("slike/glavna")]
         [HttpPost("~/clubs/images/primary")]
         [ValidateAntiForgeryToken]

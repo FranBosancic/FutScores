@@ -1,21 +1,49 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ProbaMala.Data;
+using ProbaMala.Models.Entities;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
-    // Mutations are Admin-only; the read actions (incl. cascade JSON helpers)
-    // opt back in with [AllowAnonymous].
-    [Authorize(Roles = "Admin")]
+    // Authorization: Index + search (and the cascade JSON helpers) are public
+    // ([AllowAnonymous]); Details and creating a rating are open to any signed-in user
+    // (submitting a rating is the app's core user action, so they inherit the class
+    // [Authorize]); editing/deleting a rating is allowed for its OWNER or an Admin.
+    [Authorize]
     [Route("ocjene")]
     public class RatingController : Controller
     {
         private readonly IRatingRepository _ratingRepository;
+        private readonly UserManager<AppUser> _userManager;
 
-        public RatingController(IRatingRepository ratingRepository)
+        public RatingController(IRatingRepository ratingRepository, UserManager<AppUser> userManager)
         {
             _ratingRepository = ratingRepository;
+            _userManager = userManager;
+        }
+
+        // The rating-author profile id tied to the signed-in user, or null when
+        // anonymous / not yet linked. Drives ownership decisions below.
+        private int? CurrentProfileId()
+        {
+            var appUserId = _userManager.GetUserId(User);
+            return appUserId == null ? null : _ratingRepository.GetProfileIdForAppUser(appUserId);
+        }
+
+        // A rating may be edited/deleted by an Admin or by the user who authored it.
+        private bool CanModify(int ratingAuthorId) =>
+            User.IsInRole(IdentitySeeder.AdminRole)
+            || (CurrentProfileId() is int profileId && profileId == ratingAuthorId);
+
+        // Exposes ownership info to the list/details views so they can show Edit/Delete
+        // only on ratings the current user is allowed to change.
+        private void SetOwnershipViewData()
+        {
+            ViewData["IsAdmin"] = User.IsInRole(IdentitySeeder.AdminRole);
+            ViewData["CurrentProfileId"] = CurrentProfileId();
         }
 
         // GET /ratings
@@ -27,6 +55,7 @@ namespace ProbaMala.Controllers
         public IActionResult Index(string? q)
         {
             ViewData["FilterQuery"] = q;
+            SetOwnershipViewData();
             return View(_ratingRepository.GetAll(q));
         }
 
@@ -37,6 +66,7 @@ namespace ProbaMala.Controllers
         public IActionResult Filter(string? q)
         {
             ViewData["FilterQuery"] = q;
+            SetOwnershipViewData();
             return PartialView("_RatingList", _ratingRepository.GetAll(q));
         }
 
@@ -45,7 +75,6 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/ratings/{id:int}", Name = "rating-details")]
         [HttpGet("~/ratings/details/{id:int}")]
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _ratingRepository.GetById(id);
@@ -53,6 +82,7 @@ namespace ProbaMala.Controllers
             if (viewModel == null)
                 return NotFound();
 
+            SetOwnershipViewData();
             return View(viewModel);
         }
 
@@ -60,6 +90,7 @@ namespace ProbaMala.Controllers
         // The matchId and playerId query params come from the "Rate" shortcut button
         // on the match squad page — they pre-fill the cascade so the rater only has
         // to enter a score and comment.
+        // Any signed-in user may open the rating form (inherits the class [Authorize]).
         [HttpGet("novo")]
         [HttpGet("~/ratings/create", Name = "rating-create")]
         public IActionResult Create(int? matchId, int? playerId)
@@ -99,12 +130,20 @@ namespace ProbaMala.Controllers
             return Json(_ratingRepository.GetPlayersForMatch(matchId));
         }
 
-        // POST /ratings/create
+        // POST /ratings/create — any signed-in user may submit a rating. The author is
+        // forced to the current user's own profile; it is never taken from the form.
         [HttpPost("novo")]
         [HttpPost("~/ratings/create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(RatingFormViewModel model)
+        public async Task<IActionResult> Create(RatingFormViewModel model)
         {
+            var appUser = await _userManager.GetUserAsync(User);
+            if (appUser == null)
+                return Challenge();
+
+            model.UserId = _ratingRepository.GetOrCreateProfileId(
+                appUser.Id, appUser.Email ?? appUser.UserName ?? appUser.Id);
+
             ValidateRatingForm(model);
 
             if (!ModelState.IsValid)
@@ -117,7 +156,7 @@ namespace ProbaMala.Controllers
             return RedirectToAction(nameof(Details), new { id = ratingId });
         }
 
-        // GET /ratings/edit/{id}
+        // GET /ratings/edit/{id} — the rating's author or an Admin.
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/ratings/edit/{id:int}", Name = "rating-edit")]
         public IActionResult Edit(int id)
@@ -127,10 +166,13 @@ namespace ProbaMala.Controllers
             if (model == null)
                 return NotFound();
 
+            if (!CanModify(model.UserId!.Value))
+                return Forbid();
+
             return View(model);
         }
 
-        // POST /ratings/edit/{id}
+        // POST /ratings/edit/{id} — the rating's author or an Admin; the author is kept.
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/ratings/edit/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -138,6 +180,16 @@ namespace ProbaMala.Controllers
         {
             if (id != model.Id)
                 return BadRequest();
+
+            var existing = _ratingRepository.GetFormById(id);
+            if (existing == null)
+                return NotFound();
+
+            if (!CanModify(existing.UserId!.Value))
+                return Forbid();
+
+            // An edit can't reassign authorship — keep the original author.
+            model.UserId = existing.UserId;
 
             ValidateRatingForm(model);
 
@@ -155,7 +207,7 @@ namespace ProbaMala.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        // GET /ratings/delete/{id}
+        // GET /ratings/delete/{id} — the rating's author or an Admin.
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/ratings/delete/{id:int}", Name = "rating-delete")]
         public IActionResult Delete(int id)
@@ -165,21 +217,27 @@ namespace ProbaMala.Controllers
             if (viewModel == null)
                 return NotFound();
 
+            if (!CanModify(viewModel.UserId))
+                return Forbid();
+
             return View(viewModel);
         }
 
-        // POST /ratings/delete/{id}
+        // POST /ratings/delete/{id} — the rating's author or an Admin.
         [HttpPost("obrisi/{id:int}")]
         [HttpPost("~/ratings/delete/{id:int}")]
         [ValidateAntiForgeryToken]
         [ActionName(nameof(Delete))]
         public IActionResult DeleteConfirmed(int id)
         {
-            var deleted = _ratingRepository.Delete(id);
-
-            if (!deleted)
+            var existing = _ratingRepository.GetById(id);
+            if (existing == null)
                 return NotFound();
 
+            if (!CanModify(existing.UserId))
+                return Forbid();
+
+            _ratingRepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 

@@ -19,6 +19,13 @@ namespace ProbaMala.Models.Entities
         [MaxLength(180)]
         public string Email { get; set; } = null!;
 
+        // Optional link to the login (AppUser) that owns this profile. It is the
+        // bridge that lets "edit your own rating" work: a signed-in user's ratings
+        // are authored by the profile whose AppUserId matches their account.
+        // Null for seeded or admin-created authors that were never tied to a login.
+        public string? AppUserId { get; set; }
+        public virtual AppUser? AppUser { get; set; }
+
         public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
 }

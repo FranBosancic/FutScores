@@ -6,8 +6,10 @@ using ProbaMala.Repositories;
 namespace ProbaMala.Controllers
 {
     // Primary route: /lige (Croatian), English aliases: /leagues (named for asp-route use)
-    // Mutations are Admin-only; the read actions opt back in with [AllowAnonymous].
-    [Authorize(Roles = "Admin")]
+    // Authorization (per Lab5): Index + search are public ([AllowAnonymous]); Details is
+    // visible to any signed-in user (inherits the class [Authorize]); create/edit/delete
+    // are Admin-only.
+    [Authorize]
     [Route("lige")]
     public class LeagueController : Controller
     {
@@ -45,7 +47,6 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/leagues/{id:int}", Name = "league-details")]
         [HttpGet("~/leagues/details/{id:int}")]
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var league = _leagueRepository.GetById(id);
@@ -57,6 +58,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /leagues/create
+        [Authorize(Roles = "Admin")]
         [HttpGet("novo")]
         [HttpGet("~/leagues/create", Name = "league-create")]
         public IActionResult Create()
@@ -65,6 +67,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /leagues/create
+        [Authorize(Roles = "Admin")]
         [HttpPost("novo")]
         [HttpPost("~/leagues/create")]
         [ValidateAntiForgeryToken]
@@ -80,6 +83,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /leagues/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/leagues/edit/{id:int}", Name = "league-edit")]
         public IActionResult Edit(int id)
@@ -93,6 +97,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /leagues/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/leagues/edit/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -115,6 +120,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /leagues/delete/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/leagues/delete/{id:int}", Name = "league-delete")]
         public IActionResult Delete(int id)
@@ -128,6 +134,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /leagues/delete/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("obrisi/{id:int}")]
         [HttpPost("~/leagues/delete/{id:int}")]
         [ValidateAntiForgeryToken]

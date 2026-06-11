@@ -71,6 +71,16 @@ namespace ProbaMala.Data
                 .HasForeignKey(image => image.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // One login (AppUser) maps to at most one rating-author profile (domain
+            // User). The FK is nullable — seeded/admin-created profiles have no login —
+            // and the 1:1 mapping stops two accounts sharing a profile. Deleting the
+            // login detaches the profile (SetNull) instead of deleting it.
+            modelBuilder.Entity<User>()
+                .HasOne(user => user.AppUser)
+                .WithOne()
+                .HasForeignKey<User>(user => user.AppUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // ─────────────────────────────────────────────────────────────────
             // Seed data: real 2025–26 season (Europe's top five leagues).
             // Clubs, squads and final standings verified against the 2025–26

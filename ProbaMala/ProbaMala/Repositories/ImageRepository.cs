@@ -69,6 +69,14 @@ namespace ProbaMala.Repositories
             if (!OwnerExists(owner, ownerId))
                 return (null, $"{owner} not found.");
 
+            // One image per owner: reject the upload if there's already one. The user
+            // must delete the existing image before uploading a replacement.
+            var alreadyHasImage = owner == ImageOwnerType.Club
+                ? _dbContext.Images.Any(i => i.ClubId == ownerId)
+                : _dbContext.Images.Any(i => i.PlayerId == ownerId);
+            if (alreadyHasImage)
+                return (null, $"This {owner.ToString().ToLowerInvariant()} already has an image. Delete it before uploading a new one.");
+
             var validationError = Validate(file);
             if (validationError != null)
                 return (null, validationError);

@@ -6,8 +6,10 @@ using ProbaMala.Repositories;
 
 namespace ProbaMala.Controllers
 {
-    // Mutations are Admin-only; the read actions opt back in with [AllowAnonymous].
-    [Authorize(Roles = "Admin")]
+    // Authorization (per Lab5): Index + search are public ([AllowAnonymous]); Details is
+    // visible to any signed-in user (inherits the class [Authorize]); create/edit/delete
+    // and image management are Admin-only.
+    [Authorize]
     [Route("igraci")]
     public class PlayerController : Controller
     {
@@ -47,7 +49,6 @@ namespace ProbaMala.Controllers
         [HttpGet("detalji/{id:int}")]
         [HttpGet("~/players/{id:int}", Name = "player-details")]
         [HttpGet("~/players/details/{id:int}")]
-        [AllowAnonymous]
         public IActionResult Details(int id)
         {
             var viewModel = _playerRepository.GetById(id);
@@ -59,6 +60,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /players/create
+        [Authorize(Roles = "Admin")]
         [HttpGet("novo")]
         [HttpGet("~/players/create", Name = "player-create")]
         public IActionResult Create()
@@ -67,6 +69,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /players/create
+        [Authorize(Roles = "Admin")]
         [HttpPost("novo")]
         [HttpPost("~/players/create")]
         [ValidateAntiForgeryToken]
@@ -85,6 +88,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /players/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("uredi/{id:int}")]
         [HttpGet("~/players/edit/{id:int}", Name = "player-edit")]
         public IActionResult Edit(int id)
@@ -98,6 +102,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /players/edit/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPost("uredi/{id:int}")]
         [HttpPost("~/players/edit/{id:int}")]
         [ValidateAntiForgeryToken]
@@ -123,6 +128,7 @@ namespace ProbaMala.Controllers
         }
 
         // GET /players/delete/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("obrisi/{id:int}")]
         [HttpGet("~/players/delete/{id:int}", Name = "player-delete")]
         public IActionResult Delete(int id)
@@ -137,6 +143,7 @@ namespace ProbaMala.Controllers
 
         // POST /players/delete/{id}
         [HttpPost("obrisi/{id:int}")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("~/players/delete/{id:int}")]
         [ValidateAntiForgeryToken]
         [ActionName(nameof(Delete))]
@@ -153,6 +160,7 @@ namespace ProbaMala.Controllers
         // ── Image upload (Dropzone) ──────────────────────────────────────────
 
         // POST /players/{id}/images — Dropzone posts one file per request as "file".
+        [Authorize(Roles = "Admin")]
         [HttpPost("{id:int}/slike")]
         [HttpPost("~/players/{id:int}/images")]
         [ValidateAntiForgeryToken]
@@ -177,6 +185,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /players/images/delete — imageId comes from the AJAX request body.
+        [Authorize(Roles = "Admin")]
         [HttpPost("slike/obrisi")]
         [HttpPost("~/players/images/delete")]
         [ValidateAntiForgeryToken]
@@ -186,6 +195,7 @@ namespace ProbaMala.Controllers
         }
 
         // POST /players/images/primary — mark as the player headshot.
+        [Authorize(Roles = "Admin")]
         [HttpPost("slike/glavna")]
         [HttpPost("~/players/images/primary")]
         [ValidateAntiForgeryToken]

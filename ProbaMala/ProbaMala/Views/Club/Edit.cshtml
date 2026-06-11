@@ -92,9 +92,11 @@
             new Dropzone('#imageDropzone', {
                 paramName: 'file',
                 maxFilesize: 5,                  // MB
+                maxFiles: 1,                     // one image per club
                 acceptedFiles: 'image/*',
                 addRemoveLinks: true,
-                dictDefaultMessage: 'Drop images here or click to upload',
+                dictDefaultMessage: 'Drop an image here or click to upload',
+                dictMaxFilesExceeded: 'Only one image is allowed. Delete the existing one first.',
                 headers: { 'RequestVerificationToken': token },
                 init: function () {
                     this.on('success', function (file) { this.removeFile(file); loadImages(); });

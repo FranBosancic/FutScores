@@ -1,9 +1,17 @@
 @model List<ProbaMala.Models.ViewModels.RatingDetailsViewModel>
 
+@{
+    // Ownership info supplied by the controller: an Admin sees every control; a signed-in
+    // user sees Edit/Delete only on ratings they authored. Anyone signed in can add one.
+    var isAdmin = ViewData["IsAdmin"] as bool? ?? false;
+    var currentProfileId = ViewData["CurrentProfileId"] as int?;
+    var canAddRating = User.Identity?.IsAuthenticated ?? false;
+}
+
 @* Section header with Add Rating button *@
 <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
     <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Ratings</span>
-    @if (User.IsInRole("Admin"))
+    @if (canAddRating)
     {
         <a asp-route="rating-create" class="flex items-center gap-1 text-xs font-semibold text-lime-400 transition hover:text-lime-300">
             <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -56,7 +64,7 @@ else
                         @rating.Score
                     </span>
                     <div class="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                        @if (User.IsInRole("Admin"))
+                        @if (isAdmin || (currentProfileId.HasValue && currentProfileId.Value == rating.UserId))
                         {
                         <a asp-route="rating-edit" asp-route-id="@rating.Id"
                            title="Edit"
