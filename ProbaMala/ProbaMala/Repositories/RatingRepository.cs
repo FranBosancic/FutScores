@@ -9,6 +9,7 @@ namespace ProbaMala.Repositories
     public interface IRatingRepository
     {
         List<RatingDetailsViewModel> GetAll(string? query = null);
+        List<RatingDetailsViewModel> GetByUserId(int userId);
         RatingDetailsViewModel? GetById(int id);
         RatingFormViewModel BuildFormModel(int? matchId = null, int? playerId = null);
         RatingFormViewModel? GetFormById(int id);
@@ -97,6 +98,24 @@ namespace ProbaMala.Repositories
                 return null;
 
             return MapToDetailsViewModel(rating);
+        }
+
+        // All ratings authored by one profile (domain User), newest match first.
+        // Used by the "your ratings" page.
+        public List<RatingDetailsViewModel> GetByUserId(int userId)
+        {
+            return _dbContext.Ratings
+                .AsNoTracking()
+                .Include(r => r.Player)
+                .Include(r => r.User)
+                .Include(r => r.Match).ThenInclude(m => m.HomeTeam)
+                .Include(r => r.Match).ThenInclude(m => m.AwayTeam)
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.Match.Date)
+                .ThenByDescending(r => r.Id)
+                .AsEnumerable()
+                .Select(MapToDetailsViewModel)
+                .ToList();
         }
 
         // Builds a form model, optionally pre-filled from a known match and player.

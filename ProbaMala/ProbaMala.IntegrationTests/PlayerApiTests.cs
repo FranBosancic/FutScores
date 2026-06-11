@@ -103,6 +103,45 @@ namespace ProbaMala.IntegrationTests
             players[0].Club.Id.Should().Be(first.Id);
         }
 
+        [Fact]
+        public async Task GetAll_FiltersByPosition_WhenProvided()
+        {
+            // Arrange — dva igrača, različite pozicije, isti klub.
+            var club = await SeedClubAsync("Premier League", "Test FC");
+            await SeedPlayerAsync(club.Id, "Fwd", "One", Position.Forward);
+            await SeedPlayerAsync(club.Id, "Def", "Two", Position.Defender);
+
+            // Act — enum se veže i po imenu ("Forward").
+            var response = await _client.GetAsync("/api/players?position=Forward");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var players = await response.Content.ReadFromJsonAsync<List<PlayerDTO>>();
+            players.Should().ContainSingle();
+            players![0].Position.Should().Be("Forward");
+        }
+
+        [Fact]
+        public async Task GetAll_FiltersByLeagueId_WhenProvided()
+        {
+            // Arrange — dva kluba u različitim ligama, po jedan igrač u svakom.
+            var first = await SeedClubAsync("League A", "First FC");
+            var second = await SeedClubAsync("League B", "Second FC");
+            await SeedPlayerAsync(first.Id, "One", "Player");
+            await SeedPlayerAsync(second.Id, "Two", "Player");
+
+            // Act — igrači čiji klub pripada toj ligi.
+            var response = await _client.GetAsync($"/api/players?leagueId={first.LeagueId}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var players = await response.Content.ReadFromJsonAsync<List<PlayerDTO>>();
+            players.Should().ContainSingle();
+            players![0].Club.Id.Should().Be(first.Id);
+        }
+
         // ─────────────────────────── GET by id ───────────────────────────
 
         [Fact]

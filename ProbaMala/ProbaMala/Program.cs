@@ -93,7 +93,11 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = SmartScheme;
     options.DefaultForbidScheme   = SmartScheme;
 })
-.AddPolicyScheme(SmartScheme, "JWT or Cookie", options =>
+// displayName is intentionally null: a non-null display name would make this
+// internal routing scheme show up as a bogus "Continue with…" button on the
+// login page (SignInManager.GetExternalAuthenticationSchemesAsync lists every
+// scheme that has a display name).
+.AddPolicyScheme(SmartScheme, displayName: null, options =>
 {
     options.ForwardDefaultSelector = ctx =>
     {

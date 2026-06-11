@@ -103,6 +103,49 @@ namespace ProbaMala.IntegrationTests
             matches![0].League.Id.Should().Be(a.league.Id);
         }
 
+        [Fact]
+        public async Task GetAll_FiltersByClubId_HomeOrAway()
+        {
+            // Arrange — dvije lige sa svojim utakmicama.
+            var a = await SeedLeagueWithTwoClubsAsync("League A", "A Home", "A Away");
+            var b = await SeedLeagueWithTwoClubsAsync("League B", "B Home", "B Away");
+            await SeedMatchAsync(a.league.Id, a.home.Id, a.away.Id, new DateTime(2024, 1, 1));
+            await SeedMatchAsync(b.league.Id, b.home.Id, b.away.Id, new DateTime(2024, 1, 1));
+
+            // Act + Assert — filtriranje po domaćem klubu vraća tu utakmicu.
+            var homeResponse = await _client.GetAsync($"/api/matches?clubId={a.home.Id}");
+            homeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var homeMatches = await homeResponse.Content.ReadFromJsonAsync<List<MatchDTO>>();
+            homeMatches.Should().ContainSingle();
+            homeMatches![0].HomeTeam.Id.Should().Be(a.home.Id);
+
+            // I po gostujućem klubu vraća istu utakmicu (home ILI away).
+            var awayResponse = await _client.GetAsync($"/api/matches?clubId={a.away.Id}");
+            var awayMatches = await awayResponse.Content.ReadFromJsonAsync<List<MatchDTO>>();
+            awayMatches.Should().ContainSingle();
+            awayMatches![0].AwayTeam.Id.Should().Be(a.away.Id);
+        }
+
+        [Fact]
+        public async Task GetAll_FiltersByDateRange_WhenFromAndToProvided()
+        {
+            // Arrange — tri utakmice u različitim mjesecima.
+            var (league, home, away) = await SeedLeagueWithTwoClubsAsync("Premier League", "Home FC", "Away FC");
+            await SeedMatchAsync(league.Id, home.Id, away.Id, new DateTime(2024, 1, 1));
+            await SeedMatchAsync(league.Id, home.Id, away.Id, new DateTime(2024, 6, 1));
+            await SeedMatchAsync(league.Id, home.Id, away.Id, new DateTime(2024, 12, 1));
+
+            // Act — samo lipanjska utakmica pada u raspon (uključivo).
+            var response = await _client.GetAsync("/api/matches?from=2024-03-01&to=2024-09-01");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var matches = await response.Content.ReadFromJsonAsync<List<MatchDTO>>();
+            matches.Should().ContainSingle();
+            matches![0].Date.Should().Be(new DateTime(2024, 6, 1));
+        }
+
         // ─────────────────────────── GET by id ───────────────────────────
 
         [Fact]

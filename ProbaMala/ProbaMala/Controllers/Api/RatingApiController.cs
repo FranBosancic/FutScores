@@ -29,9 +29,30 @@ namespace ProbaMala.Controllers.Api
                 .Include(r => r.Match).ThenInclude(m => m.AwayTeam);
 
         [HttpGet]
-        public ActionResult<IEnumerable<RatingDTO>> GetAll([FromQuery] string? q = null)
+        public ActionResult<IEnumerable<RatingDTO>> GetAll(
+            [FromQuery] string? q = null,
+            [FromQuery] int? playerId = null,
+            [FromQuery] int? matchId = null,
+            [FromQuery] int? userId = null,
+            [FromQuery] int? minScore = null,
+            [FromQuery] int? maxScore = null)
         {
             var query = WithRelations().AsNoTracking().AsQueryable();
+
+            if (playerId.HasValue)
+                query = query.Where(r => r.PlayerId == playerId.Value);
+
+            if (matchId.HasValue)
+                query = query.Where(r => r.MatchId == matchId.Value);
+
+            if (userId.HasValue)
+                query = query.Where(r => r.UserId == userId.Value);
+
+            if (minScore.HasValue)
+                query = query.Where(r => r.Score >= minScore.Value);
+
+            if (maxScore.HasValue)
+                query = query.Where(r => r.Score <= maxScore.Value);
 
             if (!string.IsNullOrWhiteSpace(q))
             {

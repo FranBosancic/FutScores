@@ -27,12 +27,28 @@ namespace ProbaMala.Controllers.Api
                 .Include(m => m.AwayTeam);
 
         [HttpGet]
-        public ActionResult<IEnumerable<MatchDTO>> GetAll([FromQuery] string? q = null, [FromQuery] int? leagueId = null)
+        public ActionResult<IEnumerable<MatchDTO>> GetAll(
+            [FromQuery] string? q = null,
+            [FromQuery] int? leagueId = null,
+            [FromQuery] int? clubId = null,
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null)
         {
             var query = WithRelations().AsNoTracking().AsQueryable();
 
             if (leagueId.HasValue)
                 query = query.Where(m => m.LeagueId == leagueId.Value);
+
+            // A club's fixtures — matches where it played home or away.
+            if (clubId.HasValue)
+                query = query.Where(m => m.HomeTeamId == clubId.Value || m.AwayTeamId == clubId.Value);
+
+            // Inclusive date range.
+            if (from.HasValue)
+                query = query.Where(m => m.Date >= from.Value);
+
+            if (to.HasValue)
+                query = query.Where(m => m.Date <= to.Value);
 
             if (!string.IsNullOrWhiteSpace(q))
             {

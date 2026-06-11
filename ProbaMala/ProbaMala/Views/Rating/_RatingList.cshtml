@@ -6,11 +6,16 @@
     var isAdmin = ViewData["IsAdmin"] as bool? ?? false;
     var currentProfileId = ViewData["CurrentProfileId"] as int?;
     var canAddRating = User.Identity?.IsAuthenticated ?? false;
+    var listTitle = ViewData["RatingListTitle"] as string ?? "Ratings";
+    // On the personal "Your ratings" page we keep the Edit/Delete controls always
+    // visible (hover-only reveals nothing on touch devices); elsewhere they fade in on hover.
+    var alwaysShowActions = ViewData["RatingActionsAlwaysVisible"] as bool? ?? false;
+    var actionsVisibility = alwaysShowActions ? "" : "opacity-0 group-hover:opacity-100";
 }
 
 @* Section header with Add Rating button *@
 <div class="flex items-center justify-between border-b border-slate-800 bg-slate-800/40 px-4 py-2.5">
-    <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Ratings</span>
+    <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">@listTitle</span>
     @if (canAddRating)
     {
         <a asp-route="rating-create" class="flex items-center gap-1 text-xs font-semibold text-lime-400 transition hover:text-lime-300">
@@ -63,7 +68,7 @@ else
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold @scoreBadgeClass">
                         @rating.Score
                     </span>
-                    <div class="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                    <div class="flex items-center gap-1 transition @actionsVisibility">
                         @if (isAdmin || (currentProfileId.HasValue && currentProfileId.Value == rating.UserId))
                         {
                         <a asp-route="rating-edit" asp-route-id="@rating.Id"

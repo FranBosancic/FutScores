@@ -136,6 +136,117 @@ namespace ProbaMala.IntegrationTests
             ratings![0].Comment.Should().Be("amazing");
         }
 
+        [Fact]
+        public async Task GetAll_FiltersByMinAndMaxScore_WhenProvided()
+        {
+            // Arrange — tri ocjene s različitim score-om.
+            var (player, match, user) = await SeedRatingDependenciesAsync();
+            await SeedRatingAsync(player.Id, match.Id, user.Id, 3);
+            await SeedRatingAsync(player.Id, match.Id, user.Id, 6);
+            await SeedRatingAsync(player.Id, match.Id, user.Id, 9);
+
+            // Act — samo 6 pada u [5, 8].
+            var response = await _client.GetAsync("/api/ratings?minScore=5&maxScore=8");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var ratings = await response.Content.ReadFromJsonAsync<List<RatingDTO>>();
+            ratings.Should().ContainSingle();
+            ratings![0].Score.Should().Be(6);
+        }
+
+        [Fact]
+        public async Task GetAll_FiltersByUserId_WhenProvided()
+        {
+            // Arrange — dva korisnika, svaki s jednom ocjenom.
+            var (player, match, user) = await SeedRatingDependenciesAsync();
+            var other = new User { FirstName = "Other", LastName = "Person", Email = "other@example.com" };
+            await _factory.WithDbContextAsync(async db =>
+            {
+                db.Users.Add(other);
+                await db.SaveChangesAsync();
+            });
+            await SeedRatingAsync(player.Id, match.Id, user.Id, 5);
+            await SeedRatingAsync(player.Id, match.Id, other.Id, 8);
+
+            // Act
+            var response = await _client.GetAsync($"/api/ratings?userId={user.Id}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var ratings = await response.Content.ReadFromJsonAsync<List<RatingDTO>>();
+            ratings.Should().ContainSingle();
+            ratings![0].User.Id.Should().Be(user.Id);
+        }
+
+        [Fact]
+        public async Task GetAll_FiltersByPlayerId_WhenProvided()
+        {
+            // Arrange — drugi igrač u istom klubu, ocjena za svakog.
+            var (player, match, user) = await SeedRatingDependenciesAsync();
+            var other = new Player
+            {
+                FirstName = "Second",
+                LastName = "Player",
+                DateOfBirth = new DateTime(2000, 1, 1),
+                Position = Position.Defender,
+                Nationality = "Croatia",
+                ClubId = player.ClubId
+            };
+            await _factory.WithDbContextAsync(async db =>
+            {
+                db.Players.Add(other);
+                await db.SaveChangesAsync();
+            });
+            await SeedRatingAsync(player.Id, match.Id, user.Id, 5);
+            await SeedRatingAsync(other.Id, match.Id, user.Id, 8);
+
+            // Act
+            var response = await _client.GetAsync($"/api/ratings?playerId={player.Id}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var ratings = await response.Content.ReadFromJsonAsync<List<RatingDTO>>();
+            ratings.Should().ContainSingle();
+            ratings![0].Player.Id.Should().Be(player.Id);
+        }
+
+        [Fact]
+        public async Task GetAll_FiltersByMatchId_WhenProvided()
+        {
+            // Arrange — druga utakmica između ista dva kluba, ocjena za svaku.
+            var (player, match, user) = await SeedRatingDependenciesAsync();
+            var other = new Match
+            {
+                LeagueId = match.LeagueId,
+                HomeTeamId = match.HomeTeamId,
+                AwayTeamId = match.AwayTeamId,
+                Date = new DateTime(2024, 2, 1),
+                HomeGoals = 0,
+                AwayGoals = 0
+            };
+            await _factory.WithDbContextAsync(async db =>
+            {
+                db.Matches.Add(other);
+                await db.SaveChangesAsync();
+            });
+            await SeedRatingAsync(player.Id, match.Id, user.Id, 5);
+            await SeedRatingAsync(player.Id, other.Id, user.Id, 8);
+
+            // Act
+            var response = await _client.GetAsync($"/api/ratings?matchId={match.Id}");
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var ratings = await response.Content.ReadFromJsonAsync<List<RatingDTO>>();
+            ratings.Should().ContainSingle();
+            ratings![0].Match.Id.Should().Be(match.Id);
+        }
+
         // ─────────────────────────── GET by id ───────────────────────────
 
         [Fact]

@@ -70,6 +70,24 @@ namespace ProbaMala.Controllers
             return PartialView("_RatingList", _ratingRepository.GetAll(q));
         }
 
+        // GET /ratings/mine — the signed-in user's own ratings, with edit/delete controls.
+        // ("YOU" link in the header points here.)
+        [HttpGet("moje")]
+        [HttpGet("~/ratings/mine", Name = "ratings-mine")]
+        public IActionResult Mine()
+        {
+            SetOwnershipViewData();
+            ViewData["RatingListTitle"] = "Your ratings";
+            ViewData["RatingActionsAlwaysVisible"] = true;
+
+            var profileId = CurrentProfileId();
+            var ratings = profileId.HasValue
+                ? _ratingRepository.GetByUserId(profileId.Value)
+                : new List<RatingDetailsViewModel>();
+
+            return View(ratings);
+        }
+
         // GET /ratings/{id}
         [HttpGet("{id:int}")]
         [HttpGet("detalji/{id:int}")]

@@ -19,12 +19,23 @@ namespace ProbaMala.Controllers.Api
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<PlayerDTO>> GetAll([FromQuery] string? q = null, [FromQuery] int? clubId = null)
+        public ActionResult<IEnumerable<PlayerDTO>> GetAll(
+            [FromQuery] string? q = null,
+            [FromQuery] int? clubId = null,
+            [FromQuery] int? leagueId = null,
+            [FromQuery] Position? position = null)
         {
             var query = _db.Players.AsNoTracking().Include(p => p.Club).AsQueryable();
 
             if (clubId.HasValue)
                 query = query.Where(p => p.ClubId == clubId.Value);
+
+            // Players in a league = players whose club belongs to that league.
+            if (leagueId.HasValue)
+                query = query.Where(p => p.Club.LeagueId == leagueId.Value);
+
+            if (position.HasValue)
+                query = query.Where(p => p.Position == position.Value);
 
             if (!string.IsNullOrWhiteSpace(q))
             {
