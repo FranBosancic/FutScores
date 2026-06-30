@@ -1,0 +1,16 @@
+Projekt - specifikacija
+Predaja na rokovima. Ne mora svaki kriterij biti ispunjen.
+
+
+- Deploy na cloud provider (Google, Azure) ili Virtual Machine = 3 BODA
+- Kreiranje testova za sve API endpointe Playwright scenarij 10 koraka +3 extra boda) = 2 BODA
+- AI integracija: unos podataka putem AI upita i sl. = 3 BODA
+- Global search - mogućnost pretrage izbornika i stranica i podataka = 2 BODA
+- Implementacija logging mehanizma (file ili API) = 2 BODA
+- Responsive - mobile/web UI = 2 BODA
+- CRUD mora raditi bez grešaka = 2 BODA
+- Expose MCP i pristup kroz agentic IDE = 2 BODA
+- Okvirni dojam funkcionalnosti aplikacije (da nema ‘crashevaʼ) = 12 BODOVA
+- Verifikacija razumijevanja koda (usmeno ispitivanje) = 40 BODOVA
+
+sveukupno 70 bodova
