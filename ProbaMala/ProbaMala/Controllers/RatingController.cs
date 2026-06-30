@@ -18,11 +18,16 @@ namespace ProbaMala.Controllers
     {
         private readonly IRatingRepository _ratingRepository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<RatingController> _logger;
 
-        public RatingController(IRatingRepository ratingRepository, UserManager<AppUser> userManager)
+        public RatingController(
+            IRatingRepository ratingRepository,
+            UserManager<AppUser> userManager,
+            ILogger<RatingController> logger)
         {
             _ratingRepository = ratingRepository;
             _userManager = userManager;
+            _logger = logger;
         }
 
         // The rating-author profile id tied to the signed-in user, or null when
@@ -171,6 +176,9 @@ namespace ProbaMala.Controllers
             }
 
             var ratingId = _ratingRepository.Add(model);
+            _logger.LogInformation(
+                "Rating {RatingId} created by profile {ProfileId}: player {PlayerId}, match {MatchId}, score {Score}.",
+                ratingId, model.UserId, model.PlayerId, model.MatchId, model.Score);
             return RedirectToAction(nameof(Details), new { id = ratingId });
         }
 
@@ -222,6 +230,7 @@ namespace ProbaMala.Controllers
             if (!updated)
                 return NotFound();
 
+            _logger.LogInformation("Rating {RatingId} edited by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -253,9 +262,13 @@ namespace ProbaMala.Controllers
                 return NotFound();
 
             if (!CanModify(existing.UserId))
+            {
+                _logger.LogWarning("{User} was forbidden from deleting rating {RatingId}.", User.Identity?.Name, id);
                 return Forbid();
+            }
 
             _ratingRepository.Delete(id);
+            _logger.LogInformation("Rating {RatingId} deleted by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
 

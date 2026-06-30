@@ -9,10 +9,24 @@ using ProbaMala.Data;
 using ProbaMala.Models.Entities;
 using ProbaMala.Repositories;
 using ProbaMala.Services;
+using Serilog;
 using System.Globalization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Serilog: write to the console (dev convenience) and a daily rolling file under
+// logs/. Levels and overrides come from the "Serilog" section of appsettings.json so
+// verbosity can be tuned without a rebuild. logs/ is git-ignored.
+builder.Host.UseSerilog((context, services, config) => config
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: Path.Combine("logs", "futscores-.log"),
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 14,
+        rollOnFileSizeLimit: true));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -163,6 +177,11 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// One concise "GET /ratings responded 200 in 14ms" log line per request, instead of
+// the framework's noisy default. Sits before the rest of the pipeline so it times the
+// whole request.
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

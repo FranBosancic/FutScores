@@ -14,10 +14,12 @@ namespace ProbaMala.Controllers
     public class LeagueController : Controller
     {
         private readonly ILeagueRepository _leagueRepository;
+        private readonly ILogger<LeagueController> _logger;
 
-        public LeagueController(ILeagueRepository leagueRepository)
+        public LeagueController(ILeagueRepository leagueRepository, ILogger<LeagueController> logger)
         {
             _leagueRepository = leagueRepository;
+            _logger = logger;
         }
 
         // GET /leagues
@@ -79,6 +81,7 @@ namespace ProbaMala.Controllers
                 return View(model);
 
             var leagueId = _leagueRepository.Add(model);
+            _logger.LogInformation("League {LeagueId} created by {User}.", leagueId, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id = leagueId });
         }
 
@@ -116,6 +119,7 @@ namespace ProbaMala.Controllers
             if (!updated)
                 return NotFound();
 
+            _logger.LogInformation("League {LeagueId} updated by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -146,6 +150,7 @@ namespace ProbaMala.Controllers
             if (!deleted)
                 return NotFound();
 
+            _logger.LogInformation("League {LeagueId} deleted by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
 

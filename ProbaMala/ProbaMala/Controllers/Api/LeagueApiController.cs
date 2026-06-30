@@ -13,10 +13,12 @@ namespace ProbaMala.Controllers.Api
     public class LeagueApiController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<LeagueApiController> _logger;
 
-        public LeagueApiController(AppDbContext db)
+        public LeagueApiController(AppDbContext db, ILogger<LeagueApiController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         // Single projection definition reused by every read path so the DTO shape
@@ -61,6 +63,7 @@ namespace ProbaMala.Controllers.Api
             _db.Leagues.Add(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: league {LeagueId} created by {User}.", entity.Id, User.Identity?.Name);
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
@@ -79,6 +82,7 @@ namespace ProbaMala.Controllers.Api
             entity.Name = model.Name.Trim();
             _db.SaveChanges();
 
+            _logger.LogInformation("API: league {LeagueId} updated by {User}.", id, User.Identity?.Name);
             return Ok(Project(id));
         }
 
@@ -100,6 +104,7 @@ namespace ProbaMala.Controllers.Api
             _db.Leagues.Remove(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: league {LeagueId} deleted by {User}.", id, User.Identity?.Name);
             return NoContent();
         }
 

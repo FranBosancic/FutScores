@@ -16,11 +16,16 @@ namespace ProbaMala.Controllers
     {
         private readonly IClubRepository _clubRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly ILogger<ClubController> _logger;
 
-        public ClubController(IClubRepository clubRepository, IImageRepository imageRepository)
+        public ClubController(
+            IClubRepository clubRepository,
+            IImageRepository imageRepository,
+            ILogger<ClubController> logger)
         {
             _clubRepository = clubRepository;
             _imageRepository = imageRepository;
+            _logger = logger;
         }
 
         // GET /clubs  — optional text filter (q) and league filter (leagueId)
@@ -100,6 +105,7 @@ namespace ProbaMala.Controllers
             }
 
             var clubId = _clubRepository.Add(model);
+            _logger.LogInformation("Club {ClubId} created by {User}.", clubId, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id = clubId });
         }
 
@@ -140,6 +146,7 @@ namespace ProbaMala.Controllers
             if (!updated)
                 return NotFound();
 
+            _logger.LogInformation("Club {ClubId} updated by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -183,6 +190,7 @@ namespace ProbaMala.Controllers
             if (!deleted)
                 return NotFound();
 
+            _logger.LogInformation("Club {ClubId} deleted by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
 
@@ -200,6 +208,7 @@ namespace ProbaMala.Controllers
             if (error != null)
                 return BadRequest(error);
 
+            _logger.LogInformation("Image {ImageId} uploaded to club {ClubId} by {User}.", image!.Id, id, User.Identity?.Name);
             return Json(new { success = true, id = image!.Id });
         }
 
@@ -220,7 +229,11 @@ namespace ProbaMala.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteImage(int imageId)
         {
-            return _imageRepository.Delete(imageId) ? Json(new { success = true }) : NotFound();
+            if (!_imageRepository.Delete(imageId))
+                return NotFound();
+
+            _logger.LogInformation("Club image {ImageId} deleted by {User}.", imageId, User.Identity?.Name);
+            return Json(new { success = true });
         }
 
         // POST /clubs/images/primary — mark as the club banner.

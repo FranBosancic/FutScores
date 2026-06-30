@@ -13,10 +13,12 @@ namespace ProbaMala.Controllers.Api
     public class UserApiController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<UserApiController> _logger;
 
-        public UserApiController(AppDbContext db)
+        public UserApiController(AppDbContext db, ILogger<UserApiController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         private static readonly Expression<Func<User, UserDTO>> ToDTO = u => new UserDTO
@@ -68,6 +70,7 @@ namespace ProbaMala.Controllers.Api
             _db.Users.Add(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: user {UserId} created by {User}.", entity.Id, User.Identity?.Name);
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
@@ -89,6 +92,7 @@ namespace ProbaMala.Controllers.Api
 
             _db.SaveChanges();
 
+            _logger.LogInformation("API: user {UserId} updated by {User}.", id, User.Identity?.Name);
             return Ok(Project(id));
         }
 
@@ -107,6 +111,7 @@ namespace ProbaMala.Controllers.Api
             _db.Users.Remove(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: user {UserId} deleted by {User}.", id, User.Identity?.Name);
             return NoContent();
         }
 

@@ -17,12 +17,14 @@ namespace ProbaMala.Controllers
     public class MatchController : Controller
     {
         private readonly IMatchRepository _matchRepository;
+        private readonly ILogger<MatchController> _logger;
 
         // IMatchRepository is injected by the DI container (configured in Program.cs).
         // The controller doesn't know or care whether the data comes from a real DB or a mock.
-        public MatchController(IMatchRepository matchRepository)
+        public MatchController(IMatchRepository matchRepository, ILogger<MatchController> logger)
         {
             _matchRepository = matchRepository;
+            _logger = logger;
         }
 
         // GET /matches  or  /utakmice
@@ -105,6 +107,7 @@ namespace ProbaMala.Controllers
             }
 
             var matchId = _matchRepository.Add(model);
+            _logger.LogInformation("Match {MatchId} created by {User}.", matchId, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id = matchId });
         }
 
@@ -146,6 +149,7 @@ namespace ProbaMala.Controllers
             if (!updated)
                 return NotFound();
 
+            _logger.LogInformation("Match {MatchId} updated by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -178,6 +182,7 @@ namespace ProbaMala.Controllers
             if (!deleted)
                 return NotFound();
 
+            _logger.LogInformation("Match {MatchId} deleted by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
 

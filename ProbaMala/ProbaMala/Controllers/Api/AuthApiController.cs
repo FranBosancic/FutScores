@@ -14,17 +14,20 @@ namespace ProbaMala.Controllers.Api
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IJwtTokenService      _tokenService;
         private readonly IConfiguration       _config;
+        private readonly ILogger<AuthApiController> _logger;
 
         public AuthApiController(
             UserManager<AppUser>  userManager,
             SignInManager<AppUser> signInManager,
             IJwtTokenService      tokenService,
-            IConfiguration        config)
+            IConfiguration        config,
+            ILogger<AuthApiController> logger)
         {
             _userManager  = userManager;
             _signInManager = signInManager;
             _tokenService  = tokenService;
             _config        = config;
+            _logger        = logger;
         }
 
         // POST /api/auth/token
@@ -35,17 +38,27 @@ namespace ProbaMala.Controllers.Api
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
+            {
+                _logger.LogWarning("JWT token request failed: no account for {Email}.", model.Email);
                 return Unauthorized(new { error = "Invalid credentials." });
+            }
 
             var result = await _signInManager.CheckPasswordSignInAsync(
                 user, model.Password, lockoutOnFailure: false);
 
             if (!result.Succeeded)
+            {
+                _logger.LogWarning("JWT token request failed: bad password for {Email}.", model.Email);
                 return Unauthorized(new { error = "Invalid credentials." });
+            }
 
             var roles     = await _userManager.GetRolesAsync(user);
             var token     = _tokenService.GenerateToken(user, roles);
             var expiryMin = Convert.ToInt32(_config["Jwt:ExpiryMinutes"] ?? "60");
+
+            _logger.LogInformation(
+                "JWT issued to {Email} (roles: {Roles}).",
+                user.Email, roles.Count == 0 ? "none" : string.Join(", ", roles));
 
             return Ok(new
             {

@@ -13,10 +13,12 @@ namespace ProbaMala.Controllers.Api
     public class RatingApiController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<RatingApiController> _logger;
 
-        public RatingApiController(AppDbContext db)
+        public RatingApiController(AppDbContext db, ILogger<RatingApiController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         // Loads player, user and the match (with both clubs) so all three nested
@@ -106,6 +108,9 @@ namespace ProbaMala.Controllers.Api
             _db.Ratings.Add(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation(
+                "API: rating {RatingId} created by {User} (player {PlayerId}, match {MatchId}, score {Score}).",
+                entity.Id, User.Identity?.Name, entity.PlayerId, entity.MatchId, entity.Score);
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
@@ -126,7 +131,10 @@ namespace ProbaMala.Controllers.Api
             {
                 var appUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (entity.User?.AppUserId != appUserId)
+                {
+                    _logger.LogWarning("API: {User} forbidden from editing rating {RatingId} (not owner).", User.Identity?.Name, id);
                     return Forbid();
+                }
 
                 // Zadrži izvornog autora — ne-admin ne smije mijenjati vlasništvo.
                 model.UserId = entity.UserId;
@@ -144,6 +152,7 @@ namespace ProbaMala.Controllers.Api
 
             _db.SaveChanges();
 
+            _logger.LogInformation("API: rating {RatingId} updated by {User}.", id, User.Identity?.Name);
             return Ok(Project(id));
         }
 
@@ -162,12 +171,16 @@ namespace ProbaMala.Controllers.Api
             {
                 var appUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (entity.User?.AppUserId != appUserId)
+                {
+                    _logger.LogWarning("API: {User} forbidden from deleting rating {RatingId} (not owner).", User.Identity?.Name, id);
                     return Forbid();
+                }
             }
 
             _db.Ratings.Remove(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: rating {RatingId} deleted by {User}.", id, User.Identity?.Name);
             return NoContent();
         }
 

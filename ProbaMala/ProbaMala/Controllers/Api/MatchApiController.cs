@@ -12,10 +12,12 @@ namespace ProbaMala.Controllers.Api
     public class MatchApiController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<MatchApiController> _logger;
 
-        public MatchApiController(AppDbContext db)
+        public MatchApiController(AppDbContext db, ILogger<MatchApiController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         // Loads the related league + both clubs in one round-trip so the nested
@@ -96,6 +98,7 @@ namespace ProbaMala.Controllers.Api
             _db.Matches.Add(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: match {MatchId} created by {User}.", entity.Id, User.Identity?.Name);
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
@@ -121,6 +124,7 @@ namespace ProbaMala.Controllers.Api
 
             _db.SaveChanges();
 
+            _logger.LogInformation("API: match {MatchId} updated by {User}.", id, User.Identity?.Name);
             return Ok(Project(id));
         }
 
@@ -139,6 +143,7 @@ namespace ProbaMala.Controllers.Api
             _db.Matches.Remove(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: match {MatchId} deleted by {User}.", id, User.Identity?.Name);
             return NoContent();
         }
 

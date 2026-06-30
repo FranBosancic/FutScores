@@ -14,10 +14,12 @@ namespace ProbaMala.Controllers
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IUserRepository userRepository, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         // GET /users
@@ -79,6 +81,7 @@ namespace ProbaMala.Controllers
                 return View(model);
 
             var userId = _userRepository.Add(model);
+            _logger.LogInformation("User {UserId} created by {User}.", userId, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id = userId });
         }
 
@@ -116,6 +119,7 @@ namespace ProbaMala.Controllers
             if (!updated)
                 return NotFound();
 
+            _logger.LogInformation("User {UserId} updated by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -146,6 +150,7 @@ namespace ProbaMala.Controllers
             if (!deleted)
                 return NotFound();
 
+            _logger.LogInformation("User {UserId} deleted by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
 

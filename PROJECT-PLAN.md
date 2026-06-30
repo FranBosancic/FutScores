@@ -135,19 +135,28 @@ clubs, players, matches, ratings, users), not just within one list.
     dropdowns already there). Include static page/menu targets so menu items are
     searchable too.
 
-### 2.5 Logging mechanism (file or API) — 2 pts ❌
+### 2.5 Logging mechanism (file or API) — 2 pts ✅
 
 **Goal:** application logging to a file or a logging API.
 
-- **What exists:** default ASP.NET Core console logging only (`appsettings.json` →
-  `Logging`).
-- **To add:**
-  - Add a file logging provider (e.g. **Serilog** `Serilog.AspNetCore` +
-    `Serilog.Sinks.File`, or a minimal custom `ILoggerProvider`).
-  - Wire it in `Program.cs` (`builder.Host.UseSerilog(...)` or
-    `builder.Logging.AddFile(...)`), writing to `logs/` (git-ignored).
-  - Add meaningful log statements in mutating controller/repository paths
-    (create/update/delete, auth, AI calls) so the log is demonstrably useful.
+- **Implemented with Serilog → rolling daily file:**
+  - Package `Serilog.AspNetCore` 8.0.3 (net8-aligned) in `ProbaMala.csproj`.
+  - `Program.cs`: `builder.Host.UseSerilog(...)` writes to console + a daily rolling
+    file `logs/futscores-<date>.log` (14 files retained, size-capped); levels read from
+    the `Serilog` section of `appsettings.json`. `app.UseSerilogRequestLogging()` adds
+    one concise line per request.
+  - `appsettings.json`: old `Logging` section replaced by a `Serilog` section
+    (Default Information; AspNetCore + EF Core overridden to Warning).
+  - `.gitignore`: `logs/` (ignored at any depth).
+  - Meaningful domain log calls on **every create/update/delete across all
+    controllers** — MVC (`League`, `Club`, `Player`, `Match`, `User`, `Rating`, plus
+    club/player image upload+delete) and API (`League`, `Club`, `Player`, `Match`,
+    `User`, `Rating`) — plus `AuthApiController` (JWT issued / failed login) and
+    ownership-denied **warnings** on rating edit/delete. Reads are covered generically
+    by `UseSerilogRequestLogging`.
+  - Verified at runtime and via the test run (the 122 integration tests drive the API
+    mutations, and the produced log file contains the matching create/update/delete +
+    "forbidden (not owner)" entries). All 122 tests pass.
 
 ### 2.6 Responsive mobile/web UI — 2 pts 🟡 (mostly done)
 

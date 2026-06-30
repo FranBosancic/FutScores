@@ -12,10 +12,12 @@ namespace ProbaMala.Controllers.Api
     public class PlayerApiController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<PlayerApiController> _logger;
 
-        public PlayerApiController(AppDbContext db)
+        public PlayerApiController(AppDbContext db, ILogger<PlayerApiController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -84,6 +86,7 @@ namespace ProbaMala.Controllers.Api
             _db.Players.Add(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: player {PlayerId} created by {User}.", entity.Id, User.Identity?.Name);
             _db.Entry(entity).Reference(p => p.Club).Load();
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, ToDTO(entity));
         }
@@ -110,6 +113,7 @@ namespace ProbaMala.Controllers.Api
             _db.SaveChanges();
             _db.Entry(entity).Reference(p => p.Club).Load();
 
+            _logger.LogInformation("API: player {PlayerId} updated by {User}.", id, User.Identity?.Name);
             return Ok(ToDTO(entity));
         }
 
@@ -128,6 +132,7 @@ namespace ProbaMala.Controllers.Api
             _db.Players.Remove(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: player {PlayerId} deleted by {User}.", id, User.Identity?.Name);
             return NoContent();
         }
 

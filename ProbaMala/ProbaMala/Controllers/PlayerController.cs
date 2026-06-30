@@ -15,11 +15,16 @@ namespace ProbaMala.Controllers
     {
         private readonly IPlayerRepository _playerRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly ILogger<PlayerController> _logger;
 
-        public PlayerController(IPlayerRepository playerRepository, IImageRepository imageRepository)
+        public PlayerController(
+            IPlayerRepository playerRepository,
+            IImageRepository imageRepository,
+            ILogger<PlayerController> logger)
         {
             _playerRepository = playerRepository;
             _imageRepository = imageRepository;
+            _logger = logger;
         }
 
         // GET /players
@@ -93,6 +98,7 @@ namespace ProbaMala.Controllers
             }
 
             var playerId = _playerRepository.Add(model);
+            _logger.LogInformation("Player {PlayerId} created by {User}.", playerId, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id = playerId });
         }
 
@@ -133,6 +139,7 @@ namespace ProbaMala.Controllers
             if (!updated)
                 return NotFound();
 
+            _logger.LogInformation("Player {PlayerId} updated by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -163,6 +170,7 @@ namespace ProbaMala.Controllers
             if (!deleted)
                 return NotFound();
 
+            _logger.LogInformation("Player {PlayerId} deleted by {User}.", id, User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
 
@@ -180,6 +188,7 @@ namespace ProbaMala.Controllers
             if (error != null)
                 return BadRequest(error);
 
+            _logger.LogInformation("Image {ImageId} uploaded to player {PlayerId} by {User}.", image!.Id, id, User.Identity?.Name);
             return Json(new { success = true, id = image!.Id });
         }
 
@@ -200,7 +209,11 @@ namespace ProbaMala.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteImage(int imageId)
         {
-            return _imageRepository.Delete(imageId) ? Json(new { success = true }) : NotFound();
+            if (!_imageRepository.Delete(imageId))
+                return NotFound();
+
+            _logger.LogInformation("Player image {ImageId} deleted by {User}.", imageId, User.Identity?.Name);
+            return Json(new { success = true });
         }
 
         // POST /players/images/primary — mark as the player headshot.

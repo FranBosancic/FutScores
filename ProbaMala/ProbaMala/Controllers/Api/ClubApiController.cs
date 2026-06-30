@@ -13,10 +13,12 @@ namespace ProbaMala.Controllers.Api
     public class ClubApiController : ControllerBase
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<ClubApiController> _logger;
 
-        public ClubApiController(AppDbContext db)
+        public ClubApiController(AppDbContext db, ILogger<ClubApiController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         // Nested LeagueSummaryDTO + counts; translates cleanly to a single SQL query.
@@ -76,6 +78,7 @@ namespace ProbaMala.Controllers.Api
             _db.Clubs.Add(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: club {ClubId} created by {User}.", entity.Id, User.Identity?.Name);
             return CreatedAtAction(nameof(GetById), new { id = entity.Id }, Project(entity.Id));
         }
 
@@ -100,6 +103,7 @@ namespace ProbaMala.Controllers.Api
 
             _db.SaveChanges();
 
+            _logger.LogInformation("API: club {ClubId} updated by {User}.", id, User.Identity?.Name);
             return Ok(Project(id));
         }
 
@@ -122,6 +126,7 @@ namespace ProbaMala.Controllers.Api
             _db.Clubs.Remove(entity);
             _db.SaveChanges();
 
+            _logger.LogInformation("API: club {ClubId} deleted by {User}.", id, User.Identity?.Name);
             return NoContent();
         }
 
