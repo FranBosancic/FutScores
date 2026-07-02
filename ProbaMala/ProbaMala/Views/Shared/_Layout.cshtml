@@ -49,6 +49,18 @@
                 </div>
             </a>
 
+            @* ── Global search (desktop/tablet) ── *@
+            <div class="relative hidden md:block" data-global-search>
+                <input type="search"
+                       data-global-search-input
+                       placeholder="Search pages…"
+                       autocomplete="off"
+                       aria-label="Search pages"
+                       class="w-44 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-900 lg:w-56" />
+                <div data-global-search-results
+                     class="absolute left-0 top-full z-50 mt-1 hidden w-72 overflow-hidden rounded-xl border border-white/10 bg-[#070b13] shadow-2xl"></div>
+            </div>
+
             @* ── Desktop navigation ── *@
             @* Shows from xl up: the full row (brand + section tabs + one item per league +
                login) needs a wide viewport. Below xl we fall back to the hamburger menu,
@@ -169,6 +181,18 @@
         *@
         <div id="mobile-menu" class="hidden border-t border-slate-800 bg-[#070b13]">
             <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
+
+                @* ── Global search (mobile) ── *@
+                <div class="relative mb-2" data-global-search>
+                    <input type="search"
+                           data-global-search-input
+                           placeholder="Search pages…"
+                           autocomplete="off"
+                           aria-label="Search pages"
+                           class="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-900" />
+                    <div data-global-search-results
+                         class="absolute left-0 top-full z-50 mt-1 hidden w-full overflow-hidden rounded-xl border border-white/10 bg-[#070b13] shadow-2xl"></div>
+                </div>
 
                 <a asp-route="home-index" class="rounded px-3 py-2 text-sm transition @MobileActiveClass(currentController == "Home" && currentAction == "Index")">
                     Dashboard

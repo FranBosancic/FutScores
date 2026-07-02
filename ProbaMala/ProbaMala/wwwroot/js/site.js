@@ -64,6 +64,57 @@
 		}
 	});
 
+	// ── Global search ──
+	// Each header/mobile search box fetches matching pages from /search and drops the
+	// rendered partial into its own results dropdown. Focusing the (empty) box shows the
+	// full page menu; clicking outside hides it.
+	document.querySelectorAll("[data-global-search]").forEach((container) => {
+		const input = container.querySelector("[data-global-search-input]");
+		const results = container.querySelector("[data-global-search-results]");
+
+		if (!(input instanceof HTMLInputElement) || !(results instanceof HTMLElement)) {
+			return;
+		}
+
+		const hideResults = () => results.classList.add("hidden");
+		const showResults = () => results.classList.remove("hidden");
+
+		const loadResults = debounce(async () => {
+			try {
+				const response = await fetch(`/search?q=${encodeURIComponent(input.value.trim())}`, {
+					headers: { "X-Requested-With": "XMLHttpRequest" }
+				});
+
+				if (!response.ok) {
+					hideResults();
+					return;
+				}
+
+				results.innerHTML = await response.text();
+				showResults();
+			} catch {
+				hideResults();
+			}
+		}, 200);
+
+		input.addEventListener("input", loadResults);
+		input.addEventListener("focus", loadResults);
+
+		// Close when clicking anywhere outside this search box.
+		document.addEventListener("click", (event) => {
+			if (event.target instanceof Node && !container.contains(event.target)) {
+				hideResults();
+			}
+		});
+
+		// Close on Escape and return focus handling to the input.
+		input.addEventListener("keydown", (event) => {
+			if (event.key === "Escape") {
+				hideResults();
+			}
+		});
+	});
+
 	document.querySelectorAll("[data-search-form]").forEach((form) => {
 		form.addEventListener("submit", (event) => {
 			event.preventDefault();

@@ -118,22 +118,33 @@ rating of 9 for Saka in the Arsenal–Chelsea match, great game").
   skill for ids/params. Structured output (tool use / JSON schema) is the clean way to
   turn the prompt into a typed `RatingFormViewModel`-like object.
 
-### 2.4 Global search — 2 pts ❌
+### 2.4 Global search — 2 pts 🟡 (menu/pages tier done; data tier remaining)
 
 **Goal:** one search box that searches across **menus/pages and data** (leagues,
 clubs, players, matches, ratings, users), not just within one list.
 
-- **What exists:** per-entity search (`?q=`) in each API controller and repository
-  `GetAll(query)`; no cross-entity search.
-- **To add:**
-  - `Repositories/ISearchRepository` + `SearchRepository` — fans out across entities,
-    returns a unified result list (label, type, url).
-  - `Controllers/Api/SearchApiController` (`GET /api/search?q=`) returning grouped
-    results as JSON.
-  - UI: a search input in `Views/Shared/_Layout.cshtml` (header) with a dropdown of
-    results, wired in `wwwroot/js/site.js` (debounced AJAX, same style as the cascade
-    dropdowns already there). Include static page/menu targets so menu items are
-    searchable too.
+- **Tier 1 — menus/pages ✅ (done 2026-06-30):**
+  - `Models/ViewModels/SearchResultViewModel.cs` — generic result row (Title, Category,
+    Url) reused by every tier.
+  - `Services/ISearchService` + `SearchService` — a static catalogue of the app's
+    pages, matched on title + hidden keywords; URLs resolved via `LinkGenerator` from
+    the named routes. Empty query returns the whole catalogue (focus = "jump to page"
+    menu). Registered `AddScoped` in `Program.cs`.
+  - `Controllers/SearchController` — `GET /search` (Croatian alias `/pretraga`),
+    `[AllowAnonymous]`, returns the `_SearchResults` partial.
+  - `Views/Shared/_SearchResults.cshtml` — dropdown list partial.
+  - `Views/Shared/_Layout.cshtml` — search box in the header (desktop/tablet) and in the
+    mobile menu; wired in `wwwroot/js/site.js` (`[data-global-search]`, debounced fetch,
+    focus-to-open, click-outside/Escape to close).
+  - Verified in the browser preview (desktop + mobile) and via the endpoint (title +
+    keyword matches); 122 integration tests still pass.
+- **Tier 2 — data (remaining):**
+  - `Repositories/ISearchRepository` + `SearchRepository` (or extend `SearchService`) —
+    fan out across leagues/clubs/players/matches/ratings/users, produce
+    `SearchResultViewModel`s (Category = entity type, Url = its details page), and
+    **merge** them into the same result list the page tier already returns.
+  - The UI, endpoint, and result shape are already in place — the data tier only adds
+    more results to the existing `_SearchResults` dropdown.
 
 ### 2.5 Logging mechanism (file or API) — 2 pts ✅
 

@@ -1,0 +1,24 @@
+@model List<ProbaMala.Models.ViewModels.SearchResultViewModel>
+
+@* Dropdown body for the global search box. Injected by site.js as the user types. *@
+@if (Model.Count == 0)
+{
+    <div class="px-4 py-3 text-sm text-slate-400">No matches.</div>
+}
+else
+{
+    <ul class="max-h-80 overflow-y-auto py-1">
+        @foreach (var result in Model)
+        {
+            <li>
+                <a href="@result.Url"
+                   class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-slate-200 transition hover:bg-white/5 hover:text-white">
+                    <span class="truncate">@result.Title</span>
+                    <span class="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                        @result.Category
+                    </span>
+                </a>
+            </li>
+        }
+    </ul>
+}
