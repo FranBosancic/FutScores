@@ -159,6 +159,7 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
 // Identity pages (password reset / resend confirmation) from throwing.
 builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 
+builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 
 builder.Services.AddScoped<IHomeRepository, HomeRepository>();

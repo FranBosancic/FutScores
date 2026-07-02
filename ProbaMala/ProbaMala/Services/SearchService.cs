@@ -1,15 +1,17 @@
 using ProbaMala.Models.ViewModels;
+using ProbaMala.Repositories;
 
 namespace ProbaMala.Services
 {
-    // Global search. This first slice covers only the app's navigable pages/menus;
-    // the data tier (clubs, players, matches, ratings, users) will be added later and
-    // its hits will be merged into the same List<SearchResultViewModel> this returns.
+    // Global search orchestrator. Owns the static page/menu catalogue and delegates the
+    // data tier (leagues, clubs, players, matches, ratings, users) to ISearchRepository,
+    // then merges both into one result list. Pages come first (so focusing the box shows
+    // the "jump to page" menu), followed by the grouped data matches.
     public interface ISearchService
     {
-        // Returns matching results for the query. An empty/whitespace query returns the
-        // full page catalogue, so focusing the box acts as a "jump to page" menu.
-        List<SearchResultViewModel> Search(string? query, int limit = 8);
+        // An empty/whitespace query returns the full page catalogue only; a non-empty
+        // query returns matching pages plus the data matches from the repository.
+        List<SearchResultViewModel> Search(string? query, int pageLimit = 8);
     }
 
     public class SearchService : ISearchService
@@ -17,10 +19,12 @@ namespace ProbaMala.Services
         // LinkGenerator resolves the named routes (declared on the controllers) into
         // URLs, so we don't hard-code paths that could drift from the routing table.
         private readonly LinkGenerator _links;
+        private readonly ISearchRepository _searchRepository;
 
-        public SearchService(LinkGenerator links)
+        public SearchService(LinkGenerator links, ISearchRepository searchRepository)
         {
             _links = links;
+            _searchRepository = searchRepository;
         }
 
         // The searchable page catalogue. Keywords are extra match terms that never show
@@ -39,16 +43,17 @@ namespace ProbaMala.Services
             new("Your ratings", "ratings-mine",   "my mine own submitted"),
         };
 
-        public List<SearchResultViewModel> Search(string? query, int limit = 8)
+        public List<SearchResultViewModel> Search(string? query, int pageLimit = 8)
         {
             var q = query?.Trim().ToLowerInvariant() ?? string.Empty;
 
-            return Pages
+            // Matching pages first — the whole catalogue when the query is blank.
+            var results = Pages
                 .Where(page =>
                     q.Length == 0 ||
                     page.Title.ToLowerInvariant().Contains(q) ||
                     page.Keywords.Contains(q))
-                .Take(limit)
+                .Take(pageLimit)
                 .Select(page => new SearchResultViewModel
                 {
                     Title    = page.Title,
@@ -56,6 +61,11 @@ namespace ProbaMala.Services
                     Url      = _links.GetPathByName(page.RouteName) ?? "/"
                 })
                 .ToList();
+
+            // Then the data matches (the repository returns nothing for a blank query).
+            results.AddRange(_searchRepository.Search(query));
+
+            return results;
         }
     }
 }

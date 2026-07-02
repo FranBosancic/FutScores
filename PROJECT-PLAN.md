@@ -118,7 +118,7 @@ rating of 9 for Saka in the Arsenal–Chelsea match, great game").
   skill for ids/params. Structured output (tool use / JSON schema) is the clean way to
   turn the prompt into a typed `RatingFormViewModel`-like object.
 
-### 2.4 Global search — 2 pts 🟡 (menu/pages tier done; data tier remaining)
+### 2.4 Global search — 2 pts ✅ (menus/pages + data)
 
 **Goal:** one search box that searches across **menus/pages and data** (leagues,
 clubs, players, matches, ratings, users), not just within one list.
@@ -138,13 +138,21 @@ clubs, players, matches, ratings, users), not just within one list.
     focus-to-open, click-outside/Escape to close).
   - Verified in the browser preview (desktop + mobile) and via the endpoint (title +
     keyword matches); 122 integration tests still pass.
-- **Tier 2 — data (remaining):**
-  - `Repositories/ISearchRepository` + `SearchRepository` (or extend `SearchService`) —
-    fan out across leagues/clubs/players/matches/ratings/users, produce
-    `SearchResultViewModel`s (Category = entity type, Url = its details page), and
-    **merge** them into the same result list the page tier already returns.
-  - The UI, endpoint, and result shape are already in place — the data tier only adds
-    more results to the existing `_SearchResults` dropdown.
+- **Tier 2 — data ✅ (done 2026-06-30):**
+  - `Repositories/ISearchRepository` + `SearchRepository` — fans out across leagues,
+    clubs, players, matches, ratings and users with minimal per-entity projections,
+    caps each type (default 5), and maps every hit to `SearchResultViewModel`
+    (Category = entity type, Url = its details page via `LinkGenerator`). Returns
+    nothing for a blank query (never dumps the whole DB). Registered `AddScoped`.
+  - `SearchService` now orchestrates: matching pages first, then the merged data hits.
+  - `_SearchResults.cshtml` groups results by Category into section headers (Pages,
+    League, Club, Player, Match, Rating, User).
+  - **Why a dedicated repo over reusing the list repos:** search needs a lightweight
+    projection + per-type cap, it's a cross-cutting concern kept in one place, and it
+    avoids growing/risking the six tested list repositories. (Slight `Contains`
+    duplication accepted — cohesion over strict DRY.)
+  - Verified in the browser preview (e.g. "barcelona" → Club + Match groups; "salah" →
+    Player + Rating) and via the endpoint; 122 integration tests still pass.
 
 ### 2.5 Logging mechanism (file or API) — 2 pts ✅
 
