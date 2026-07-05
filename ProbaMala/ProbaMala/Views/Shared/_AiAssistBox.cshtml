@@ -1,0 +1,33 @@
+@{
+    // Reusable AI-assist box. Each Create page sets ViewData["AiPlaceholder"] (and
+    // optionally ["AiLabel"]); the controller sets ViewData["AiConfigured"] and, after a
+    // pre-fill, ViewData["AiNote"]. The form posts to the current controller's AiFill
+    // action; site.js shows a loading overlay on submit (via the data-ai-form hook).
+    var aiPlaceholder = ViewData["AiPlaceholder"] as string ?? "Describe it in plain language and let AI fill the form…";
+    var aiLabel       = ViewData["AiLabel"] as string ?? "✨ Describe it and let AI fill the form";
+}
+
+@if (ViewData["AiNote"] is string aiNote)
+{
+    <div class="mb-5 flex items-start gap-2 rounded-lg border border-lime-500/30 bg-lime-500/10 px-4 py-3 text-sm text-lime-200">
+        <span class="mt-0.5">✨</span>
+        <span>@aiNote</span>
+    </div>
+}
+
+@if (ViewData["AiConfigured"] is true)
+{
+    <form asp-action="AiFill" method="post" data-ai-form class="mb-6 rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+        @Html.AntiForgeryToken()
+        <label class="mb-2 block text-sm font-semibold text-slate-200">@aiLabel</label>
+        <textarea name="prompt" rows="2" placeholder="@aiPlaceholder"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-lime-500/60 focus:bg-slate-900"></textarea>
+        <div class="mt-2 flex items-center justify-between gap-3">
+            <span class="text-xs text-slate-500">AI pre-fills the form below — you review and save.</span>
+            <button type="submit" data-ai-submit
+                    class="inline-flex items-center gap-2 rounded-lg border border-lime-500/40 bg-lime-500/10 px-3 py-1.5 text-sm font-medium text-lime-200 transition hover:bg-lime-500/20 disabled:opacity-60">
+                Generate
+            </button>
+        </div>
+    </form>
+}

@@ -115,6 +115,41 @@
 		});
 	});
 
+	// ── AI assist: loading overlay ──
+	// The AI pre-fill forms do a normal full-page POST that waits on the model for a few
+	// seconds. Show a full-screen overlay (and disable the button) on submit so the wait
+	// has clear feedback; it's replaced automatically when the pre-filled page renders.
+	const showAiOverlay = () => {
+		let overlay = document.getElementById("ai-overlay");
+
+		if (!overlay) {
+			overlay = document.createElement("div");
+			overlay.id = "ai-overlay";
+			overlay.className = "fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-[#02040d]/80 backdrop-blur-sm";
+			overlay.innerHTML =
+				'<div class="h-10 w-10 animate-spin rounded-full border-2 border-slate-700 border-t-lime-400"></div>' +
+				'<div class="text-center">' +
+				'<div class="text-sm font-semibold text-slate-100">FutScores AI is filling the form…</div>' +
+				'<div class="mt-1 text-xs text-slate-400">This usually takes a few seconds.</div>' +
+				'</div>';
+			document.body.appendChild(overlay);
+		}
+
+		overlay.classList.remove("hidden");
+	};
+
+	document.querySelectorAll("[data-ai-form]").forEach((form) => {
+		form.addEventListener("submit", () => {
+			const button = form.querySelector("[data-ai-submit]");
+			if (button instanceof HTMLButtonElement) {
+				button.disabled = true;
+				button.textContent = "Generating…";
+			}
+
+			showAiOverlay();
+		});
+	});
+
 	document.querySelectorAll("[data-search-form]").forEach((form) => {
 		form.addEventListener("submit", (event) => {
 			event.preventDefault();

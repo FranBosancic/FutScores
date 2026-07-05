@@ -98,25 +98,59 @@ integration tests — the lab asks specifically for Playwright.
 - **Touches:** no app code — purely a new test project driving existing endpoints
   (`Controllers/Api/*`).
 
-### 2.3 AI integration — data entry via AI prompt — 3 pts ❌
+### 2.3 AI integration — AI-assisted data entry — 3 pts 🟢 (built for all entities; needs API key to run live)
 
-**Goal:** let the user enter data through a natural-language AI prompt (e.g. "Add a
-rating of 9 for Saka in the Arsenal–Chelsea match, great game").
+**Goal:** let the user enter data through a natural-language prompt (e.g. "Salah was
+outstanding in Liverpool's win over Man City — give him a 9"). Now on **all five**
+Create pages: Rating, Player, Club, Match, User.
 
-- **To add:**
-  - `Services/IAiDataEntryService` + implementation — calls an LLM, returns a structured
-    object (which entity + fields) that maps onto an existing repository `Add`/`Update`.
-  - `Controllers/Api/AiApiController` (or an MVC action + a prompt box partial in
-    `Views/Shared/`) accepting the prompt, calling the service, and dispatching to the
-    right repository.
-  - Config: API key in `appsettings.json` / user-secrets / env var (same pattern as
-    `Jwt` and `Authentication:Google`).
-  - Reuse the existing validation in `RatingController.ValidateRatingForm` / repository
-    consistency checks so AI-entered data goes through the same guards as the forms.
-- **Decision needed:** which model/provider. Default to the latest Claude model
-  (`claude-opus-4-8` or a faster Claude) via the Anthropic API — see the `claude-api`
-  skill for ids/params. Structured output (tool use / JSON schema) is the clean way to
-  turn the prompt into a typed `RatingFormViewModel`-like object.
+**Chosen design (with the user):** target the **Rating** entity; the AI **pre-fills the
+existing Create form** and the human confirms (nothing is written by the AI). Provider:
+**Claude** via the official `Anthropic` C# SDK, structured-output mode. Model is configured
+in `Ai:Model` — currently **`claude-haiku-4-5`** (fast/cheap; swap without code changes).
+
+- **Implemented (2026-07-02):**
+  - `Models/DTOs/RatingAiIntent.cs` — the structured extraction shape (player + two club
+    names + score + comment). Names, not ids.
+  - `Services/IAiDataEntryService` + `AiDataEntryService` — calls Claude with a JSON
+    schema (`OutputConfig.Format`), deserializes the reply to `RatingAiIntent`. Behind an
+    interface; `IsConfigured` is false when no key, so the app runs and the AI box hides.
+    Registered `AddScoped`.
+  - `RatingRepository` resolution helpers — `FindClubIdByName`, `FindMatchIdBetween`
+    (order-independent), `FindPlayerIdByNameInMatch`. **Our code owns name→id resolution
+    and validation; the AI only does language understanding.**
+  - `RatingController.AiFill(prompt)` (`POST /ratings/ai`, `[Authorize]`) — extract →
+    resolve → reuse `BuildFormModel(matchId, playerId)` → re-render the Create form
+    pre-filled, with a note saying how far resolution got. Falls back gracefully when a
+    club/match/player can't be matched.
+  - `Views/Rating/Create.cshtml` — an "✨ AI assist" prompt box (shown only when
+    configured) posting to `AiFill`, plus a note banner and a model-error summary.
+  - Config: `Ai` section in `appsettings.json` (`Model`, empty `ApiKey`); the real key
+    goes in **user-secrets** (never committed). Package: `Anthropic` 12.35.0.
+  - Build (incl. Razor) + 122 integration tests pass. The live call is unverified until
+    the user adds an Anthropic API key (`dotnet user-secrets set "Ai:ApiKey" "…"`).
+- **Extended (2026-07-03):**
+  - Generalized the service to `ExtractRatingAsync` / `ExtractPlayerAsync` /
+    `ExtractClubAsync` over one private `ExtractAsync<T>` (system prompt + JSON schema in,
+    typed intent out). New DTOs `PlayerAiIntent`, `ClubAiIntent`; date parsing in
+    `Services/AiParsing`.
+  - Name→id resolution moved into a shared `Services/INameResolver` (`ResolveClub`,
+    `ResolveLeagueId`, `ResolveMatchId`, `ResolvePlayerIdInMatch`) — the RatingRepository
+    helpers were removed and RatingController now uses the resolver too. One place owns
+    resolution for all AI entities.
+  - `AiFill` added to **PlayerController** (resolves club) and **ClubController** (resolves
+    league), Admin-only, same pre-fill-and-confirm flow.
+  - Reusable `Views/Shared/_AiAssistBox.cshtml` partial (per-page placeholder via
+    `ViewData["AiPlaceholder"]`); used on Rating/Player/Club Create pages.
+  - **Loading overlay**: `site.js` shows a full-screen "FutScores AI is filling the form…"
+    spinner + disables the button on any `[data-ai-form]` submit; replaced when the
+    pre-filled page renders. Verified in-browser (box + placeholder + overlay behaviour).
+  - **Match + User added (2026-07-03):** `MatchAiIntent` (resolves both clubs; league
+    derived from the home club) and `UserAiIntent` (name + email, no FK). `ExtractMatchAsync`
+    / `ExtractUserAsync`, `AiFill` on Match/UserController, AI box on both Create pages.
+    All five entities verified rendering the box in-browser; build + 122 tests pass.
+- **Remaining:** add the API key and smoke-test the live model. Feature is otherwise
+  complete across all entities.
 
 ### 2.4 Global search — 2 pts ✅ (menus/pages + data)
 

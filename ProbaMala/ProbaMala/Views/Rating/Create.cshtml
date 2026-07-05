@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create Rating";
+    ViewData["AiPlaceholder"] = "e.g. Salah was outstanding in Liverpool's win over Manchester City — give him a 9, great movement.";
 }
 
 <div class="mx-auto w-full max-w-3xl space-y-4 px-4 sm:px-6">
@@ -24,6 +25,12 @@
         @* Body *@
         <div class="px-4 py-5">
             <p class="mb-5 text-sm text-slate-400">Shape the performance narrative with a clear score, match context, and short review that actually explains the number.</p>
+
+            @* Model-level messages (e.g. AI resolution notes/errors) *@
+            <div asp-validation-summary="ModelOnly" class="mb-4 text-sm text-rose-300 empty:hidden"></div>
+
+            @* AI assist box + resolution note (shown only when the AI is configured) *@
+            <partial name="_AiAssistBox" />
 
             <form asp-action="Create" method="post" class="space-y-6">
                 @Html.AntiForgeryToken()

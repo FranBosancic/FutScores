@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create Player";
+    ViewData["AiPlaceholder"] = "e.g. Add Erling Haaland, a forward from Norway born in 2000, to Manchester City.";
 }
 
 <div class="mx-auto w-full max-w-3xl space-y-4 px-4 sm:px-6">
@@ -24,6 +25,9 @@
         @* Body *@
         <div class="px-4 py-5">
             <p class="mb-5 text-sm text-slate-400">Add a player profile tied to a club, position, and nationality.</p>
+
+            <div asp-validation-summary="ModelOnly" class="mb-4 text-sm text-rose-300 empty:hidden"></div>
+            <partial name="_AiAssistBox" />
 
             <form asp-action="Create" method="post" class="space-y-6">
                 @Html.AntiForgeryToken()

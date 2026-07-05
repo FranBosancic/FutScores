@@ -162,6 +162,12 @@ builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 builder.Services.AddScoped<ISearchRepository, SearchRepository>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 
+// AI-assisted data entry (natural-language form prefill). Runs with the feature
+// disabled when no Ai:ApiKey is configured, so the app still starts without a key.
+// INameResolver turns the AI's names into database ids (the authoritative half).
+builder.Services.AddScoped<IAiDataEntryService, AiDataEntryService>();
+builder.Services.AddScoped<INameResolver, NameResolver>();
+
 builder.Services.AddScoped<IHomeRepository, HomeRepository>();
 builder.Services.AddScoped<ILeagueRepository, LeagueRepository>();
 builder.Services.AddScoped<IClubRepository, ClubRepository>();

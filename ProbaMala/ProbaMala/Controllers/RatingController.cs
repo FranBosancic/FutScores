@@ -5,6 +5,7 @@ using ProbaMala.Data;
 using ProbaMala.Models.Entities;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
+using ProbaMala.Services;
 
 namespace ProbaMala.Controllers
 {
@@ -18,15 +19,21 @@ namespace ProbaMala.Controllers
     {
         private readonly IRatingRepository _ratingRepository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IAiDataEntryService _aiService;
+        private readonly INameResolver _resolver;
         private readonly ILogger<RatingController> _logger;
 
         public RatingController(
             IRatingRepository ratingRepository,
             UserManager<AppUser> userManager,
+            IAiDataEntryService aiService,
+            INameResolver resolver,
             ILogger<RatingController> logger)
         {
             _ratingRepository = ratingRepository;
             _userManager = userManager;
+            _aiService = aiService;
+            _resolver = resolver;
             _logger = logger;
         }
 
@@ -118,7 +125,73 @@ namespace ProbaMala.Controllers
         [HttpGet("~/ratings/create", Name = "rating-create")]
         public IActionResult Create(int? matchId, int? playerId)
         {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
             return View(_ratingRepository.BuildFormModel(matchId, playerId));
+        }
+
+        // POST /ratings/ai — AI-assisted pre-fill. Takes a natural-language note, asks the
+        // AI for a structured intent, resolves the names to ids against the DB, and returns
+        // the normal Create form pre-filled for the user to review and save. It never
+        // writes anything — the human confirms via the standard Create POST path.
+        [HttpPost("ai")]
+        [HttpPost("~/ratings/ai")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AiFill(string prompt)
+        {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
+
+            if (!_aiService.IsConfigured)
+            {
+                ModelState.AddModelError(string.Empty, "The AI assistant is not configured.");
+                return View("Create", _ratingRepository.BuildFormModel());
+            }
+
+            if (string.IsNullOrWhiteSpace(prompt))
+            {
+                ModelState.AddModelError(string.Empty, "Describe the rating for the AI first.");
+                return View("Create", _ratingRepository.BuildFormModel());
+            }
+
+            var result = await _aiService.ExtractRatingAsync(prompt);
+            if (!result.Success || result.Value is null)
+            {
+                ModelState.AddModelError(string.Empty, result.Error ?? "The AI couldn't understand that. Try rephrasing.");
+                return View("Create", _ratingRepository.BuildFormModel());
+            }
+
+            var intent = result.Value;
+
+            // AI gives names; our code resolves them to ids. Each step only runs when the
+            // previous one succeeded, so a bad club name doesn't cascade into a wrong match.
+            var home = _resolver.ResolveClub(intent.HomeTeamName);
+            var away = _resolver.ResolveClub(intent.AwayTeamName);
+            int? matchId  = home != null && away != null
+                ? _resolver.ResolveMatchId(home.Id, away.Id)
+                : null;
+            int? playerId = matchId.HasValue
+                ? _resolver.ResolvePlayerIdInMatch(intent.PlayerName, matchId.Value)
+                : null;
+
+            // Reuse the existing form builder (it also sets up the cascade dropdowns).
+            var model = matchId.HasValue
+                ? _ratingRepository.BuildFormModel(matchId.Value, playerId)
+                : _ratingRepository.BuildFormModel();
+
+            model.Score   = Math.Clamp(intent.Score, 1, 10);
+            model.Comment = string.IsNullOrWhiteSpace(intent.Comment) ? null : intent.Comment;
+
+            // Tell the user exactly how far the resolution got.
+            ViewData["AiNote"] = !matchId.HasValue
+                ? $"AI read “{intent.HomeTeamName} vs {intent.AwayTeamName}” but I couldn't find that match — please pick it manually."
+                : !playerId.HasValue
+                    ? $"AI read player “{intent.PlayerName}” but couldn't match them to this squad — please pick the player."
+                    : "Pre-filled by AI — review the details and save.";
+
+            _logger.LogInformation(
+                "AI pre-filled a rating form (match {MatchId}, player {PlayerId}) for {User}.",
+                matchId, playerId, User.Identity?.Name);
+
+            return View("Create", model);
         }
 
         // ── Cascade JSON endpoints ────────────────────────────────────────────

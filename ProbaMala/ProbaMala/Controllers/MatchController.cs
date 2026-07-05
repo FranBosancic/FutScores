@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
+using ProbaMala.Services;
 
 namespace ProbaMala.Controllers
 {
@@ -17,13 +18,21 @@ namespace ProbaMala.Controllers
     public class MatchController : Controller
     {
         private readonly IMatchRepository _matchRepository;
+        private readonly IAiDataEntryService _aiService;
+        private readonly INameResolver _resolver;
         private readonly ILogger<MatchController> _logger;
 
         // IMatchRepository is injected by the DI container (configured in Program.cs).
         // The controller doesn't know or care whether the data comes from a real DB or a mock.
-        public MatchController(IMatchRepository matchRepository, ILogger<MatchController> logger)
+        public MatchController(
+            IMatchRepository matchRepository,
+            IAiDataEntryService aiService,
+            INameResolver resolver,
+            ILogger<MatchController> logger)
         {
             _matchRepository = matchRepository;
+            _aiService = aiService;
+            _resolver = resolver;
             _logger = logger;
         }
 
@@ -74,7 +83,59 @@ namespace ProbaMala.Controllers
         [HttpGet("~/matches/create", Name = "match-create")]
         public IActionResult Create()
         {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
             return View(_matchRepository.BuildFormModel());
+        }
+
+        // POST /matches/ai — AI-assisted pre-fill (Admin only). Extracts the fixture from a
+        // natural-language note, resolves both club names to ids (league derived from the
+        // home club), and returns the Create form pre-filled for review. Writes nothing.
+        [Authorize(Roles = "Admin")]
+        [HttpPost("ai")]
+        [HttpPost("~/matches/ai")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AiFill(string prompt)
+        {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
+
+            if (!_aiService.IsConfigured || string.IsNullOrWhiteSpace(prompt))
+            {
+                ModelState.AddModelError(string.Empty,
+                    _aiService.IsConfigured ? "Describe the match for the AI first." : "The AI assistant is not configured.");
+                return View("Create", _matchRepository.BuildFormModel());
+            }
+
+            var result = await _aiService.ExtractMatchAsync(prompt);
+            if (!result.Success || result.Value is null)
+            {
+                ModelState.AddModelError(string.Empty, result.Error ?? "The AI couldn't understand that. Try rephrasing.");
+                return View("Create", _matchRepository.BuildFormModel());
+            }
+
+            var intent = result.Value;
+            var model = new MatchFormViewModel
+            {
+                HomeGoals = Math.Clamp(intent.HomeGoals, 0, 99),
+                AwayGoals = Math.Clamp(intent.AwayGoals, 0, 99)
+            };
+
+            if (AiParsing.TryParseFlexibleDate(intent.Date, out var date))
+                model.Date = date;
+
+            // Resolve both clubs; the league comes from the home club (matches live in one league).
+            var home = _resolver.ResolveClub(intent.HomeTeamName);
+            var away = _resolver.ResolveClub(intent.AwayTeamName);
+            if (home != null) { model.LeagueId = home.LeagueId; model.HomeTeamId = home.Id; }
+            if (away != null) model.AwayTeamId = away.Id;
+
+            _matchRepository.PopulateFormOptions(model);
+
+            ViewData["AiNote"] = home != null && away != null
+                ? "Pre-filled by AI — review the details and save."
+                : $"AI read “{intent.HomeTeamName} vs {intent.AwayTeamName}” but couldn't match both clubs — please pick them.";
+
+            _logger.LogInformation("AI pre-filled a match form for {User}.", User.Identity?.Name);
+            return View("Create", model);
         }
 
         // GET /matches/clubs?leagueId=5  (AJAX — JSON)

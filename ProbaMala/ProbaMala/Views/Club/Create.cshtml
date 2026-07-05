@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create Club";
+    ViewData["AiPlaceholder"] = "e.g. Add Wrexham, founded in 1864, to the Premier League.";
 }
 
 <div class="mx-auto w-full max-w-3xl space-y-4 px-4 sm:px-6">
@@ -24,6 +25,9 @@
         @* Body *@
         <div class="px-4 py-5">
             <p class="mb-5 text-sm text-slate-400">Add a new club hub and link it to its competition.</p>
+
+            <div asp-validation-summary="ModelOnly" class="mb-4 text-sm text-rose-300 empty:hidden"></div>
+            <partial name="_AiAssistBox" />
 
             <form asp-action="Create" method="post" class="space-y-6">
                 @Html.AntiForgeryToken()

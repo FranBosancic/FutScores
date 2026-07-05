@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
+using ProbaMala.Services;
 
 namespace ProbaMala.Controllers
 {
@@ -14,11 +15,16 @@ namespace ProbaMala.Controllers
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepository;
+        private readonly IAiDataEntryService _aiService;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger)
+        public UserController(
+            IUserRepository userRepository,
+            IAiDataEntryService aiService,
+            ILogger<UserController> logger)
         {
             _userRepository = userRepository;
+            _aiService = aiService;
             _logger = logger;
         }
 
@@ -65,7 +71,46 @@ namespace ProbaMala.Controllers
         [HttpGet("~/users/create", Name = "user-create")]
         public IActionResult Create()
         {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
             return View(_userRepository.BuildFormModel());
+        }
+
+        // POST /users/ai — AI-assisted pre-fill (Admin only). Extracts name + email from a
+        // natural-language note and returns the Create form pre-filled for review. No FK
+        // resolution needed; writes nothing itself.
+        [Authorize(Roles = "Admin")]
+        [HttpPost("ai")]
+        [HttpPost("~/users/ai")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AiFill(string prompt)
+        {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
+
+            if (!_aiService.IsConfigured || string.IsNullOrWhiteSpace(prompt))
+            {
+                ModelState.AddModelError(string.Empty,
+                    _aiService.IsConfigured ? "Describe the user for the AI first." : "The AI assistant is not configured.");
+                return View("Create", _userRepository.BuildFormModel());
+            }
+
+            var result = await _aiService.ExtractUserAsync(prompt);
+            if (!result.Success || result.Value is null)
+            {
+                ModelState.AddModelError(string.Empty, result.Error ?? "The AI couldn't understand that. Try rephrasing.");
+                return View("Create", _userRepository.BuildFormModel());
+            }
+
+            var intent = result.Value;
+            var model = new UserFormViewModel
+            {
+                FirstName = intent.FirstName,
+                LastName  = intent.LastName,
+                Email     = intent.Email
+            };
+
+            ViewData["AiNote"] = "Pre-filled by AI — review the details and save.";
+            _logger.LogInformation("AI pre-filled a user form for {User}.", User.Identity?.Name);
+            return View("Create", model);
         }
 
         // POST /users/create

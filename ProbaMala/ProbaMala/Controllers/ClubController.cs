@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProbaMala.Models.Entities;
 using ProbaMala.Models.ViewModels;
 using ProbaMala.Repositories;
+using ProbaMala.Services;
 
 namespace ProbaMala.Controllers
 {
@@ -16,15 +17,21 @@ namespace ProbaMala.Controllers
     {
         private readonly IClubRepository _clubRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly IAiDataEntryService _aiService;
+        private readonly INameResolver _resolver;
         private readonly ILogger<ClubController> _logger;
 
         public ClubController(
             IClubRepository clubRepository,
             IImageRepository imageRepository,
+            IAiDataEntryService aiService,
+            INameResolver resolver,
             ILogger<ClubController> logger)
         {
             _clubRepository = clubRepository;
             _imageRepository = imageRepository;
+            _aiService = aiService;
+            _resolver = resolver;
             _logger = logger;
         }
 
@@ -86,7 +93,53 @@ namespace ProbaMala.Controllers
         [HttpGet("~/clubs/create", Name = "club-create")]
         public IActionResult Create()
         {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
             return View(_clubRepository.BuildFormModel());
+        }
+
+        // POST /clubs/ai — AI-assisted pre-fill (Admin only). Extracts club data from a
+        // natural-language note, resolves the league name to an id, and returns the Create
+        // form pre-filled for review. Writes nothing itself.
+        [Authorize(Roles = "Admin")]
+        [HttpPost("ai")]
+        [HttpPost("~/clubs/ai")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AiFill(string prompt)
+        {
+            ViewData["AiConfigured"] = _aiService.IsConfigured;
+
+            if (!_aiService.IsConfigured || string.IsNullOrWhiteSpace(prompt))
+            {
+                ModelState.AddModelError(string.Empty,
+                    _aiService.IsConfigured ? "Describe the club for the AI first." : "The AI assistant is not configured.");
+                return View("Create", _clubRepository.BuildFormModel());
+            }
+
+            var result = await _aiService.ExtractClubAsync(prompt);
+            if (!result.Success || result.Value is null)
+            {
+                ModelState.AddModelError(string.Empty, result.Error ?? "The AI couldn't understand that. Try rephrasing.");
+                return View("Create", _clubRepository.BuildFormModel());
+            }
+
+            var intent = result.Value;
+            var model = new ClubFormViewModel { Name = intent.Name };
+
+            if (AiParsing.TryParseFlexibleDate(intent.FoundedDate, out var founded))
+                model.FoundedDate = founded;
+
+            var leagueId = _resolver.ResolveLeagueId(intent.LeagueName);
+            if (leagueId.HasValue)
+                model.LeagueId = leagueId;
+
+            _clubRepository.PopulateFormOptions(model);
+
+            ViewData["AiNote"] = leagueId.HasValue
+                ? "Pre-filled by AI — review the details and save."
+                : $"AI read league “{intent.LeagueName}” but couldn't find it — please pick the league.";
+
+            _logger.LogInformation("AI pre-filled a club form for {User}.", User.Identity?.Name);
+            return View("Create", model);
         }
 
         // POST /clubs/create
