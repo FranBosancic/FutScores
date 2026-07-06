@@ -226,18 +226,29 @@ clubs, players, matches, ratings, users), not just within one list.
   and the **API** side (`Controllers/Api/*`), backed by repositories, covered by 114
   integration tests. Keep it green; re-run `dotnet test` after changes.
 
-### 2.8 Expose MCP + access through an agentic IDE — 2 pts ❌
+### 2.8 Expose MCP + access through an agentic IDE — 2 pts ✅
 
 **Goal:** expose the app's data/operations as an **MCP server** so an agentic IDE can
 read/act on FutScores.
 
-- **To add:**
-  - An MCP server exposing FutScores tools (e.g. `list_players`, `search`, `add_rating`).
-    Cleanest path: a small server that calls the existing **REST API** (`/api/*`) so the
-    business logic and auth are reused — no duplication of EF logic.
-  - Place under a new top-level folder, e.g. `mcp-server/` (Node `@modelcontextprotocol/sdk`
-    or a .NET MCP server), with tool definitions mapping 1:1 to API endpoints.
-  - Document how to register it in an agentic IDE (config snippet) for the oral demo.
+- **Implemented (2026-07-03):** `ProbaMala/ProbaMala.Mcp` — a C# console app (official
+  `ModelContextProtocol` SDK 1.4.0, net8.0) that runs an MCP server over **stdio**. It's a
+  thin translator: each tool calls the FutScores **REST API** via a typed `HttpClient`
+  (`FutScoresApiClient`), so all logic/validation/auth stay in the web app.
+  - **Tools (10):** reads `search`, `list_leagues`, `list_clubs`, `list_players`,
+    `get_player`, `list_matches`, `get_match`, `list_ratings`, `list_users` (public GET);
+    write `add_rating` (fetches a JWT from `/api/auth/token` with the admin account, then
+    POSTs). Declared with `[McpServerToolType]` / `[McpServerTool]` + `[Description]`.
+  - **A JSON `/api/search` endpoint** (`SearchApiController`) was added to the web app so
+    the `search` tool gets JSON (the web `/search` returns an HTML partial).
+  - **Config:** `FutScores:BaseUrl` + `FutScores:Admin:{Email,Password}` (dev defaults);
+    logs forced to stderr (stdout is the protocol channel).
+  - **IDE registration:** repo-root `.mcp.json` registers the `futscores` server for
+    Claude Code (build the DLL first; other IDEs use the same command/args). See
+    `ProbaMala/ProbaMala.Mcp/README.md`.
+  - **Verified end-to-end:** `tools/list` returns all 10; `list_leagues`, `search`,
+    `list_players`, and `add_rating` (create → then deleted) all round-trip against the
+    running app. 122 integration tests still pass.
 
 ### 2.9 No-crash impression — 12 pts (ongoing)
 

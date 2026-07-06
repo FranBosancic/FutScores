@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "futscores": {
+      "command": "dotnet",
+      "args": ["ProbaMala/ProbaMala.Mcp/bin/Debug/net8.0/ProbaMala.Mcp.dll"]
+    }
+  }
+}
