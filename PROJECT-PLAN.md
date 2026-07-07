@@ -61,42 +61,49 @@ string key). A signed-in account is linked to its author profile via `User.AppUs
 
 Status legend: ✅ done · 🟡 partial · ❌ to build.
 
-### 2.1 Deploy to cloud provider / VM — 3 pts ❌
+### 2.1 Deploy to cloud provider / VM — 3 pts 🟢 (app cloud-ready; user runs the Azure deploy)
 
-**Goal:** the app running on Azure, Google Cloud, or a VM, reachable over the internet.
+**Goal:** the app running on Azure, reachable over the internet. **Target chosen:** Azure
+for Students → **Azure Container Apps** (scale-to-zero) + **Azure Database for PostgreSQL
+Flexible Server**.
 
-- **What exists:** `ProbaMala/docker-compose.yml` (Postgres + Adminer only — no app
-  container yet). Connection string in `appsettings.json` (`ConnectionStrings:Postgres`).
-- **To add:**
-  - `ProbaMala/ProbaMala/Dockerfile` — multi-stage build (`sdk` → `aspnet` runtime)
-    publishing the web app.
-  - Extend `docker-compose.yml` (or a deploy compose) with an `app` service depending
-    on `postgres`, env-var-driven connection string and secrets.
-  - Host config: connection string + `Jwt:Key` + Google secrets via **environment
-    variables** (not committed). `Program.cs` already reads them through `IConfiguration`.
-  - `app.UseHttpsRedirection()` and the migration-on-startup block in `Program.cs`
-    already make first-run setup automatic (`Database.Migrate()` runs for relational DBs).
-- **Decision needed:** target host (Azure App Service / Azure Container Apps / a Linux
-  VM with Docker / Google Cloud Run). Affects the deploy scripts only, not app code.
+- **Done (2026-07-03) — the app is deployment-ready:**
+  - `ProbaMala/ProbaMala/Dockerfile` (multi-stage sdk→aspnet, listens on `:8080`) +
+    `.dockerignore`. **Verified locally**: image builds, container runs migrations against
+    Postgres and serves `/api/leagues` + `/api/search`.
+  - `Program.cs` adds **ForwardedHeaders** (X-Forwarded-Proto/For, known networks/proxies
+    cleared) so HTTPS redirection works behind Azure's TLS-terminating ingress (no loop).
+  - Config already env-driven: `ConnectionStrings__Postgres`, `Jwt__Key`, `SeedAdmin__*`,
+    `Ai__*`; `Database.Migrate()` + `IdentitySeeder` run on startup so schema/admin appear
+    automatically.
+  - **`DEPLOY-AZURE.md`** — a copy-paste `az` runbook (resource group → Postgres flexible
+    server → `az containerapp up --source ProbaMala/ProbaMala`), plus cost control (stop
+    Postgres / scale-to-zero / `az group delete`) and optional Google-login/AI-key env vars.
+- **Remaining (user's step, needs their Azure account):** create the Azure for Students
+  account and run the `DEPLOY-AZURE.md` commands under `az login`. I can walk through it
+  live but can't run it under their credentials.
 
-### 2.2 Playwright tests for all API endpoints — 2 pts (+3 extra) ❌
+### 2.2 Playwright tests for all API endpoints — 2 pts (+3 extra) ✅
 
-**Goal:** a Playwright scenario of at least 10 steps covering the API endpoints
-(+3 bonus for extra coverage). Note: this is **separate** from the existing xUnit
-integration tests — the lab asks specifically for Playwright.
+**Goal:** Playwright tests covering all API endpoints (+3 bonus for a 10-step scenario).
+Separate from the xUnit integration tests — the lab asks specifically for Playwright.
 
-- **What exists:** `ProbaMala/ProbaMala.IntegrationTests/` (xUnit, 114 tests) — good
-  reference for endpoint shapes and auth, but not Playwright.
-- **To add:**
-  - New test project/folder, e.g. `ProbaMala/ProbaMala.E2ETests/` (Playwright for .NET,
-    `Microsoft.Playwright` + NUnit/xUnit) **or** a standalone Node Playwright project.
-  - A 10+ step scenario chaining real HTTP calls against a running instance:
-    e.g. `POST /api/auth/token` → create league → create club → create player →
-    create match → create rating → GET lists → PUT → DELETE → assert 404.
-  - Auth: obtain a JWT from `AuthApiController` (`POST /api/auth/token`) and send it
-    as a Bearer header for the Admin-only mutations.
-- **Touches:** no app code — purely a new test project driving existing endpoints
-  (`Controllers/Api/*`).
+- **Implemented (2026-07-03):** `ProbaMala/ProbaMala.PlaywrightTests` — Playwright for
+  .NET (`Microsoft.Playwright` 1.61, `IAPIRequestContext`, no browser) + xUnit (net8.0),
+  run against a **running** app (default `http://localhost:5009`).
+  - `ApiFixture` (shared `[Collection("api")]`) logs in once for a JWT, exposes an
+    admin-authenticated context + seed helpers; tests **clean up everything they create**
+    (unique tags + deletes in reverse dependency order).
+  - **Per-endpoint coverage:** one class per entity (Leagues/Clubs/Players/Matches/
+    Ratings/Users) — GET all, GET by id (200 + 404), POST (201 + 400), PUT (200 + 404),
+    DELETE (204 + 404); `AuthApiTests` covers the token endpoint (200/401) + negative auth.
+  - `SearchApiTests` covers `GET /api/search`; `FilterApiTests` smoke-tests every
+    query-filter variant (`?q`, `?leagueId`, `?clubId`, `?position`, `?minScore/maxScore`…).
+  - **`EndToEndScenarioTests` — the +3 bonus:** a 10-step chained scenario
+    (auth → league → 2 clubs → player → match → user → rate → read → update → delete → 404).
+  - **42 tests pass** against the live API; every endpoint + every verb's 404 path covered;
+    no leftover data. See the project README.
+- **Run:** start Postgres + app, then `dotnet test ProbaMala/ProbaMala.PlaywrightTests`.
 
 ### 2.3 AI integration — AI-assisted data entry — 3 pts 🟢 (built for all entities; needs API key to run live)
 
