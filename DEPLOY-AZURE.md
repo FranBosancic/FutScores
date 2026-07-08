@@ -1,5 +1,7 @@
 # Deploying FutScores to Azure (for Students)
 
+> Vault: [[Home]] · concept note: [[Deploy]] · plan: [[PROJECT-PLAN]]
+
 Target: **Azure Container Apps** (the app; scales to zero when idle ≈ free) +
 **Azure Database for PostgreSQL Flexible Server** (the DB). The app is containerised via
 `ProbaMala/ProbaMala/Dockerfile`; migrations + the seed admin run automatically on first
