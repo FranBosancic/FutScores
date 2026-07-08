@@ -82,7 +82,7 @@
                 @* Divider between the global tabs and the per-league dropdowns *@
                 @if (navLeagues.Any())
                 {
-                    <span class="h-4 w-px self-center bg-slate-700"></span>
+                    <span class="hidden h-4 w-px self-center bg-slate-700 min-[1700px]:block"></span>
                 }
 
                 @*
@@ -98,7 +98,7 @@
                         and the dropdown panel so group-hover stays active while the mouse
                         travels down. This avoids adding real padding (which shifts alignment).
                     *@
-                    <div class="group relative after:absolute after:inset-x-0 after:top-full after:h-3 after:content-['']">
+                    <div class="group relative hidden after:absolute after:inset-x-0 after:top-full after:h-3 after:content-[''] min-[1700px]:block">
 
                         @* League label — also a direct link to the league detail page *@
                         <a href="/leagues/@league.Id"
@@ -152,7 +152,7 @@
 
                 @if (!navLeagues.Any())
                 {
-                    <span class="text-sm italic text-slate-500">No leagues yet</span>
+                    <span class="hidden text-sm italic text-slate-500 min-[1700px]:inline">No leagues yet</span>
                 }
             </nav>
 
@@ -167,10 +167,10 @@
                     aria-expanded="false"
                     aria-controls="mobile-menu"
                     aria-label="Toggle navigation menu"
-                    class="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded bg-slate-900 text-slate-200 transition hover:bg-slate-800 xl:hidden">
-                <span class="flex h-0.5 w-5 rounded bg-current"></span>
-                <span class="mt-1 flex h-0.5 w-5 rounded bg-current"></span>
-                <span class="mt-1 flex h-0.5 w-5 rounded bg-current"></span>
+                    class="ml-auto inline-flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-1 rounded bg-slate-900 text-slate-200 transition hover:bg-slate-800 xl:hidden">
+                <span class="h-0.5 w-5 rounded bg-current"></span>
+                <span class="h-0.5 w-5 rounded bg-current"></span>
+                <span class="h-0.5 w-5 rounded bg-current"></span>
             </button>
         </div>
 
@@ -179,7 +179,7 @@
             Since hover doesn't exist on touch devices, each league section
             shows its Clubs and Matches sub-links inline and indented.
         *@
-        <div id="mobile-menu" class="hidden border-t border-slate-800 bg-[#070b13]">
+        <div id="mobile-menu" class="hidden max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-800 bg-[#070b13]">
             <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 sm:px-6">
 
                 @* ── Global search (mobile) ── *@
