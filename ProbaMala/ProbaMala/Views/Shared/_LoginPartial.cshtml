@@ -6,15 +6,16 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <div class="flex min-w-0 items-center gap-2">
-        @* "You" → your own ratings (edit/delete). The email goes in the tooltip so a
-           long address can never stretch the header. *@
+        @* Shows WHO you are logged in as (email/username) so identity is visible at a glance.
+           Truncated so a long address can never stretch the header; full value in the tooltip.
+           Clicking still opens your own ratings (edit/delete). *@
         <a asp-route="ratings-mine"
-           title="Your ratings (@User.Identity?.Name)"
-           class="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white">
+           title="Logged in as @User.Identity?.Name — open your ratings"
+           class="flex min-w-0 shrink items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white">
             <svg class="h-4 w-4 shrink-0 text-slate-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
             </svg>
-            <span class="font-medium">You</span>
+            <span class="max-w-[12rem] truncate font-medium">@User.Identity?.Name</span>
             @if (User.IsInRole("Admin"))
             {
                 <span class="shrink-0 rounded bg-lime-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-lime-400">Admin</span>

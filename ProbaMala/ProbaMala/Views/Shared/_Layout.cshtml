@@ -49,8 +49,10 @@
                 </div>
             </a>
 
-            @* ── Global search (desktop/tablet) ── *@
-            <div class="relative hidden md:block" data-global-search>
+            @* ── Global search (desktop) ── *@
+            @* Hidden until xl so it doesn't eat horizontal space at lg where the nav first
+               appears; the hamburger menu carries its own search on smaller screens. *@
+            <div class="relative hidden xl:block" data-global-search>
                 <input type="search"
                        data-global-search-input
                        placeholder="Search pages…"
@@ -62,10 +64,10 @@
             </div>
 
             @* ── Desktop navigation ── *@
-            @* Shows from xl up: the full row (brand + section tabs + one item per league +
-               login) needs a wide viewport. Below xl we fall back to the hamburger menu,
-               otherwise the items overflow and force a horizontal page scrollbar. *@
-            <nav class="hidden flex-1 items-center gap-5 text-sm xl:flex">
+            @* Shows from lg up. Every league lives inside ONE "Leagues" dropdown so the row
+               keeps a fixed, small item count and fits a normal laptop width at 100% zoom
+               without overflowing into a horizontal scrollbar. Below lg → hamburger menu. *@
+            <nav class="hidden flex-1 items-center gap-5 text-sm lg:flex">
 
                 @* Dashboard — always the first static link *@
                 <a asp-route="home-index"
@@ -79,85 +81,49 @@
                 <a asp-route="ratings-index" class="transition hover:text-white @ActiveClass(currentController == "Rating")">Ratings</a>
                 <a asp-route="users-index" class="transition hover:text-white @ActiveClass(currentController == "User")">Users</a>
 
-                @* Divider between the global tabs and the per-league dropdowns *@
+                @* Leagues — a single dropdown listing every league (previously each league was
+                   its own top-level item, which needed a 1700px viewport to fit). *@
                 @if (navLeagues.Any())
                 {
-                    <span class="hidden h-4 w-px self-center bg-slate-700 min-[1700px]:block"></span>
-                }
+                    <span class="h-4 w-px self-center bg-slate-700"></span>
 
-                @*
-                    One item per league. Hovering reveals a dropdown with Clubs and Matches
-                    links that are pre-filtered to that league (via ?leagueId=).
-                    The dropdown uses Tailwind's group-hover utilities — no JS required.
-                *@
-                @foreach (var league in navLeagues)
-                {
-                    @*
-                        after:content-[''] + after:absolute + after:top-full + after:h-3:
-                        Creates an invisible 12 px pseudo-element bridge between the trigger
-                        and the dropdown panel so group-hover stays active while the mouse
-                        travels down. This avoids adding real padding (which shifts alignment).
-                    *@
-                    <div class="group relative hidden after:absolute after:inset-x-0 after:top-full after:h-3 after:content-[''] min-[1700px]:block">
-
-                        @* League label — also a direct link to the league detail page *@
-                        <a href="/leagues/@league.Id"
-                           class="flex items-center gap-1 text-slate-300 transition hover:text-white">
-                            @league.Name
-                            @* Chevron rotates on hover to indicate dropdown state *@
+                    @* after:content-[''] bridges the 12px gap to the panel so the hover
+                       (group-hover) stays active while the mouse travels down. *@
+                    <div class="group relative after:absolute after:inset-x-0 after:top-full after:h-3 after:content-['']">
+                        <button type="button"
+                                class="flex items-center gap-1 text-slate-300 transition hover:text-white @ActiveClass(currentController == "League")">
+                            Leagues
                             <svg class="h-3 w-3 opacity-50 transition-transform duration-150 group-hover:rotate-180"
                                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd"
                                       d="M5.23 7.21a.75.75 0 011.06.02L10 11.085l3.71-3.755a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
                                       clip-rule="evenodd" />
                             </svg>
-                        </a>
+                        </button>
 
-                        @*
-                            Dropdown panel.
-                            - invisible + opacity-0 : hidden but takes up no space and can fade in.
-                            - group-hover:visible + group-hover:opacity-100 : revealed on hover.
-                            - pointer-events-none / group-hover:pointer-events-auto : prevents
-                              accidental hover triggers on the transparent area when hidden.
-                        *@
-                        <div class="pointer-events-none invisible absolute left-0 top-full z-50 mt-0 w-36
+                        @* Dropdown panel — scrolls internally if there are many leagues. *@
+                        <div class="pointer-events-none invisible absolute left-0 top-full z-50 mt-0 max-h-80 w-48 overflow-y-auto
                                     rounded-xl border border-white/10 bg-[#070b13] py-1 opacity-0 shadow-2xl
                                     transition-all duration-150
                                     group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-
-                            @* → Clubs filtered to this league *@
-                            <a href="/clubs?leagueId=@league.Id"
-                               class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
-                                <svg class="h-4 w-4 shrink-0 text-lime-400" xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654zM18 8a2 2 0 11-4 0 2 2 0 014 0zM5.304 16.19a.844.844 0 01-.277-.71 5 5 0 019.947 0 .843.843 0 01-.277.71A6.975 6.975 0 0110 18a6.974 6.974 0 01-4.696-1.81z" />
-                                </svg>
-                                Clubs
-                            </a>
-
-                            @* → Matches filtered to this league *@
-                            <a href="/matches?leagueId=@league.Id"
-                               class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
-                                <svg class="h-4 w-4 shrink-0 text-lime-400" xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                                          clip-rule="evenodd" />
-                                </svg>
-                                Matches
-                            </a>
+                            @foreach (var league in navLeagues)
+                            {
+                                <a href="/leagues/@league.Id"
+                                   class="block px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                    @league.Name
+                                </a>
+                            }
                         </div>
                     </div>
                 }
-
-                @if (!navLeagues.Any())
+                else
                 {
-                    <span class="hidden text-sm italic text-slate-500 min-[1700px]:inline">No leagues yet</span>
+                    <span class="text-sm italic text-slate-500">No leagues yet</span>
                 }
             </nav>
 
             @* ── Auth (desktop only): login/register or user + logout ── *@
-            <div class="hidden shrink-0 items-center xl:flex">
+            <div class="hidden shrink-0 items-center lg:flex">
                 <partial name="_LoginPartial" />
             </div>
 
@@ -167,7 +133,7 @@
                     aria-expanded="false"
                     aria-controls="mobile-menu"
                     aria-label="Toggle navigation menu"
-                    class="ml-auto inline-flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-1 rounded bg-slate-900 text-slate-200 transition hover:bg-slate-800 xl:hidden">
+                    class="ml-auto inline-flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-1 rounded bg-slate-900 text-slate-200 transition hover:bg-slate-800 lg:hidden">
                 <span class="h-0.5 w-5 rounded bg-current"></span>
                 <span class="h-0.5 w-5 rounded bg-current"></span>
                 <span class="h-0.5 w-5 rounded bg-current"></span>
